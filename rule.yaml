@@ -1,0 +1,241 @@
+1:
+  name: 1
+  phase: F_UNIT_FACTION_BLUE
+  debug: 1
+  control:
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  - 2
+  - 1
+  - 3
+  foo:
+  - spawninterval: F_UNIT_FACTION_BLUE 0 0
+    unit:
+    - template: MadokaKaname
+      crd: 4 5
+    - template: SayakaMiki
+      crd: 5 6
+    - template: MamiTomoe
+      crd: 3 6
+    - template: HomuraAkemi
+      crd: 5 4
+    - template: KyoukoSakura
+      crd: 2 7
+    - template: HitomiShizuki
+      crd: 4 7
+    - template: NULL
+      class: F_UNIT_CLASS_ORIKOMAGIKA
+      crd: 1 6
+    - template: OrikoMikuni
+      crd: 7 3
+    - template: KirikaKure
+      crd: 8 3
+    - template: Kyubey
+      crd: 2 5
+  - spawninterval: F_UNIT_FACTION_RED 0 0
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_KAZUMIMAGIKA
+      crd:
+      - 14 4
+      - 13 5
+      - 14 6
+      - 16 6
+      - 13 7
+      - 15 7
+      - 17 7
+    - template: Kyubey
+      crd: 17 5
+  - spawninterval: F_UNIT_FACTION_ORANGE 0 0
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_MADOKAMAGIKA
+      crd:
+      - 2 13
+      - 4 13
+      - 3 14
+      - 7 14
+      - 2 15
+      - 4 15
+      - 6 15
+      - 5 16
+      - 7 16
+    - template: Kyubey
+      crd: 3 16
+  - spawninterval: F_UNIT_FACTION_YELLOW 0 0
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_MADOKAMAGIKA
+      crd:
+      - 16 12
+      - 15 13
+      - 14 14
+      - 16 14
+      - 13 15
+      - 15 15
+      - 12 16
+      - 14 16
+      - 16 16
+    - template: Kyubey
+      crd: 17 13
+  - spawninterval: F_UNIT_FACTION_GREEN 0 0
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_HUMAN
+      crd:
+      - 10 4
+      - 11 5
+      - 10 6
+      - 2 9
+      - 3 10
+      - 14 10
+      - 16 10
+      - 4 11
+      - 13 11
+      - 9 12
+      - 10 13
+      - 10 15
+  - spawninterval: F_UNIT_FACTION_BLUE 1 1 255
+    unit:
+    - template: Kyubey
+      crd: F_UNIT_FACTION_BLUE 6
+      option: unique safe
+  - spawninterval: F_UNIT_FACTION_RED 1 1 255
+    unit:
+    - template: Kyubey
+      crd: F_UNIT_FACTION_RED 6
+      option: unique safe
+  - spawninterval: F_UNIT_FACTION_ORANGE 1 1 255
+    unit:
+    - template: Kyubey
+      crd: F_UNIT_FACTION_ORANGE 6
+      option: unique safe
+  - spawninterval: F_UNIT_FACTION_YELLOW 1 1 255
+    unit:
+    - template: Kyubey
+      crd: F_UNIT_FACTION_YELLOW 6
+      option: unique safe
+  - spawninterval: F_UNIT_FACTION_GREEN 1 1 255
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_HUMAN
+      crd: F_UNIT_FACTION_BANK 6
+      spawn: 10 10 0 100 90 80 70 60 50 40 30 20 10
+MamiTomoe:
+  name: MamiTomoe
+  phase: F_UNIT_FACTION_BLUE
+  debug: 1
+  control:
+  - 0
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  - 3
+  foo:
+  - spawninterval: F_UNIT_FACTION_BLUE 0 0
+    unit:
+    - template: MamiTomoe
+      crd: 10 10
+  - spawninterval: F_UNIT_FACTION_RED 0 0
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_MADOKAMAGIKA
+      crd:
+      - 10 10 3
+2:
+  name: 2
+  phase: F_UNIT_FACTION_BLUE
+  debug: 1
+  control:
+  - 0
+  - 1
+  - 1
+  - 1
+  - 1
+  - 2
+  - 1
+  - 3
+  foo:
+  - spawninterval: F_UNIT_FACTION_BLUE 0 0
+    unit:
+    - template: MamiTomoe
+      crd: 10 10
+  - spawninterval: F_UNIT_FACTION_RED 0 0
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_MADOKAMAGIKA
+      crd: 10 10 3
+defense1:
+  name: TD-Randomway
+  phase: F_UNIT_FACTION_BLACK
+  control:
+  - 0
+  - 1
+  - 1
+  - 1
+  - 1
+  - 2
+  - 1
+  - 3
+  foo:
+  - spawninterval: F_UNIT_FACTION_BLUE 0 0
+    unit:
+    - template: MadokaKaname
+      crd: 9 9
+      option: essential
+    - template: SayakaMiki
+      crd: 10 10
+    - template: MamiTomoe
+      crd: 8 10
+    - template: HomuraAkemi
+      crd: 11 9
+    - template: KyoukoSakura
+      crd: 11 11
+    - template: Kyubey
+      crd: 10 8
+  - spawninterval: F_UNIT_FACTION_BLACK 4 0 32
+    event: |-
+      game.Main.System.wave++;
+      game.Main.System.lock();
+      (new game.Main.Label()).phase("Wave "+game.Main.System.wave+"/9","#FFFFFF",8);
+  - spawninterval: F_UNIT_FACTION_BLACK 4 0 32
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_MADOKAMAGIKA
+      faction: F_UNIT_FACTION_RED
+      crd:
+      - 1 18 4
+      spawn: 3 0 0.084
+  - spawninterval: F_UNIT_FACTION_BLACK 4 0 32
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_MADOKAMAGIKA
+      faction: F_UNIT_FACTION_RED
+      crd:
+      - 18 18 4
+      spawn: 3 0 0.084
+      target: MadokaKaname
+  - spawninterval: F_UNIT_FACTION_BLUE 1 1 255
+    unit:
+    - template: Kyubey
+      crd: F_UNIT_FACTION_BLUE 6
+      option: unique safe
+  - spawninterval: F_UNIT_FACTION_GREEN 1 1 255
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_HUMAN
+      crd: F_UNIT_FACTION_BANK 6
+      spawn: 3 6 0 100 85 70 55 40 25
+      target: MadokaKaname
+  - spawninterval: F_UNIT_FACTION_GREEN 20
+    unit:
+    - template: Walpurgisnacht
+      faction: F_UNIT_FACTION_PURPLE
+      crd:
+      - 10 10 2

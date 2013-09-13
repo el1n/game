@@ -1,0 +1,212 @@
+ability:
+# Madoka Kaname
+- name: The Last Day Dawns
+  icon: resources/icon/sunrise.png
+  desc: 魔法少女になったとき、全ての魔女とその使い魔を消滅させる。この効果はあらゆる効果を無視する。
+# Madoka Kaname
+- name: The World of Salvation
+  icon: resources/icon/angel-outfit.png
+  desc: 魔女になったとき、Willが50%以上の魔法少女にダメージを与え、50%未満の魔法少女を消滅させる。この効果はあらゆる効果を無視する。
+# Sayaka Miki
+- name: Life Sheath
+  icon: resources/icon/edged-shield.png
+  desc: 無条件に防御力上昇を得る。
+# Mami Tomoe
+- name: Giallo Nastro
+  icon: resources/icon/crossed-chains.png
+  #desc: 最後に攻撃したユニットへZone<Giallo Nastro>を展開し、行動不能にする。Zoneの展開に成功したとき、ダメージ軽減を得る。
+  desc: 最後に攻撃したユニットへZone<Giallo Nastro>を展開する。Zoneの展開に成功したとき、与えるダメージが66%減少する。
+
+# Homura Akemi
+- name: The World 21
+  icon: resources/icon/clockwork_1.png
+  desc: このユニットは反撃されない。
+# Kyouko Sakura
+- name: Rosso Fantasma
+  icon: resources/icon/NULL
+  desc: NULL
+  flag: 1
+# Hitomi Sizuki
+- name: Blood Rage
+  icon: resources/icon/bleeding-eye.png
+  desc: 反撃の際、受けたダメージを基礎攻撃力として反撃する。
+  flag: 1
+# Oriko Mikuni
+- name: King Crimson
+  icon: resources/icon/sunken-eye.png
+  desc: ユニット未満のExperienceの持つユニットからの攻撃に対し、ダメージ軽減を得る。
+
+# Stairway to Heaven
+- name: Stairway to Heaven
+  icon: resources/icon/ammonite-fossil.png
+  desc: 攻撃順序を無視し、必ず先制攻撃できる。
+# Yuma Chitose
+- name: Crazy Diamond
+  icon: resources/icon/NULL
+  desc: NULL
+  flag: 1
+- name: 0x00000200
+- name: 0x00000400
+
+- name: 0x00001000
+- name: 0x00002000
+- name: 0x00004000
+- name: 0x00008000
+
+- name: 0x00010000
+- name: 0x00020000
+- name: People Know Me
+  icon: NULL
+  desc: 無条件にダメージ軽減を得る。
+- name: Walpurgisnacht
+  icon: NULL
+  desc: この魔女はZone<Maze>ではなくZone<Counterclockwise>を展開する。Magicはパフォーマンスに影響しない。
+
+# Nanoha Takamachi
+- name: The White Devil
+# Fate Testarossa
+- name: 0x00020000
+# Hayate Yagami
+- name: 0x00040000
+#
+- name: Belka system
+  icon: resources/icon/NULL
+  desc: 戦闘の際、Magicが1.00未満ならばMagicストックを使用してMagicを1.00以上の
+  flag: 1
+
+# Common Ability (Bank 2)
+- name: Charge
+  icon: resources/icon/walking-boot.png
+  desc: 反撃の際、距離が2のとき、距離を1に詰めて反撃する。
+- name: Dark Soul Explosion
+  icon: resources/icon/defibrilate.png
+  desc: 死亡の際、原因となるユニットのWillを減少させる。超過した差分はMagicへのダメージとなる。
+- name: Enraged
+  icon: resources/icon/dragon-head.png
+  desc: Will減少によって攻撃力上昇を得る。
+- name: For Great Justice
+  icon: resources/icon/fist.png
+  desc: Magic減少による攻撃力低下を無視する。
+
+- name: I Will Avenge You
+  icon: resources/icon/bull.png
+  desc: 反撃の際、攻撃力上昇を得る。
+- name: Last Stand
+  icon: resources/icon/cracked-saber.png
+  desc: 死亡の際、原因となるユニットへ反撃する。
+- name: Pressure
+  desc: NULL
+  flag: 1
+- name: Scream of Soul
+  icon: resources/icon/screaming.png
+  desc: 魔女になったとき、コントロールを失わない。
+
+- name: This girl is a genius
+  icon: resources/icon/materials-science.png
+  desc: Experienceをより多く獲得する。
+- name: The Unyielding
+  icon: resources/icon/crystal-shine.png
+  desc: ダメージが原因となるWill減少を無視する。
+- name: Amity
+  icon: resources/icon/charm.png
+  desc: 中立ユニットに隣接したとき、そのユニットのコントロールを得る。
+  flag: 1
+- name: Unmelted Heart
+  icon: resources/icon/heart-drop.png
+  desc: Willの増減が半分になる。
+
+- name: The Persevere
+  icon: resources/icon/barbute.png
+  desc: 魔女とその使い魔に対して攻撃力上昇を得る。
+- name: Black Heart
+  icon: resources/icon/cowled.png
+  desc: 魔法少女に対して攻撃力上昇を得る。
+- name: Visions of Regret
+  icon: resources/icon/tear-tracks.png
+  desc: 死亡の際、原因となるユニットへHex<Visions of Regret>を与える。
+- name: Martial Arts
+  icon: resources/icon/grab.png
+  desc: 近接戦闘の際、攻撃力上昇を得る。Martial Artsを持たないユニットからの反撃を受けない。
+
+- name: Surprise
+  icon: resources/icon/scorpion.png
+  desc: 戦闘対象のWillがユニット以上の場合、再攻撃する。
+- name: Double Strike
+  icon: resources/icon/resources/icon/scalpel-strike.png
+  desc: 2回攻撃できる。但し与えるダメージが33%減少する。
+- name: Grenths Balance
+  desc: 仮
+- name: Power Block
+
+- name: Mass Vortex
+  icon: resources/icon/vortex.png
+  desc: 運動エネルギー属性攻撃において、距離による威力減衰を無視する。
+- name: Blackout
+- name: Plasma Manipulation
+  icon: resources/icon/ink-swirl.png
+  desc: 熱エネルギー属性攻撃において、距離による威力減衰を無視する。
+- name: Wizard Sense
+  icon: resources/icon/magic-swirl.png
+  desc: 攻撃の際、Magic消費を20%軽減する。
+
+# Common Ability (Bank 3)
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+
+# Hex (Bank 3)
+- name: Essential
+  icon: NULL
+  desc: このユニットを死亡させてはいけない。
+- name: Giallo Nastro
+  icon: resources/icon/crossed-chains.png
+- name: Everlasting Love
+  icon: NULL
+- name: NULL
+  icon: NULL
+
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+- name: NULL
+  icon: NULL
+text:
+  deathtoll:
+  - \%sに殺害される。
+  - 穢れが溜まり魔女になる。
+  - 魔力が尽きて魔女になる。

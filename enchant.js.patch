@@ -1,0 +1,124 @@
+*** enchant.js-builds-0.7.0/build/enchant.js	2013-06-07 19:46:24.000000000 +0900
+--- enchant.js	2013-09-14 06:21:14.076802056 +0900
+***************
+*** 7,12 ****
+--- 7,17 ----
+   */
+  
+  (function(window, undefined){
++ 	NODE = 0
++ 	CALLSTACK = 0
++ 	CALLSTACK_PEAK = 0
++ 	EVENTLISTENER = 0
++ 	ELEMENT = 0
+  
+  /**
+   * ECMA-262 5th edition Functions
+***************
+*** 773,780 ****
+--- 778,787 ----
+          var listeners = this._listeners[type];
+          if (listeners == null) {
+              this._listeners[type] = [listener];
++ 			//DEBUG("enchant.js/EVENTLISTENER: "+(++EVENTLISTENER)+" [+]");
+          } else if (listeners.indexOf(listener) === -1) {
+              listeners.unshift(listener);
++ 			//DEBUG("enchant.js/EVENTLISTENER: "+(++EVENTLISTENER)+" [+]");
+  
+          }
+      },
+***************
+*** 798,803 ****
+--- 805,811 ----
+              var i = listeners.indexOf(listener);
+              if (i !== -1) {
+                  listeners.splice(i, 1);
++ 				//DEBUG("enchant.js/EVENTLISTENER: "+(--EVENTLISTENER)+" [+]");
+              }
+          }
+      },
+***************
+*** 808,813 ****
+--- 816,822 ----
+       */
+      clearEventListener: function(type) {
+          if (type != null) {
++ 			//DEBUG("enchant.js/EVENTLISTENER: "+(EVENTLISTENER -= this._listeners[type].length)+" [+]");
+              delete this._listeners[type];
+          } else {
+              this._listeners = {};
+***************
+*** 914,920 ****
+                  while (stage.firstChild) {
+                      stage.removeChild(stage.firstChild);
+                  }
+!                 stage.style.position = 'relative';
+  
+                  var bounding = stage.getBoundingClientRect();
+                  this._pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
+--- 923,929 ----
+                  while (stage.firstChild) {
+                      stage.removeChild(stage.firstChild);
+                  }
+!                 //stage.style.position = 'relative';
+  
+                  var bounding = stage.getBoundingClientRect();
+                  this._pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
+***************
+*** 3223,3228 ****
+--- 3232,3238 ----
+              var addedToScene = new enchant.Event('addedtoscene');
+              node.dispatchEvent(addedToScene);
+          }
++ 		DEBUG("enchant.js/NODE: "+(++NODE)+" [+]");
+      },
+      /**
+       * Incorporates Node into Group.
+***************
+*** 3269,3274 ****
+--- 3279,3288 ----
+                  var removedFromScene = new enchant.Event('removedfromscene');
+                  node.dispatchEvent(removedFromScene);
+              }
++ 			while(node.childNodes != null && node.childNodes.length > 0)
++ 				node.removeChild(node.childNodes[0])
++ 			node.clearEventListener()
++ 			DEBUG("enchant.js/NODE: "+(--NODE)+" [-]");
+          }
+      },
+      /**
+***************
+*** 5806,5816 ****
+              e.timeline = this;
+              action.dispatchEvent(e);
+          }
+!         if (remainingTime > 0 || (this.queue[0] && this.queue[0].time === 0)) {
+              var event = new enchant.Event("enterframe");
+              event.elapsed = remainingTime;
+              this.dispatchEvent(event);
+          }
+      },
+      /**
+       */
+--- 5820,5840 ----
+              e.timeline = this;
+              action.dispatchEvent(e);
+          }
+! 		//++CALLSTACK;
+!         //if (remainingTime > 0 || (this.queue[0] && this.queue[0].time === 0)) {
+!         if (++CALLSTACK < 2048 && (remainingTime > 0 || (this.queue[0] && this.queue[0].time === 0))) {
+! 			CALLSTACK_PEAK = CALLSTACK
+! 			//DEBUG("enchant.js/CALLSTACK: "+(CALLSTACK)+" [+]");
+! 			//if(CALLSTACK >= 256)
+! 			//	DEBUG("enchant.js/CALLSTACK: Peak "+(CALLSTACK));
+              var event = new enchant.Event("enterframe");
+              event.elapsed = remainingTime;
+              this.dispatchEvent(event);
++ 			if(CALLSTACK_PEAK === CALLSTACK && CALLSTACK_PEAK >= 256)
++ 				DEBUG("enchant.js/CALLSTACK: Peak "+(CALLSTACK));
+          }
++ 		//DEBUG("enchant.js/CALLSTACK: "+(--CALLSTACK)+" [-]");
++ 		--CALLSTACK;
+      },
+      /**
+       */

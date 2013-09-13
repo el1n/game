@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<script type="text/javascript" charset="UTF-8">
+DEBUG = function(m){
+	var id = "NULL";
+
+	if(m.replace(/^(.+?)[\s:]/)){
+		id = RegExp.$1;
+	}
+	if(elem = document.getElementById("info")){
+		if(elem[id] == null)
+			(elem.appendChild(document.createElement("div"))).id = id
+		document.getElementById(id).innerHTML = m;
+	}
+};
+</script>
+<script src="enchant.js" type="text/javascript"></script>
+<script src="http://jashkenas.github.com/coffee-script/extras/coffee-script.js" type="text/javascript"></script>
+<script src="y2j.php?param=LANGUAGE&yaml=lang.yaml" type="text/javascript"></script>
+<script src="name.json" type="text/javascript"></script>
+<script src="y2j.php?param=MODE&yaml=rule.yaml" type="text/javascript"></script>
+<script src="main.coffee" type="text/coffeescript"></script>
+</head>
+<style type="text/css">
+body {
+	background-Color: #7F7F7F;
+	width: 100%;
+	height: 100%;
+}
+
+#enchant-stage {
+	position: absolute;
+	width: 360px;
+	height: 640px;
+	margin-left: -360px;
+	margin-top: -320px;
+	left: 50%;
+	top: 50%;
+	border: 1px solid #000000;
+    padding: 0px 0px 0px 0px;
+}
+
+#info {
+	font-family: 'Tahoma';
+	font-size: 8px;
+	position: absolute;
+	width: 360px;
+	height: 640px;
+	margin-left: 0px;
+	margin-top: -320px;
+	left: 50%;
+	top: 50%;
+	#border: 1px solid #000000;
+    #padding: 0px 0px 0px 0px;
+    padding: 0px 8px;
+}
+
+#info div {
+	line-height: 10px;
+	margin: 0px 0px;
+    #padding: -2px -2px -2px -2px;
+}
+
+#enchant-stage1 {
+	position: absolute;
+	width: 540px;
+	height: 960px;
+	margin-left: -270px;
+	margin-top: -480px;
+	left: 50%;
+	top: 50%;
+	border: 2px solid #000000;
+    padding: 0px 0px 0px 0px;
+}
+
+@font-face {
+	font-family: 'MadokaRunes';
+	src: url('resources/font/MadokaRunes-2.0.ttf');
+}
+</style>
+<body>
+<div><a href="./" target=_blank>latest</a></div>
+<div><a href="./dev.html" target=_blank>dev</a></div>
+<div><a href="./main.coffee" target=_blank>そーす (CS)</a></div>
+<div><a href="./main.js" target=_blank>そーす (JS)</a></div>
+<div><a href="./man.txt" target=_blank>man</a></div>
+<div><a href="./v1.html" target=_blank>v1</a></div>
+<div><a href="./v2.html" target=_blank>v2</a></div>
+<div style="font-size:32px;font-family:'Georgia';">Georgia</div>
+<div style="font-size:32px;font-family:'Georgia';font-style:italic;">Georgia</div>
+<div style="font-size:32px;font-family:'Verdana';">Verdana</div>
+<div style="font-size:32px;font-family:'Verdana';font-style:italic;">Verdana</div>
+<div style="font-size:32px;font-family:'MadokaRunes';">MadokaRunes</div>
+<div style="font-size:32px;font-family:'MadokaRunes';font-style:italic;">MadokaRunes</div>
+<div style="font-size:32px;font-family:'Shardee';">Shardee</div>
+<div style="font-size:32px;font-family:'Shardee';font-style:italic;">Shardee</div>
+<div style="font-size:32px;font-family:'Garton';">Garton</div>
+<div style="font-size:32px;font-family:'Garton';font-style:italic;">Garton</div>
+<div style="font-size:32px;font-family:'Mountains of Christmas';">Mountains of Christmas</div>
+<div style="font-size:32px;font-family:'Mountains of Christmas';font-style:italic;">Mountains of Christmas</div>
+<div id="enchant-stage"></div>
+<div id="info"></div>
+</body>
+</html>
