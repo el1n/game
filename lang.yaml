@@ -179,7 +179,7 @@ ability:
 
 # Hex (Bank 3)
 - name: Essential
-  icon: NULL
+  icon: resources/icon/crown.png
   desc: このユニットを死亡させてはいけない。
 - name: Giallo Nastro
   icon: resources/icon/crossed-chains.png

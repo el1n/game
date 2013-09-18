@@ -2,15 +2,23 @@ NULL = null
 NOP = () ->
 
 C_TEST = 0
-#C_GAMEMODE = "test"
 C_GAMEMODE = "2"
 C_GAMEMODE = "defense1"
-N_DEPLOY = 0
 
 C_FONT_FAMILY = "Georgia"
+#C_FONT_FAMILY = "Verdana"
 #C_FONT_FAMILY = "Shardee"
+#C_FONT_FAMILY = "Mountains of Christmas"
+#C_FONT_FAMILY = "Hiragino Maru Gothic Pro W4"
+#C_FONT_FAMILY = "Hiragino Kaku Gothic Pro W3"
+#C_FONT_FAMILY = "Hiragino Kaku Gothic Pro W6"
+#C_FONT_FAMILY = "Hiragino Mincho ProN W6"
 #C_FONT_FAMILY = "Garton"
+#C_FONT_FAMILY = "Inconsolata"
+#C_FONT_FAMILY = "Lucida Sans Unicode"
+#C_FONT_FAMILY = "Book Antiqua"
 C_FONT_STYLE = "italic"
+#C_FONT_STYLE = "bold"
 C_FONT_SIZE = 0
 
 N_GAME_SPEED = 30
@@ -33,8 +41,6 @@ N_X_CELL = N_X_GRID
 N_Y_CELL = N_X_GRID
 N_X_UNIT = 80
 N_Y_UNIT = 80
-
-C_TYPE_FUNCTION = typeof(() -> 0)
 
 F_CACHE							= 1
 N_IMP_BANK						= 1
@@ -141,6 +147,7 @@ F_ABILITY_0x20040000			= 0x20400000
 F_ABILITY_WIZARD_SENSE			= 0x20800000
 F_ABILITY_MASK_2				= 0x20FFFFFF
 F_ABILITY_BANK_2				= 0x20000000
+F_ABILITY_BANK_3				= 0x40000000
 F_HEX_ESSENTIAL					= 0x40001000
 F_HEX_GIALLO_NASTRO				= 0x40002000
 F_HEX_MASK						= 0x40FFFFFF
@@ -403,6 +410,7 @@ F_DEAL_B_WIL1					= 0x00000080
 			@preload("resources/icon/bleeding-eye.png")
 			@preload("resources/icon/walking-boot.png")
 			@preload("resources/icon/heart-drop.png")
+			@preload("resources/icon/crown.png")
 
 			@preload("resources/icon/pirate-grave_1.png")
 			@preload("resources/icon/hazard-sign.png")
@@ -877,133 +885,11 @@ F_DEAL_B_WIL1					= 0x00000080
 						wk:0
 						hk:0
 
-					@ctrl = [
-						0
-						1
-						1
-						1
-						1
-						1
-						1
-						1
-					]
-
-
 					@addEventListener(enchant.Event.ENTER,() ->
-						@mode = new game.Flag()
-
-						switch N_DEPLOY
-							when 1
-								@mode.on(F_MODE_SPAWN_HUMAN)
-
-								@UnitTemplate.MadokaKaname.apply(@UnitContainer.create(),F_UNIT_FACTION_BLUE).spawn(new game.Coordinates(4,1,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.SayakaMiki.apply(@UnitContainer.create(),F_UNIT_FACTION_BLUE).spawn(new game.Coordinates(3,2,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.MamiTomoe.apply(@UnitContainer.create(),F_UNIT_FACTION_BLUE).spawn(new game.Coordinates(3,4,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.HomuraAkemi.apply(@UnitContainer.create(),F_UNIT_FACTION_BLUE).spawn(new game.Coordinates(5,2,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.KyoukoSakura.apply(@UnitContainer.create(),F_UNIT_FACTION_BLUE).spawn(new game.Coordinates(4,3,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.HitomiShizuki.apply(@UnitContainer.create(),F_UNIT_FACTION_BLUE).spawn(new game.Coordinates(2,3,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.OrikoMikuni.apply(@UnitContainer.create(),F_UNIT_FACTION_BLUE).spawn(new game.Coordinates(7,2,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.KirikaKure.apply(@UnitContainer.create(),F_UNIT_FACTION_BLUE).spawn(new game.Coordinates(8,2,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.Kyubey.apply(@UnitContainer.create(),F_UNIT_FACTION_BLUE).spawn(new game.Coordinates(10,3,F_VEC_SETAS_GRID_GRID))
-		
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_GREEN).spawn(new game.Coordinates(1,5,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_GREEN).spawn(new game.Coordinates(9,5,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_GREEN).spawn(new game.Coordinates(3,6,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_GREEN).spawn(new game.Coordinates(8,6,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_GREEN).spawn(new game.Coordinates(10,6,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_GREEN).spawn(new game.Coordinates(9,7,F_VEC_SETAS_GRID_GRID))
-		
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_RED).spawn(new game.Coordinates(11,8,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_RED).spawn(new game.Coordinates(10,9,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_RED).spawn(new game.Coordinates(12,9,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_RED).spawn(new game.Coordinates(9,10,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_RED).spawn(new game.Coordinates(11,10,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_RED).spawn(new game.Coordinates(8,11,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.Jyubey.apply(@UnitContainer.create()).spawn(new game.Coordinates(12,6,F_VEC_SETAS_GRID_GRID))
-		
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_ORANGE).spawn(new game.Coordinates(2,7,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_ORANGE).spawn(new game.Coordinates(1,8,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_ORANGE).spawn(new game.Coordinates(2,9,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_ORANGE).spawn(new game.Coordinates(1,10,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_ORANGE).spawn(new game.Coordinates(4,10,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_ORANGE).spawn(new game.Coordinates(2,11,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_ORANGE).spawn(new game.Coordinates(5,11,F_VEC_SETAS_GRID_GRID))
-		
-								@UnitTemplate.Charlotte.apply(@UnitContainer.create()).spawn(new game.Coordinates(6,5,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.NanohaTakamachi.apply(@UnitContainer.create()).spawn(new game.Coordinates(7,5,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.MarisaKirisame.apply(@UnitContainer.create()).spawn(new game.Coordinates(5,7,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.AliceMargatroid.apply(@UnitContainer.create()).spawn(new game.Coordinates(7,7,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.PatchouliKnowledge.apply(@UnitContainer.create()).spawn(new game.Coordinates(6,8,F_VEC_SETAS_GRID_GRID))
-							when 2
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_GREEN).spawn(new game.Coordinates(2,2,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_WITCH|F_UNIT_FACTION_PURPLE).spawn(new game.Coordinates(2,7,F_VEC_SETAS_GRID_GRID))
-							when 3
-								@UnitTemplate.HomuraAkemi.apply(@UnitContainer.create()).spawn(new game.Coordinates(3,4,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.MamiTomoe.apply(@UnitContainer.create()).spawn(new game.Coordinates(3,3,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.Charlotte.apply(@UnitContainer.create()).spawn(new game.Coordinates(5,5,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_BLUE|F_UNIT_STATE_END).spawn(new game.Coordinates(5,3,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_BLUE|F_UNIT_STATE_END).spawn(new game.Coordinates(5,4,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_BLUE|F_UNIT_STATE_END).spawn(new game.Coordinates(5,6,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_BLUE|F_UNIT_STATE_END).spawn(new game.Coordinates(5,7,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_BLUE|F_UNIT_STATE_END).spawn(new game.Coordinates(6,4,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_BLUE|F_UNIT_STATE_END).spawn(new game.Coordinates(6,5,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_BLUE|F_UNIT_STATE_END).spawn(new game.Coordinates(6,6,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_HUMAN|F_UNIT_FACTION_BLUE|F_UNIT_STATE_END).spawn(new game.Coordinates(7,5,F_VEC_SETAS_GRID_GRID))
-							when 4
-								@UnitTemplate.HomuraAkemi.apply(@UnitContainer.create()).spawn(new game.Coordinates(2,2,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_WITCH|F_UNIT_FACTION_PURPLE).spawn(new game.Coordinates(3,5,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_WITCH|F_UNIT_FACTION_PURPLE).spawn(new game.Coordinates(5,5,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_WITCH|F_UNIT_FACTION_PURPLE).spawn(new game.Coordinates(4,12,F_VEC_SETAS_GRID_GRID))
-							when 5
-								@UnitTemplate.HomuraAkemi.apply(@UnitContainer.create()).spawn(new game.Coordinates(2,2,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.MamiTomoe.apply(@UnitContainer.create()).spawn(new game.Coordinates(9,5,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.Charlotte.apply(unit = @UnitContainer.create()).spawn(new game.Coordinates(8,5,F_VEC_SETAS_GRID_GRID))
-								for x in [2..10]
-									for y in [3..7]
-										crd = new game.Coordinates(x,y,F_VEC_SETAS_GRID_GRID)
-										crd.b.on(F_ZONE_ZOC_MAZE)
-										game.Main.ZoneContainer.create(1).open(crd,unit)
-							when 6
-								@UnitTemplate.MamiTomoe.apply(@UnitContainer.create()).spawn(new game.Coordinates(2,2,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.KyoukoSakura.apply(@UnitContainer.create()).spawn(new game.Coordinates(2,3,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_RED).spawn(new game.Coordinates(3,2,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_RED).spawn(new game.Coordinates(4,3,F_VEC_SETAS_GRID_GRID))
-							when 7
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_RED).spawn(new game.Coordinates(5,3,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_FACTION_BLUE).spawn(new game.Coordinates(3,3,F_VEC_SETAS_GRID_GRID))
-								@UnitContainer.lastChild.mgk = 0.010
-							when 8
-								@mode.on(F_MODE_SPAWN_HUMAN)
-								@spawn = new Array()
-								@spawn.push(new game.Coordinates(1,18,F_VEC_SETAS_GRID_GRID))
-								@spawn.push(new game.Coordinates(18,18,F_VEC_SETAS_GRID_GRID))
-
-								@FieldContainer.look(new game.Coordinates(10,10,F_VEC_SETAS_GRID_GRID))
-
-								@UnitTemplate.MadokaKaname.apply(@UnitContainer.create()).spawn(new game.Coordinates(9,9,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.SayakaMiki.apply(@UnitContainer.create()).spawn(new game.Coordinates(10,10,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.MamiTomoe.apply(@UnitContainer.create()).spawn(new game.Coordinates(8,10,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.HomuraAkemi.apply(@UnitContainer.create()).spawn(new game.Coordinates(11,9,F_VEC_SETAS_GRID_GRID))
-								@UnitTemplate.KyoukoSakura.apply(@UnitContainer.create()).spawn(new game.Coordinates(11,11,F_VEC_SETAS_GRID_GRID))
-
-								@UnitContainer.tl.exec(->
-									(new game.Main.Label()).phase("Wave 1",NULL,8)
-								)
-
-
-
-						#@MaskContainer.Mask.open()
-						#@MaskContainer.Mask.tl.delay(N_2000MS)
-						#@MaskContainer.Mask.close()
-						#@MaskContainer.Label[0].open()
-						#@MaskContainer.Label[0].tl.delay(N_2000MS)
-						#@MaskContainer.Label[0].close()
-
 						@ctrl = MODE[C_GAMEMODE].control
 						game.Main.MaskContainer.Mask.open()
 						@System.init2()
 					)
-
 
 					if window.performance?.memory?
 						@tl.exec(->
@@ -2538,6 +2424,9 @@ F_DEAL_B_WIL1					= 0x00000080
 					)
 				prepareStatusContainer:() ->
 					@addChild(@StatusContainer = new class extends enchant.Group
+						N_BORDER = 6
+						N_RADIUS = 20
+						N_MARGIN = 20
 						constructor:() ->
 							super()
 							game.Action.apply(@)
@@ -2545,229 +2434,481 @@ F_DEAL_B_WIL1					= 0x00000080
 							#@CTL_OPEN_ST.b = 0
 							#@CTL_CLOSE_ST.b = 0
 
-							@y = -N_Y_WND
+							Window = class
+								# x:
+								# y:
+								# w:
+								# h:
+								# r:
+								set:(a = @) ->
+									{
+										@p
+										@x
+										@y
+										@w
+										@h
+										@m
+										@mx
+										@my
+										@rr
+										@bz
+										@bd
+										@c
+										@r
+										@gs
+										@cs
+										@rs
+									} = a
+
+									@wx = @x
+									@wy = @y
+									@ww = @w
+									@wh = @h
+									@cx = @x
+									@cy = @y
+									@cw = @w
+									@ch = @h
+									@mx ?= @m
+									@my ?= @m
+
+									if @p?
+										@wx += @p.cx
+										@wy += @p.cy
+										@cx += @p.cx
+										@cy += @p.cy
+
+									if !@bd?
+										@bd = @bz / (@bz = Math.abs(@bz))
+									if @bd == 0
+										@wexpand(@bz / 2)
+										@cshrink(@bz / 2)
+									else if @bd > 0
+										@wexpand(@bz)
+									else if @bd < 0
+										@cshrink(@bz)
+
+									@bx = @wx + @bz / 2
+									@by = @wy + @bz / 2
+									@bw = @ww - @bz
+									@bh = @wh - @bz
+
+									@wexpand(-Math.min(0,@mx),-Math.min(0,@my))
+									@cshrink(Math.max(0,@mx),Math.max(0,@my))
+									@move(-Math.min(0,@wx),-Math.min(0,@wy))
+
+									@gs ?= @m
+									@cs ?= @gs
+									@rs ?= @gs
+
+									@gw = (@cw - @cs * (@c - 1)) / @c
+									@gh = (@ch - @rs * (@r - 1)) / @r
+
+									return(@)
+								wexpand:(x,y) ->
+									y ?= x
+									@wx -= x
+									@wy -= y
+									@ww += x * 2
+									@wh += y * 2
+								cshrink:(x,y) ->
+									y ?= x
+									@cx += x
+									@cy += y
+									@cw -= x * 2
+									@ch -= y * 2
+								move:(x,y) ->
+									y ?= x
+									@wx += x
+									@wy += y
+									@cx += x
+									@cy += y
+									@bx += x
+									@by += y
+								grid:(x,y,w = 1,h = 1) ->
+									return([
+										parseInt(@cx + (@gw + @cs) * x)
+										parseInt(@cy + (@gh + @rs) * y)
+										parseInt(@gw + (@gw + @cs) * (w - 1))
+										parseInt(@gh + (@gh + @rs) * (h - 1))
+									])
+
+							@window = new Array()
+							@window.push(new Window().set(
+								x:0
+								y:N_Y_WND - 360
+								w:N_X_WND
+								h:360
+								m:20
+								rr:20
+								bz:-6
+								c:8
+								r:6
+								gs:10
+							))
+							@window.push(new Window().set(
+								x:0
+								y:N_Y_WND - 720 + 6
+								w:N_X_WND
+								h:360
+								m:20
+								rr:20
+								bz:-6
+								c:8
+								r:6
+								gs:10
+							))
+							@window.push(new Window().set(
+								x:0
+								y:0
+								w:N_X_WND
+								h:N_Y_WND - 720 + 12
+								m:20
+								rr:20
+								bz:-6
+								c:12
+								r:9
+								gs:10
+							))
+
+							@pos = [
+								x:0
+								y:-N_Y_WND
+							,
+								x:0
+								y:-N_Y_WND + 160 + N_MARGIN * 2 - N_BORDER
+							,
+								x:0
+								y:0
+							]
+
+							f = (wnd) ->
+								@image.context.beginPath()
+								@image.context.moveTo(wnd.bx + wnd.rr,wnd.by)
+								@image.context.lineTo(wnd.bx + wnd.bw - wnd.rr,wnd.by)
+								@image.context.arcTo(wnd.bx + wnd.bw,wnd.by,wnd.bx + wnd.bw,wnd.by + wnd.rr,wnd.rr)
+								@image.context.lineTo(wnd.bx + wnd.bw,wnd.by + wnd.bh - wnd.rr)
+								@image.context.arcTo(wnd.bx + wnd.bw,wnd.by + wnd.bh,wnd.bx + wnd.bw - wnd.rr,wnd.by + wnd.bh,wnd.rr)
+								@image.context.lineTo(wnd.bx + wnd.rr,wnd.by + wnd.bh)
+								@image.context.arcTo(wnd.bx,wnd.by + wnd.bh,wnd.bx,wnd.by + wnd.bh - wnd.rr,wnd.rr)
+								@image.context.lineTo(wnd.bx,wnd.by + wnd.rr)
+								@image.context.arcTo(wnd.bx,wnd.by,wnd.bx + wnd.rr,wnd.by,wnd.rr)
+								@image.context.closePath()
+
+							@addChild(new enchant.Sprite(N_X_WND,N_Y_WND))
+							@lastChild.opacity = 0.800
+							@lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND)
+
+							for _ in @window
+								f.call(@lastChild,_)
+								#@lastChild.image.context.fillStyle = "#E0E0E0"
+								@lastChild.image.context.fillStyle = @lastChild.image.context.createLinearGradient(_.cx + _.cw * 0.250,_.cy,_.cx + _.cw * 0.750,_.cy + _.ch)
+								#@lastChild.image.context.fillStyle.addColorStop(0,"#FFFFFF")
+								#@lastChild.image.context.fillStyle.addColorStop(1,"#DFDFDF")
+								@lastChild.image.context.fillStyle.addColorStop(0,"#202020")
+								@lastChild.image.context.fillStyle.addColorStop(1,"#000000")
+								@lastChild.image.context.fill()
+								@lastChild.image.context.lineWidth = Math.abs(_.bz)
+								@lastChild.image.context.strokeStyle = "#f8b5cc"
+								@lastChild.image.context.stroke()
+
+								#for c in [0.._.c - 1]
+								#	for r in [0.._.r - 1]
+								#		@lastChild.image.context.strokeStyle = "#0000ff"
+								#		@lastChild.image.context.lineWidth = 1
+								#		@lastChild.image.context.strokeRect(_.grid(c,r)...)
 
 							@addChild(new enchant.Sprite(N_X_WND,N_Y_WND))
 							@lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND)
-							@lastChild.image.draw(game.assets['resources/interface/status.png'],0,N_Y_WND - (360 * 1))
-							@lastChild.image.draw(game.assets['resources/interface/status.png'],0,N_Y_WND - (360 * 2))
-							@lastChild.image.draw(game.assets['resources/interface/status.png'],0,N_Y_WND - (360 * 3))
 
-							@lastChild.ACTION = 1
-							@lastChild.opacity = 0.750
+							@window.push(new Window().set(
+								x:0
+								y:0
+								w:320
+								h:320
+								m:0
+								rr:20
+								bz:6
+								c:1
+								r:1
+							))
 
-							@lastChild.tween = [
-								{
-									y:0
-								}
-								{
-									y:-N_X_WND / 4 + N_X_WND / 36
-								}
+							@addChild(new enchant.Sprite(1,1))
+							@lastChild.image = game.assets["resources/Mami_Tomoe.png"]
+							@lastChild.window = new Window().set(
+								x:0
+								y:0
+								w:320
+								h:320
+								m:0
+								rr:20
+								bz:6
+								c:1
+								r:1
+							)
+							@lastChild.cvsRender = (e) ->
+								@window.w = @width
+								@window.h = @height
+								@window.set()
+								f.call({image:{context:e}},@window)
+								e.save()
+								e.clip()
+								e.drawImage(@image._element,0,0,320,320,@window.cx,@window.cy,@width,@height)
+								e.restore()
+								e.lineWidth = @window.bz
+								e.strokeStyle = "#f8b5cc"
+								#@lastChild.image.context.strokeStyle = "#0000ff"
+								e.stroke()
+								#f.call(@lastChild,0,0,320,320,12,60)
+
+							@lastChild.pos = [
+								x:@window[0].cx + (@window[0].ch - @lastChild.window.ww) / 2
+								y:@window[0].cy + (@window[0].ch - @lastChild.window.wh) / 2 + @lastChild.window.ch / 2
+								width:@lastChild.window.cw / 2
+								height:@lastChild.window.ch / 2
+							,
+								x:@window[0].cx + (@window[0].ch - @lastChild.window.ww) / 2
+								y:@window[0].cy + (@window[0].ch - @lastChild.window.wh) / 2 + @lastChild.window.ch / 2
+								width:@lastChild.window.cw / 2
+								height:@lastChild.window.ch / 2
+							,
+								x:@window[0].cx + (@window[0].ch - @lastChild.window.ww) / 2
+								y:@window[0].cy + (@window[0].ch - @lastChild.window.wh) / 2
+								width:@lastChild.window.cw
+								height:@lastChild.window.ch
 							]
 
-							setxy = (elem,x,y) ->
-								elem.tween = [
-									{
-										x:(N_X_WND / 36) + (N_X_WND - N_X_WND / 36) / 6 * x
-										y:N_Y_WND + (-N_X_WND / 2 * parseInt(y / 6)) + -N_X_WND / 36 + (N_X_WND / 2 + N_X_WND / 36) / 7 * (-y % 6 - 1)
-									}
-									{
-										x:(N_X_WND / 36) + N_X_WND / 4 + (N_X_WND * 0.750 - N_X_WND / 36) / 3 * (x - 3)
-										y:N_Y_WND + -N_X_WND / 4 + (-N_X_WND / 2 * parseInt(y / 6)) + -N_X_WND / 36 + (N_X_WND / 4 + N_X_WND / 36) / 3 * (-y % 6 - 1)
-									}
+							@window.push(new Window().set(
+								x:0
+								y:N_Y_WND - 360
+								w:N_X_WND
+								h:360
+								mx:10
+								my:20
+								rr:20
+								bz:-6
+								c:8
+								r:6
+								cs:0
+								rs:10
+							))
+
+							for i in [0,3,4]
+								@addChild(new enchant.Sprite(100,100))
+								@lastChild.color = [
+									["#00DF00","#003F00"]
+									NULL
+									NULL
+									["#DF0000","#3F0000"]
+									["#0000DF","#00003F"]
+								][i]
+								@lastChild.cvsRender = (e) ->
+									e.beginPath()
+									e.moveTo(0 + 10,@height / 2)
+									e.lineTo(@width * @width2,@height / 2)
+									e.lineTo(@width * @width2 - 10,@height)
+									e.lineTo(0,@height)
+									e.closePath()
+									e.fillStyle = e.createLinearGradient(
+										@width
+										@height
+										0
+										0
+									)
+									e.fillStyle.addColorStop(0,@color[0])
+									e.fillStyle.addColorStop(1,@color[1])
+									e.fill()
+								@lastChild.y = @window[4].grid(4,i,4)[1]
+								@lastChild.height = @window[4].grid(4,i,4)[3]
+
+								@lastChild.pos = [
+									x:@window[4].grid(2,i,6)[0]
+									width:@window[4].grid(2,i,6)[2]
+								,
+									x:@window[4].grid(2,i,6)[0]
+									width:@window[4].grid(2,i,6)[2]
+								,
+									x:@window[4].grid(4,i,4)[0]
+									width:@window[4].grid(4,i,4)[2]
 								]
-								return(elem)
-							mkLabel = (x,y,s,z = 0) ->
-								j = new enchant.Label()
-								j.text = s
-								j.textAlign = 'left'
-								j.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24 + z}px '#{C_FONT_FAMILY}'"
-								j.font1 = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24 + z}px '#{C_FONT_FAMILY}'"
-								j.font2 = (C_FONT_SIZE + 24 + z) + 'px \'MadokaRunes\''
-								return(setxy(j,x,y))
 
-							@addChild(new enchant.Sprite(320,320))
-							@lastChild.backgroundColor = '#000000'
-							@lastChild.x = N_X_WND / 36
-							@lastChild.y = N_Y_WND - @lastChild.height - N_X_WND / 36
-							@lastChild.originX = 0
-							@lastChild.originY = 0
-							@lastChild.scaleX = 0.500
-							@lastChild.scaleY = 0.500
-							@lastChild.x_ = [
-								N_X_WND / 36
-								N_X_WND / 36
-							]
-							@lastChild.y_ = [
-								N_Y_WND - @lastChild.height - N_X_WND / 36
-								N_Y_WND - @lastChild.height - N_X_WND / 36
-							]
-							@lastChild.tween = [
-								{
-									scaleX:1
-									scaleY:1
-								}
-								{
-									scaleX:0.500
-									scaleY:0.500
-								}
-							]
-
-							@addChild(new enchant.Entity())
-							@lastChild.height = (N_X_WND / 36) + (N_X_WND / 2 - N_X_WND / 36) / 6 / 6
-							@lastChild.backgroundColor = '#00DF00'
-							setxy(@lastChild,3,1)
-							@lastChild.tween[0].width_ = N_X_WND - @lastChild.tween[0].x - N_X_WND / 36
-							@lastChild.tween[1].width_ = N_X_WND - @lastChild.tween[1].x - N_X_WND / 36
-
-							@addChild(new enchant.Entity())
-							@lastChild.height = (N_X_WND / 36) + (N_X_WND / 2 - N_X_WND / 36) / 6 / 6
-							@lastChild.backgroundColor = '#0020FF'
-							setxy(@lastChild,3,2)
-							@lastChild.tween[0].width_ = N_X_WND - @lastChild.tween[0].x - N_X_WND / 36
-							@lastChild.tween[1].width_ = N_X_WND - @lastChild.tween[1].x - N_X_WND / 36
-
-							@addChild(new enchant.Entity())
-							@lastChild.height = (N_X_WND / 36) + (N_X_WND / 2 - N_X_WND / 36) / 6 / 6
-							@lastChild.backgroundColor = '#FF2000'
-							setxy(@lastChild,3,5)
-							@lastChild.tween[0].width_ = N_X_WND - @lastChild.tween[0].x - N_X_WND / 36
-							@lastChild.tween[1].width_ = N_X_WND - @lastChild.tween[1].x - N_X_WND / 36
-
-							@addChild(new enchant.Entity())
-							setxy(@lastChild,0,0)
-
-							# 6 +18
 							for i in [0..5]
-								@addChild(mkLabel(3,i,[
-									'No Named Girl'
-									'Magic'
-									'Will'
-									'Resist'
-									'Power'
-									'Experience'
-									][i],if i == 0 then 8 else 0))
-								@addChild(mkLabel(4,i,''))
-								@addChild(mkLabel(5,i,''))
+								e = @draw([
+									"Experience"
+									"Power"
+									"Resist"
+									"Will"
+									"Magic"
+									"No Named Girl"
+								][i],[
+									0
+									0
+									0
+									0
+									0
+									8
+								][i],"left",@window[0],4,i,4)
 
-							@addChild(mkLabel(1,11,'Abilities'))
-							@addChild(mkLabel(2,11,''))
-
-							# 24 +12
-							for i in [10..6]
-								@addChild(mkLabel(0,i,''))
-								@addChild(mkLabel(3,i,'',-8))
-
-							# 36 +18
-							for i in [12..17]
-								@addChild(mkLabel(0,i,[
-									'Total Spec'
-									'Move'
-									'Range'
-									'Type'
-									'Class'
-									'Faction'
-									][i - 12]))
-								@addChild(mkLabel(1,i,''))
-								@addChild(mkLabel(2,i,''))
-
-							# 54 +18
-							for i in [16..12]
-								@addChild(mkLabel(3,i,''))
-								@addChild(mkLabel(4,i,''))
-								@addChild(mkLabel(5,i,''))
-
-							@addChild(mkLabel(4,17,'Hex'))
-
-							@sw = 0
-							#@close2()
+								e.pos = [
+									x:@window[0].grid(2,i)[0]
+								,
+									x:@window[0].grid(2,i)[0]
+								,
+									x:e.x
+								]
 
 
-							@addChild(new enchant.Sprite(N_X_WND,N_Y_WND))
-							@lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND)
-							@lastChild.tween = [
-								{
-									y:0
-								}
-								{
-									y:-N_X_WND / 4 + N_X_WND / 36
-								}
-							]
+							for i in [0..5]
+								@draw([
+									"Faction"
+									"Class"
+									"Type"
+									"Range"
+									"Move"
+									"Performance"
+								][i],0,"left",@window[1],4,i,4)
+								@draw([
+									"Lifetime"
+									"-"
+									"-"
+									"-"
+									"-"
+									"-"
+								][i],0,"left",@window[1],0,i,4)
 
-							for _ in @childNodes
-								_.tween[0].time = N_333MS
-								_.tween[1].time = N_333MS
-								_.tween[0].easing = enchant.Easing.QUINT_EASEOUT
-								_.tween[1].easing = enchant.Easing.QUINT_EASEOUT
+							@move(0)
 						MOUSE_DOWN:() ->
-							for _ in @childNodes when _.tween?
-								_.tl.clear().tween(_.tween[@sw])
+							@sw ?= 1
+							console.log(@)
 
-							if @sw
-								@tl.clear().moveTo(0,-N_Y_WND + N_X_WND / 2,N_333MS,enchant.Easing.QUINT_EASEOUT)
-							else
-								@tl.clear().moveTo(0,-N_X_WND / 4,N_333MS,enchant.Easing.QUINT_EASEOUT)
-							@sw ^= 1
-						#MOUSE_CLICK:(crd) ->
-						#	for i in [0..@childNodes.length - 1]
-						#		@childNodes[i].tl.clear().tween(@childNodes[i].tween[@sw])
-						#	@sw ^= 1
-						#MOUSE_DRAG:(crd) ->
-						#	@sw = 0
-						#	@MOUSE_CLICK()
-						#	crd.b.off(F_VEC_MASK)
-						#	crd.x[0] = 0
-						#	crd.x[1] = 0
-						#	crd.dif().neg().add(new game.Coordinates(0,@y)).setas(@)
-						#MOUSE_DROP:(crd) ->
-						#	@tl.moveTo(0,-N_Y_WND + N_X_WND / 2,N_333MS,enchant.Easing.QUINT_EASEOUT)
+							@move(@sw ^= 3)
+						move:(i) ->
+							for _ in [@].concat(@childNodes)
+								if _.pos? && _.pos[i]
+									_.pos[i].time ?= N_333MS
+									_.pos[i].easing ?= enchant.Easing.QUINT_EASEOUT
+
+									_.tl.clear().tween(_.pos[i])
+						draw:(sv,z,align,wnd,x,y,w = 1,h = 1) ->
+							id = "#{wnd.x}.#{wnd.y}(#{x}.#{y}):text"
+
+							if !(e = @childNodes.grep((_) -> _.id == id).fv())
+								@addChild(e = new enchant.Label())
+							e.id = id
+							#e._style["text-shadow"] = "-1px -1px 0 #000,1px -1px 0 #000, -1px  1px 0 #000,1px  1px 0 #000"
+							e._style["text-shadow"] = "-4px -4px 0 #ff0000;"
+							e._style["border"] = "double 10px #ff0000"
+							e._style["backgroundColor"] = "#ff0000"
+							e.text = sv
+							#e.color = "#000000"
+							e.color = "#FFFFFF"
+							e.textAlign = align
+							e.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + z + 24}px '#{C_FONT_FAMILY}'"
+							[e.x,e.y,e.width,e.height] = wnd.grid(x,y,w,h)
+							e.y += wnd.gh / 2 - (C_FONT_SIZE + z + 24) / 3 * 2
+
+							return(e)
+						draw2:(img,i,wnd,x,y,w = 1,h = 1) ->
+							cellx = wnd.c
+							gridx = (wnd.w - N_BORDER * 2 - (cellx + 1) * N_MARGIN) / cellx
+							celly = wnd.r
+							gridy = (wnd.h - N_BORDER * 2 - (celly + 1) * N_MARGIN) / celly
+							@childNodes[1].image.draw(
+								img
+								0
+								0
+								512
+								512
+								wnd.grid(x,y,w,h)[0]
+								wnd.grid(x,y,w,h)[1]
+								48
+								48
+							)
+
+							@childNodes[1].image.context.beginPath()
+							@childNodes[1].image.context.lineWidth = 2
+							@childNodes[1].image.context.strokeStyle = ["#cced39","#df61e8"][i]
+							#@childNodes[1].image.context.stroke()
+							@childNodes[1].image.context.strokeRect(
+								wnd.grid(x,y,w,h)[0]
+								wnd.grid(x,y,w,h)[1]
+								48
+								48
+							)
+
+							r = 48 / 8
+							@childNodes[1].image.context.beginPath()
+							###
+							@childNodes[1].image.context.moveTo(
+								wnd.grid(x,y,w,h)[0] + 48 + (r - r * 1.500)
+								wnd.grid(x,y,w,h)[1] + 48 + (0 - r * 1.500)
+							)
+							@childNodes[1].image.context.lineTo(
+								wnd.grid(x,y,w,h)[0] + 48 + (r * 2 - r * 1.500)
+								wnd.grid(x,y,w,h)[1] + 48 + (r * 2 - r * 1.500)
+							)
+							@childNodes[1].image.context.lineTo(
+								wnd.grid(x,y,w,h)[0] + 48 + (0 - r * 1.500)
+								wnd.grid(x,y,w,h)[1] + 48 + (r * 2 - r * 1.500)
+							)
+							###
+							if i == 0
+								@childNodes[1].image.context.moveTo(
+									wnd.grid(x,y,w,h)[0] + 48 - r
+									wnd.grid(x,y,w,h)[1]
+								)
+								@childNodes[1].image.context.lineTo(
+									wnd.grid(x,y,w,h)[0] + 48
+									wnd.grid(x,y,w,h)[1] + r * 2
+								)
+								@childNodes[1].image.context.lineTo(
+									wnd.grid(x,y,w,h)[0] + 48 - r * 2
+									wnd.grid(x,y,w,h)[1] + r * 2
+								)
+							else if i == 1
+								@childNodes[1].image.context.moveTo(
+									wnd.grid(x,y,w,h)[0] + 48 - r * 2
+									wnd.grid(x,y,w,h)[1]
+								)
+								@childNodes[1].image.context.lineTo(
+									wnd.grid(x,y,w,h)[0] + 48
+									wnd.grid(x,y,w,h)[1]
+								)
+								@childNodes[1].image.context.lineTo(
+									wnd.grid(x,y,w,h)[0] + 48 - r
+									wnd.grid(x,y,w,h)[1] + r * 2
+								)
+							@childNodes[1].image.context.closePath()
+							@childNodes[1].image.context.fillStyle = ["#cced39","#df61e8"][i]
+							@childNodes[1].image.context.fill()
+							@childNodes[1].image.context.lineWidth = 2
+							@childNodes[1].image.context.strokeStyle = "#cccccc"
+							#@childNodes[1].image.context.stroke()
 						open:(elem) ->
-							#@childNodes[2].width = (N_X_WND / 2 - N_X_WND / 36) * elem.mgk
-							#@childNodes[2].width = (N_X_WND - @childNodes[2].x - N_X_WND / 36) * elem.mgk
-							#@childNodes[3].width = (N_X_WND - @childNodes[3].x - N_X_WND / 36) * elem.wil
-							@#childNodes[4].width = (N_X_WND - @childNodes[4].x - N_X_WND / 36) * elem.exp
-							@childNodes[2].tween[0].width = @childNodes[2].tween[0].width_ * Math.min(1,elem.mgk)
-							@childNodes[2].tween[1].width = @childNodes[2].tween[1].width_ * Math.min(1,elem.mgk)
-							@childNodes[3].tween[0].width = @childNodes[3].tween[0].width_ * Math.min(1,elem.wil)
-							@childNodes[3].tween[1].width = @childNodes[3].tween[1].width_ * Math.min(1,elem.wil)
-							@childNodes[4].tween[0].width = @childNodes[4].tween[0].width_ * Math.min(1,elem.exp)
-							@childNodes[4].tween[1].width = @childNodes[4].tween[1].width_ * Math.min(1,elem.exp)
+							@childNodes[3].width2 = elem.exp
+							@childNodes[4].width2 = elem.wil
+							@childNodes[5].width2 = elem.mgk
+							@childNodes[2].image = elem.kao
+							@draw(elem.name,8,"left",@window[0],4,5,4)
+							@draw(elem.mgk.toFixed(2),0,"right",@window[0],6,4)
+							@draw(elem.mg2.toFixed(2),0,"right",@window[0],7,4)
+							@draw(elem.wil.toFixed(2),0,"right",@window[0],6,3)
+							@draw(elem.exp.toFixed(2),0,"right",@window[0],6,0)
+							@draw(['E-','E','D','C','B','A','A+','A+','A+','A+','2,000Kg/m2'][elem.atk],0,"center",@window[0],6,1)
+							@draw(['E-','E','D','C','B','A','A+','A+','A+','A+','< 20,195J'][elem.def],0,"center",@window[0],6,2)
 
-							@childNodes[1].image = elem.kao
-							@childNodes[6].text = elem.name
-							if elem.b.is(F_UNIT_CLASS_MAHOUSHOJO)
-								@childNodes[6].font = @childNodes[6].font1
-							else if elem.b.is(F_UNIT_CLASS_WITCH|F_UNIT_CLASS_MINION)
-								@childNodes[6].font = @childNodes[6].font2
-							else
-								@childNodes[6].font = @childNodes[6].font1
-							@childNodes[10].text = elem.mgk.toFixed(2)
-							@childNodes[11].text = "+ #{elem.mg2.toFixed(2)}"
-							@childNodes[13].text = elem.wil.toFixed(2)
-							@childNodes[16].text = ['E-','E','D','C','B','A','A+','A+','A+','A+','< 20,195J'][elem.def]
-							@childNodes[19].text = ['E-','E','D','C','B','A','A+','A+','A+','A+','2,000Kg/m2'][elem.atk]
-							#@childNodes[10].text = ['NOVICE','VETERAN','PRO','MASTER','WITCH'][parseInt(elem.exp * 100 / 25)]
-							@childNodes[23].text = elem.exp.toFixed(2)
+							@draw([
+									NULL
+									'Allies'
+									'Allies'
+									'Foes'
+									'Foes'
+									'Foes'
+									'Neutrality'
+									'Witches'
+									'Foes'
+							][elem.b.geti(F_UNIT_FACTION_MASK)],0,"right",@window[1],5,0,2.800)
 
-							#dmg = 0
-							#dmg += Math.pow2(elem.atk - 1,2) / 100
-							#dmg += Math.pow2(elem.mgk - 0,(elem.atk - 1) / 10 + 2)
-							#dmg += (Math.pow2((elem.exp - 0.500) * 2,1.500) + 1) / 3
-
-							@childNodes[37].text = "#{elem.perf().toFixed(2)} (#{elem.perf(F_DEAL_A_MGK1|F_DEAL_A_WIL1).toFixed(2)})"
-							@childNodes[41].text = elem.speed
-							@childNodes[44].text = elem.range
-							values = new Array()
-							if elem.b.is(F_UNIT_ATK_MELEE)
-								values.push("Phy")
-							if elem.b.is(F_UNIT_ATK_KINETIC)
-								values.push("KE")
-							if elem.b.is(F_UNIT_ATK_THERMAL)
-								values.push("TE")
-							if elem.b.is(F_UNIT_ATK_MAGIC)
-								values.push("Mgk")
-							@childNodes[46].text = values.join("/")
-							@childNodes[49].text = [
+							@draw([
 									NULL
 									"Madoka Magica"
 									"Incubator"
@@ -2786,81 +2927,75 @@ F_DEAL_B_WIL1					= 0x00000080
 									"-"
 									"-"
 									"Kuma"
-							][elem.b.geti(F_UNIT_CLASS_MASK)]
-							@childNodes[52].text = [
-									NULL
-									'Allies'
-									'Allies'
-									'Foes'
-									'Foes'
-									'Foes'
-									'Neutrality'
-									'Witches'
-									'Foes'
-							][elem.b.geti(F_UNIT_FACTION_MASK)]
+							][elem.b.geti(F_UNIT_CLASS_MASK)],0,"right",@window[1],5,1,2.800)
 
-							for i in [26..35]
-								@childNodes[i].text = ''
-							i = 26
-							for b in [0..23]
-								if elem.b.is((1 << b)|F_ABILITY_BANK_1)
-									if game.assets[LANGUAGE.ability[b].icon]?
-										@lastChild.image.draw(
-											game.assets[LANGUAGE.ability[b].icon]
-											0
-											0
-											512
-											512
-											@childNodes[i].tween[0].x - 8
-											@childNodes[i].tween[0].y - 8
-											48
-											48
-										)
-									@childNodes[i++].text = "        "+LANGUAGE.ability[b].name
-									@childNodes[i++].text = LANGUAGE.ability[b].desc
-							for b in [0..23]
-								if elem.b.is((1 << b)|F_ABILITY_BANK_2)
-									if game.assets[LANGUAGE.ability[b + 24].icon]?
-										@lastChild.image.draw(
-											game.assets[LANGUAGE.ability[b + 24].icon]
-											0
-											0
-											512
-											512
-											@childNodes[i].tween[0].x - 8
-											@childNodes[i].tween[0].y - 8
-											48
-											48
-										)
-									@childNodes[i++].text = "        "+LANGUAGE.ability[b + 24].name
-									@childNodes[i++].text = LANGUAGE.ability[b + 24].desc
-							i = 54
-							for b in [12..23]
-								if elem.b.is((1 << b)|F_HEX_BANK)
-									if game.assets[LANGUAGE.ability[b + 48].icon]?
-										@lastChild.image.draw(
-											game.assets[LANGUAGE.ability[b + 48].icon]
-											0
-											0
-											512
-											512
-											@childNodes[i].tween[0].x - 8
-											@childNodes[i].tween[0].y - 8
-											48
-											48
-										)
-									@childNodes[i++].text = "        "+LANGUAGE.ability[b + 48].name
-									#@childNodes[i++].text = LANGUAGE.ability[b + 24].desc
+							_ = new Array()
+							if elem.b.is(F_UNIT_ATK_MELEE)
+								_.push("Phy")
+							if elem.b.is(F_UNIT_ATK_KINETIC)
+								_.push("KE")
+							if elem.b.is(F_UNIT_ATK_THERMAL)
+								_.push("TE")
+							if elem.b.is(F_UNIT_ATK_ELECTROMAGNETIC)
+								_.push("EM")
+							if elem.b.is(F_UNIT_ATK_PRESSURE_WAVE)
+								_.push("PW")
+							if elem.b.is(F_UNIT_ATK_MAGIC)
+								_.push("Mgk")
+							@draw(_.join("/"),0,"right",@window[1],5,2,2.800)
 
-							@sw = 1
-							@tl.clear().moveTo(0,-N_Y_WND + N_X_WND / 2,N_333MS,enchant.Easing.QUINT_EASEOUT)
-							#@MOUSE_CLICK()
-							@MOUSE_DOWN()
+							@draw(elem.range,0,"right",@window[1],6,3)
+							@draw(elem.speed,0,"right",@window[1],6,4)
+							@draw(elem.perf().toFixed(2),0,"right",@window[1],6,5)
+							@draw(elem.perf(F_DEAL_A_MGK1|F_DEAL_A_WIL1).toFixed(2),0,"right",@window[1],7,5)
+
+							i = 0
+							b = 0
+							while i < @window[2].r
+								if b == 0
+									@draw("Ability",0,"center",@window[2],1,i++,3)
+									@draw("",0,"left",@window[2],5,i,7)
+								if b == 60
+									@draw("Hex",0,"center",@window[2],1,i++,3)
+									@draw("",0,"left",@window[2],5,i,7)
+
+								if b < 24
+									if elem.b.is((1 << b % 24)|F_ABILITY_BANK_1)
+										if game.assets[LANGUAGE.ability[b].icon]?
+											@draw2(game.assets[LANGUAGE.ability[b].icon],0,@window[2],0,i)
+										@draw(LANGUAGE.ability[b].name,0,"left",@window[2],1,i,6)
+										@draw(LANGUAGE.ability[b].desc,-8,"left",@window[2],5,i,7)
+										++i
+								else if b < 48
+									if elem.b.is((1 << b % 24)|F_ABILITY_BANK_2)
+										if game.assets[LANGUAGE.ability[b].icon]?
+											@draw2(game.assets[LANGUAGE.ability[b].icon],0,@window[2],0,i)
+										@draw(LANGUAGE.ability[b].name,0,"left",@window[2],1,i,6)
+										@draw(LANGUAGE.ability[b].desc,-8,"left",@window[2],5,i,7)
+										++i
+								else if b < 60
+									if elem.b.is((1 << b % 24)|F_ABILITY_BANK_3)
+										if game.assets[LANGUAGE.ability[b].icon]?
+											@draw2(game.assets[LANGUAGE.ability[b].icon],0,@window[2],0,i)
+										@draw(LANGUAGE.ability[b].name,0,"left",@window[2],1,i,6)
+										@draw(LANGUAGE.ability[b].desc,-8,"left",@window[2],5,i,7)
+										++i
+								else if b < 72
+									if elem.b.is((1 << b % 24)|F_HEX_BANK)
+										if game.assets[LANGUAGE.ability[b].icon]?
+											@draw2(game.assets[LANGUAGE.ability[b].icon],1,@window[2],0,i)
+										@draw(LANGUAGE.ability[b].name,0,"left",@window[2],1,i,6)
+										@draw(LANGUAGE.ability[b].desc,-8,"left",@window[2],5,i,7)
+										++i
+								else if b >= 72
+									@draw("",0,"left",@window[2],1,i,6)
+									@draw("",0,"left",@window[2],5,i,7)
+									++i
+								++b
+							@move(1)
 						close:() ->
-							@lastChild.image.clear()
-							@tl.clear().moveTo(0,-N_Y_WND,N_333MS,enchant.Easing.QUINT_EASEOUT)
-							@sw = 1
-							#@MOUSE_CLICK()
+							@childNodes[1].image.clear()
+							@move(0)
 					)
 				prepareDialogContainer:() ->
 					@addChild(@DialogContainer = new class extends enchant.Group
@@ -3674,18 +3809,15 @@ F_DEAL_B_WIL1					= 0x00000080
 							around = crd.clone().around(bounds,0).grep((_) -> !game.Main.FieldContainer.getc(_)?)
 							crd = around[Math.xor128(around.len())]
 
-						if C_TEST && @b.is(F_UNIT_FACTION_BLUE)
-							@b.on(F_UNIT_FACTION_CYAN,F_UNIT_FACTION_MASK)
-
 						#@b.off(F_UNIT_STATE_END)
 						if @b.is(F_UNIT_CLASS_MAHOUSHOJO)
-							@spr.frame = (Math.log(@b.get(F_UNIT_FACTION_MASK) >>> 16) / Math.LN2) * 12
+							@spr.frame = @b.geti(F_UNIT_FACTION_MASK) * 12
 							@spr.scaleY = 1
 						else if @b.is(F_UNIT_CLASS_INCUBATOR)
-							@spr.frame = (Math.log(@b.get(F_UNIT_FACTION_MASK) >>> 16) / Math.LN2) * 12
+							@spr.frame = @b.geti(F_UNIT_FACTION_MASK) * 12
 							@spr.scaleY = 0.8
 						else if @b.is(F_UNIT_CLASS_WITCH)
-							@spr.frame = (Math.log(@b.get(F_UNIT_FACTION_MASK) >>> 16) / Math.LN2) * 12 + 4
+							@spr.frame = @b.geti(F_UNIT_FACTION_MASK) * 12 + 4
 							@spr.scaleY = -1
 							if @b.is(F_ABILITY_WALPURGISNACHT)
 								for unit in crd.around(@range).map((_) -> game.Main.FieldContainer.getc(_)).grep() when !@isallies(unit) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_HUMAN)
@@ -3694,10 +3826,10 @@ F_DEAL_B_WIL1					= 0x00000080
 								for unit in crd.around(@range).map((_) -> game.Main.FieldContainer.getc(_)).grep() when !@isallies(unit) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_HUMAN)
 									game.Main.UnitContainer.Damage.deal2(@,unit,0,unit.wil * 0.100)
 						else if @b.is(F_UNIT_CLASS_MINION)
-							@spr.frame = (Math.log(@b.get(F_UNIT_FACTION_MASK) >>> 16) / Math.LN2) * 12 + 4
+							@spr.frame = @b.geti(F_UNIT_FACTION_MASK) * 12 + 4
 							@spr.scaleY = 1
 						else if @b.is(F_UNIT_CLASS_HUMAN)
-							@spr.frame = (Math.log(@b.get(F_UNIT_FACTION_MASK) >>> 16) / Math.LN2) * 12 + 8
+							@spr.frame = @b.geti(F_UNIT_FACTION_MASK) * 12 + 8
 							@spr.scaleY = 1
 							@mgk = 0
 						else

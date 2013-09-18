@@ -1,5 +1,5 @@
 *** enchant.js-builds-0.7.0/build/enchant.js	2013-06-07 19:46:24.000000000 +0900
---- enchant.js	2013-09-14 06:21:14.076802056 +0900
+--- enchant.js	2013-09-17 17:01:26.616802707 +0900
 ***************
 *** 7,12 ****
 --- 7,17 ----
@@ -65,8 +65,28 @@
                   var bounding = stage.getBoundingClientRect();
                   this._pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
 ***************
+*** 2730,2735 ****
+--- 2739,2745 ----
+                          }
+                          increase = increase / 2 | 0;
+                      }
++                     //ctx.strokeText(buf, 0, y);
+                      ctx.fillText(buf, 0, y);
+                      y += line.height - 1;
+                      c += length;
+***************
+*** 2742,2747 ****
+--- 2752,2758 ----
+                  } else {
+                      x = 0;
+                  }
++                 //ctx.strokeText(buf, x, y);
+                  ctx.fillText(buf, x, y);
+                  y += line.height - 1;
+              }
+***************
 *** 3223,3228 ****
---- 3232,3238 ----
+--- 3234,3240 ----
               var addedToScene = new enchant.Event('addedtoscene');
               node.dispatchEvent(addedToScene);
           }
@@ -76,7 +96,7 @@
        * Incorporates Node into Group.
 ***************
 *** 3269,3274 ****
---- 3279,3288 ----
+--- 3281,3290 ----
                   var removedFromScene = new enchant.Event('removedfromscene');
                   node.dispatchEvent(removedFromScene);
               }
@@ -100,7 +120,7 @@
       },
       /**
        */
---- 5820,5840 ----
+--- 5822,5842 ----
               e.timeline = this;
               action.dispatchEvent(e);
           }
@@ -115,7 +135,7 @@
               event.elapsed = remainingTime;
               this.dispatchEvent(event);
 + 			if(CALLSTACK_PEAK === CALLSTACK && CALLSTACK_PEAK >= 256)
-+ 				DEBUG("enchant.js/CALLSTACK: Peak "+(CALLSTACK));
++ 				DEBUG("enchant.js/CALLSTACK: Peak "+(CALLSTACK_PEAK));
           }
 + 		//DEBUG("enchant.js/CALLSTACK: "+(--CALLSTACK)+" [-]");
 + 		--CALLSTACK;
