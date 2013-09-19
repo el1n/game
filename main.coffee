@@ -3,7 +3,8 @@ NOP = () ->
 
 C_TEST = 0
 C_GAMEMODE = "2"
-C_GAMEMODE = "defense1"
+C_GAMEMODE = "HomuraAkemi"
+#C_GAMEMODE = "defense1"
 
 C_FONT_FAMILY = "Georgia"
 #C_FONT_FAMILY = "Verdana"
@@ -2620,18 +2621,6 @@ F_DEAL_B_WIL1					= 0x00000080
 							@addChild(new enchant.Sprite(N_X_WND,N_Y_WND))
 							@lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND)
 
-							@window.push(new Window().set(
-								x:0
-								y:0
-								w:320
-								h:320
-								m:0
-								rr:20
-								bz:6
-								c:1
-								r:1
-							))
-
 							@addChild(new enchant.Sprite(1,1))
 							@lastChild.image = game.assets["resources/Mami_Tomoe.png"]
 							@lastChild.window = new Window().set(
@@ -2656,9 +2645,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								e.restore()
 								e.lineWidth = @window.bz
 								e.strokeStyle = "#f8b5cc"
-								#@lastChild.image.context.strokeStyle = "#0000ff"
 								e.stroke()
-								#f.call(@lastChild,0,0,320,320,12,60)
 
 							@lastChild.pos = [
 								x:@window[0].cx + (@window[0].ch - @lastChild.window.ww) / 2
@@ -2693,7 +2680,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							))
 
 							for i in [0,3,4]
-								@addChild(new enchant.Sprite(100,100))
+								@addChild(new enchant.Entity())
 								@lastChild.color = [
 									["#00DF00","#003F00"]
 									NULL
@@ -2702,33 +2689,34 @@ F_DEAL_B_WIL1					= 0x00000080
 									["#0000DF","#00003F"]
 								][i]
 								@lastChild.cvsRender = (e) ->
-									e.beginPath()
-									e.moveTo(0 + 10,@height / 2)
-									e.lineTo(@width * @width2,@height / 2)
-									e.lineTo(@width * @width2 - 10,@height)
-									e.lineTo(0,@height)
-									e.closePath()
-									e.fillStyle = e.createLinearGradient(
-										@width
-										@height
-										0
-										0
-									)
-									e.fillStyle.addColorStop(0,@color[0])
-									e.fillStyle.addColorStop(1,@color[1])
-									e.fill()
-								@lastChild.y = @window[4].grid(4,i,4)[1]
-								@lastChild.height = @window[4].grid(4,i,4)[3]
+									if @width2 > 0
+										e.beginPath()
+										e.moveTo(0 + 10,@height / 2)
+										e.lineTo(@width * @width2,@height / 2)
+										e.lineTo(@width * @width2 - 10,@height)
+										e.lineTo(0,@height)
+										e.closePath()
+										e.fillStyle = e.createLinearGradient(
+											@width
+											@height
+											0
+											0
+										)
+										e.fillStyle.addColorStop(0,@color[0])
+										e.fillStyle.addColorStop(1,@color[1])
+										e.fill()
+								@lastChild.y = @window[3].grid(4,i,4)[1]
+								@lastChild.height = @window[3].grid(4,i,4)[3]
 
 								@lastChild.pos = [
-									x:@window[4].grid(2,i,6)[0]
-									width:@window[4].grid(2,i,6)[2]
+									x:@window[3].grid(2,i,6)[0]
+									width:@window[3].grid(2,i,6)[2]
 								,
-									x:@window[4].grid(2,i,6)[0]
-									width:@window[4].grid(2,i,6)[2]
+									x:@window[3].grid(2,i,6)[0]
+									width:@window[3].grid(2,i,6)[2]
 								,
-									x:@window[4].grid(4,i,4)[0]
-									width:@window[4].grid(4,i,4)[2]
+									x:@window[3].grid(4,i,4)[0]
+									width:@window[3].grid(4,i,4)[2]
 								]
 
 							for i in [0..5]
@@ -2793,18 +2781,15 @@ F_DEAL_B_WIL1					= 0x00000080
 
 							if !(e = @childNodes.grep((_) -> _.id == id).fv())
 								@addChild(e = new enchant.Label())
+
+								[e.x,e.y,e.width,e.height] = wnd.grid(x,y,w,h)
+								e.y += wnd.gh / 2 - (C_FONT_SIZE + z + 24) / 3 * 2
 							e.id = id
-							#e._style["text-shadow"] = "-1px -1px 0 #000,1px -1px 0 #000, -1px  1px 0 #000,1px  1px 0 #000"
-							e._style["text-shadow"] = "-4px -4px 0 #ff0000;"
-							e._style["border"] = "double 10px #ff0000"
-							e._style["backgroundColor"] = "#ff0000"
 							e.text = sv
 							#e.color = "#000000"
 							e.color = "#FFFFFF"
 							e.textAlign = align
 							e.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + z + 24}px '#{C_FONT_FAMILY}'"
-							[e.x,e.y,e.width,e.height] = wnd.grid(x,y,w,h)
-							e.y += wnd.gh / 2 - (C_FONT_SIZE + z + 24) / 3 * 2
 
 							return(e)
 						draw2:(img,i,wnd,x,y,w = 1,h = 1) ->
@@ -2890,7 +2875,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@childNodes[2].image = elem.kao
 							@draw(elem.name,8,"left",@window[0],4,5,4)
 							@draw(elem.mgk.toFixed(2),0,"right",@window[0],6,4)
-							@draw(elem.mg2.toFixed(2),0,"right",@window[0],7,4)
+							@draw("+ #{elem.mg2.toFixed(2)}",0,"right",@window[0],7,4)
 							@draw(elem.wil.toFixed(2),0,"right",@window[0],6,3)
 							@draw(elem.exp.toFixed(2),0,"right",@window[0],6,0)
 							@draw(['E-','E','D','C','B','A','A+','A+','A+','A+','2,000Kg/m2'][elem.atk],0,"center",@window[0],6,1)
@@ -2947,7 +2932,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@draw(elem.range,0,"right",@window[1],6,3)
 							@draw(elem.speed,0,"right",@window[1],6,4)
 							@draw(elem.perf().toFixed(2),0,"right",@window[1],6,5)
-							@draw(elem.perf(F_DEAL_A_MGK1|F_DEAL_A_WIL1).toFixed(2),0,"right",@window[1],7,5)
+							@draw("/ #{elem.perf(F_DEAL_A_MGK1|F_DEAL_A_WIL1).toFixed(2)}",0,"right",@window[1],7,5)
 
 							i = 0
 							b = 0
@@ -4240,6 +4225,37 @@ F_DEAL_B_WIL1					= 0x00000080
 						@CTL_OPEN_ST.alpha = 0.500
 						@CTL_OPEN_ST.time = N_200MS
 						@CTL_CLOSE_ST.time = N_200MS
+
+						@cvsRender = (cvs) ->
+							@__proto__.cvsRender.call(@,cvs)
+							cvs.drawImage(
+								@ani._element
+								0
+								@height * 1.500 + (@age * 2 % 160)
+								@width
+								@height
+								0
+								0
+								@width
+								@height
+							)
+						@ani = new enchant.Surface(N_X_CELL,N_Y_CELL * 6)
+						@ani.context.fillStyle = @ani.context.createLinearGradient(
+							N_X_CELL
+							N_Y_CELL / 2
+							0
+							N_Y_CELL + N_Y_CELL / 2
+						)
+						#@ani.context.fillStyle.addColorStop(0,"#007FFF")
+						@ani.context.fillStyle.addColorStop(0.200,"rgba(255,255,255,0.000)")
+						@ani.context.fillStyle.addColorStop(0.400,"rgba(255,255,255,0.300)")
+						@ani.context.fillStyle.addColorStop(0.600,"rgba(255,255,255,0.000)")
+						@ani.context.fillStyle.addColorStop(0.700,"rgba(255,255,255,0.150)")
+						@ani.context.fillStyle.addColorStop(0.800,"rgba(255,255,255,0.000)")
+						@ani.context.fillRect(0,0,80,160)
+						a = @ani.context.getImageData(0,0,80,160)
+						@ani.context.putImageData(a,0,160)
+						@ani.context.putImageData(a,0,320)
 
 					MOUSE_DOWN:(crd) ->
 						if @crd.b.is(F_ZONE_MARK_MOVE) && @bind.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)

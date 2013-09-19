@@ -124,6 +124,30 @@
       class: F_UNIT_CLASS_HUMAN
       crd: F_UNIT_FACTION_BANK 6
       spawn: 10 10 0 100 90 80 70 60 50 40 30 20 10
+HomuraAkemi:
+  name: HomuraAkemi
+  phase: F_UNIT_FACTION_BLUE
+  debug: 1
+  control:
+  - 0
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  - 3
+  foo:
+  - spawninterval: F_UNIT_FACTION_BLUE 0 0
+    unit:
+    - template: HomuraAkemi
+      crd: 10 10
+  - spawninterval: F_UNIT_FACTION_RED 0 0
+    unit:
+    - template: NULL
+      class: F_UNIT_CLASS_MADOKAMAGIKA
+      crd:
+      - 10 10 3
 MamiTomoe:
   name: MamiTomoe
   phase: F_UNIT_FACTION_BLUE
