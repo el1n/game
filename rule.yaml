@@ -312,6 +312,8 @@ MadokaMagika:
     unit:
     - template: NULL
       class: F_UNIT_CLASS_HUMAN
+      crd:
+      - 10 10 3
 defense1:
   name: TD-Randomway
   phase: F_UNIT_FACTION_BLACK
