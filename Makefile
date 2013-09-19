@@ -20,4 +20,4 @@ enchant.js.patch: enchant.js
 	-diff -c enchant.js-builds-0.7.0/build/enchant.js $< >$@
 
 test:
-	coffee -p main.coffee >/dev/null
+	perl ir.pl main.coffee|coffee -bps >/dev/null

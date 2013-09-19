@@ -28,8 +28,8 @@ C_FONT_STYLE = "italic"
 C_FONT_SIZE = 0
 
 N_GAME_SPEED = 30
-N_X_WND = 720
-N_Y_WND = N_X_WND / 9 * 16
+N_X_WND = 720 #ir$
+N_Y_WND = N_X_WND / 9 * 16 #ir$
 N_M_BTN_MAIN = N_X_WND / 20
 N_W_BTN_MAIN = N_X_WND - (N_M_BTN_MAIN * 2)
 N_H_BTN_MAIN = 64
@@ -191,6 +191,10 @@ F_DEAL_B_MGK1					= 0x00000040
 F_DEAL_B_WIL1					= 0x00000080
 
 (-> #ir< window.onload = () ->
+	if navigator.userAgent.match(/Android|iPhone|iPad/)
+		N_X_WND = document.body.clientWidth
+		N_Y_WND = document.body.clientHeight
+
 	DEBUG("totalJSHeapSize: 0 MB")
 	DEBUG("usedJSHeapSize: 0 MB")
 	DEBUG("enchant.js/NODE: -")
@@ -862,6 +866,12 @@ F_DEAL_B_WIL1					= 0x00000080
 
 				@used = () ->
 					return(@visible)
+		cache:(sv,f) ->
+			@_cache ?= new Object()
+
+			if !@_cache[sv]?
+				@_cache[sv] = f()
+			return(@_cache[sv])
 		prepare:() ->
 			#@debug()
 		prepareMain:() ->
@@ -2440,6 +2450,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							#@CTL_OPEN_ST.b = 0
 							#@CTL_CLOSE_ST.b = 0
 							@ref = new Object()
+							@y = -N_Y_WND
 
 							Window = class
 								# x:
@@ -2780,7 +2791,13 @@ F_DEAL_B_WIL1					= 0x00000080
 									_.pos[i].time ?= N_333MS
 									_.pos[i].easing ?= enchant.Easing.QUINT_EASEOUT
 
-									_.tl.clear().tween(_.pos[i])
+									if i == 0
+										_.tl.clear().tween(_.pos[i]).exec(->
+											@visible = 1
+										)
+									else
+										@visible = 1
+										_.tl.clear().tween(_.pos[i])
 						draw:(sv,z,align,wnd,x,y,w = 1,h = 1) ->
 							id = "#{wnd.x}.#{wnd.y}(#{x}.#{y}):text"
 
@@ -4234,7 +4251,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@cvsRender = (cvs) ->
 								@__proto__.cvsRender.call(@,cvs)
 								cvs.drawImage(
-									@ani._element
+									@anima._element
 									0
 									@height * 1.500 + (@age * 2 % 160)
 									@width
@@ -4244,24 +4261,26 @@ F_DEAL_B_WIL1					= 0x00000080
 									@width
 									@height
 								)
-							@ani = new enchant.Surface(N_X_CELL,N_Y_CELL * 6)
-							@ani.context.fillStyle = @ani.context.createLinearGradient(
-								N_X_CELL
-								N_Y_CELL / 2
-								0
-								N_Y_CELL + N_Y_CELL / 2
-							)
-							#@ani.context.fillStyle.addColorStop(0,"#007FFF")
-							@ani.context.fillStyle.addColorStop(0.200,"rgba(255,255,255,0.000)")
-							@ani.context.fillStyle.addColorStop(0.400,"rgba(255,255,255,0.300)")
-							@ani.context.fillStyle.addColorStop(0.600,"rgba(255,255,255,0.000)")
-							@ani.context.fillStyle.addColorStop(0.700,"rgba(255,255,255,0.150)")
-							@ani.context.fillStyle.addColorStop(0.800,"rgba(255,255,255,0.000)")
-							@ani.context.fillRect(0,0,80,160)
-							a = @ani.context.getImageData(0,0,80,160)
-							@ani.context.putImageData(a,0,160)
-							@ani.context.putImageData(a,0,320)
 
+							@anima = game.cache("zone_animation",=>
+								o = new enchant.Surface(N_X_CELL,N_Y_CELL * 6)
+								o.context.fillStyle = o.context.createLinearGradient(
+									N_X_CELL
+									N_Y_CELL / 2
+									0
+									N_Y_CELL + N_Y_CELL / 2
+								)
+								o.context.fillStyle.addColorStop(0.200,"rgba(255,255,255,0.000)")
+								o.context.fillStyle.addColorStop(0.400,"rgba(255,255,255,0.300)")
+								o.context.fillStyle.addColorStop(0.600,"rgba(255,255,255,0.000)")
+								o.context.fillStyle.addColorStop(0.700,"rgba(255,255,255,0.150)")
+								o.context.fillStyle.addColorStop(0.800,"rgba(255,255,255,0.000)")
+								o.context.fillRect(0,0,80,160)
+								o.context.putImageData(o.context.getImageData(0,0,80,160),0,160)
+								o.context.putImageData(o.context.getImageData(0,0,80,160),0,320)
+
+								return(o)
+							)
 					MOUSE_DOWN:(crd) ->
 						if @crd.b.is(F_ZONE_MARK_MOVE) && @bind.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)
 							@bind.move_(@crd)
