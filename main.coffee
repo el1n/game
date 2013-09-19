@@ -3,8 +3,13 @@ NOP = () ->
 
 C_TEST = 0
 C_GAMEMODE = "2"
+C_GAMEMODE = "MadokaKaname"
+C_GAMEMODE = "SayakaMiki"
+C_GAMEMODE = "MamiTomoe"
 C_GAMEMODE = "HomuraAkemi"
-#C_GAMEMODE = "defense1"
+C_GAMEMODE = "KyoukoSakura"
+C_GAMEMODE = "MadokaMagika"
+#ir< C_GAMEMODE = "defense1"
 
 C_FONT_FAMILY = "Georgia"
 #C_FONT_FAMILY = "Verdana"
@@ -185,7 +190,7 @@ F_DEAL_A_WIL1					= 0x00000020
 F_DEAL_B_MGK1					= 0x00000040
 F_DEAL_B_WIL1					= 0x00000080
 
-window.onload = () ->
+(-> #ir< window.onload = () ->
 	DEBUG("totalJSHeapSize: 0 MB")
 	DEBUG("usedJSHeapSize: 0 MB")
 	DEBUG("enchant.js/NODE: -")
@@ -4747,3 +4752,4 @@ window.onload = () ->
 		NOP
 	game.prepare()
 	game.start()
+)() #ir<
