@@ -185,7 +185,7 @@ F_DEAL_A_WIL1					= 0x00000020
 F_DEAL_B_MGK1					= 0x00000040
 F_DEAL_B_WIL1					= 0x00000080
 
-(->
+window.onload = () ->
 	DEBUG("totalJSHeapSize: 0 MB")
 	DEBUG("usedJSHeapSize: 0 MB")
 	DEBUG("enchant.js/NODE: -")
@@ -2434,6 +2434,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							#game.Control.apply(@)
 							#@CTL_OPEN_ST.b = 0
 							#@CTL_CLOSE_ST.b = 0
+							@ref = new Object()
 
 							Window = class
 								# x:
@@ -2766,7 +2767,6 @@ F_DEAL_B_WIL1					= 0x00000080
 							@move(0)
 						MOUSE_DOWN:() ->
 							@sw ?= 1
-							console.log(@)
 
 							@move(@sw ^= 3)
 						move:(i) ->
@@ -2779,17 +2779,16 @@ F_DEAL_B_WIL1					= 0x00000080
 						draw:(sv,z,align,wnd,x,y,w = 1,h = 1) ->
 							id = "#{wnd.x}.#{wnd.y}(#{x}.#{y}):text"
 
-							if !(e = @childNodes.grep((_) -> _.id == id).fv())
+							if !(e = @ref[id])
 								@addChild(e = new enchant.Label())
-
-								[e.x,e.y,e.width,e.height] = wnd.grid(x,y,w,h)
-								e.y += wnd.gh / 2 - (C_FONT_SIZE + z + 24) / 3 * 2
-							e.id = id
+								@ref[id] = e
 							e.text = sv
 							#e.color = "#000000"
 							e.color = "#FFFFFF"
 							e.textAlign = align
 							e.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + z + 24}px '#{C_FONT_FAMILY}'"
+							[e.x,e.y,e.width,e.height] = wnd.grid(x,y,w,h)
+							e.y += wnd.gh / 2 - (C_FONT_SIZE + z + 24) / 3 * 2
 
 							return(e)
 						draw2:(img,i,wnd,x,y,w = 1,h = 1) ->
@@ -4226,36 +4225,37 @@ F_DEAL_B_WIL1					= 0x00000080
 						@CTL_OPEN_ST.time = N_200MS
 						@CTL_CLOSE_ST.time = N_200MS
 
-						@cvsRender = (cvs) ->
-							@__proto__.cvsRender.call(@,cvs)
-							cvs.drawImage(
-								@ani._element
+						if 1
+							@cvsRender = (cvs) ->
+								@__proto__.cvsRender.call(@,cvs)
+								cvs.drawImage(
+									@ani._element
+									0
+									@height * 1.500 + (@age * 2 % 160)
+									@width
+									@height
+									0
+									0
+									@width
+									@height
+								)
+							@ani = new enchant.Surface(N_X_CELL,N_Y_CELL * 6)
+							@ani.context.fillStyle = @ani.context.createLinearGradient(
+								N_X_CELL
+								N_Y_CELL / 2
 								0
-								@height * 1.500 + (@age * 2 % 160)
-								@width
-								@height
-								0
-								0
-								@width
-								@height
+								N_Y_CELL + N_Y_CELL / 2
 							)
-						@ani = new enchant.Surface(N_X_CELL,N_Y_CELL * 6)
-						@ani.context.fillStyle = @ani.context.createLinearGradient(
-							N_X_CELL
-							N_Y_CELL / 2
-							0
-							N_Y_CELL + N_Y_CELL / 2
-						)
-						#@ani.context.fillStyle.addColorStop(0,"#007FFF")
-						@ani.context.fillStyle.addColorStop(0.200,"rgba(255,255,255,0.000)")
-						@ani.context.fillStyle.addColorStop(0.400,"rgba(255,255,255,0.300)")
-						@ani.context.fillStyle.addColorStop(0.600,"rgba(255,255,255,0.000)")
-						@ani.context.fillStyle.addColorStop(0.700,"rgba(255,255,255,0.150)")
-						@ani.context.fillStyle.addColorStop(0.800,"rgba(255,255,255,0.000)")
-						@ani.context.fillRect(0,0,80,160)
-						a = @ani.context.getImageData(0,0,80,160)
-						@ani.context.putImageData(a,0,160)
-						@ani.context.putImageData(a,0,320)
+							#@ani.context.fillStyle.addColorStop(0,"#007FFF")
+							@ani.context.fillStyle.addColorStop(0.200,"rgba(255,255,255,0.000)")
+							@ani.context.fillStyle.addColorStop(0.400,"rgba(255,255,255,0.300)")
+							@ani.context.fillStyle.addColorStop(0.600,"rgba(255,255,255,0.000)")
+							@ani.context.fillStyle.addColorStop(0.700,"rgba(255,255,255,0.150)")
+							@ani.context.fillStyle.addColorStop(0.800,"rgba(255,255,255,0.000)")
+							@ani.context.fillRect(0,0,80,160)
+							a = @ani.context.getImageData(0,0,80,160)
+							@ani.context.putImageData(a,0,160)
+							@ani.context.putImageData(a,0,320)
 
 					MOUSE_DOWN:(crd) ->
 						if @crd.b.is(F_ZONE_MARK_MOVE) && @bind.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)
@@ -4523,14 +4523,16 @@ F_DEAL_B_WIL1					= 0x00000080
 						@childNodes[0].width = w + 2
 						@childNodes[0].height = (h + 2) * 2 + 1
 						@childNodes[0].backgroundColor = '#000000'
-						@childNodes[0].opacity = 0.750
+						@childNodes[0].opacity = 0.200
 						#@childNodes[0].visible = 0
 
 						@childNodes[1].x = m
 						@childNodes[1].y = N_X_GRID - m - (h + 2) * 2
 						@childNodes[1].width = 0
 						@childNodes[1].height = h
-						@childNodes[1].backgroundColor = '#0020FF'
+						@childNodes[1].backgroundColor = '#DF2000'
+						#@childNodes[1].backgroundColor = '#00DF00'
+						#@childNodes[1].backgroundColor = '#0020FF'
 						#@childNodes[1].opacity = 0.750
 						#@childNodes[1].visible = 0
 						@childNodes[1].localX = -N_X_GRID
@@ -4539,7 +4541,9 @@ F_DEAL_B_WIL1					= 0x00000080
 						@childNodes[2].y = N_X_GRID - m - (h + 2) * 1
 						@childNodes[2].width = 0
 						@childNodes[2].height = h
-						@childNodes[2].backgroundColor = '#00DF00'
+						#@childNodes[2].backgroundColor = '#FF2000'
+						#@childNodes[2].backgroundColor = '#00DF00'
+						@childNodes[2].backgroundColor = '#0020FF'
 						#@childNodes[2].opacity = 0.750
 						#@childNodes[2].visible = 0
 						@childNodes[2].localX = -N_X_GRID
@@ -4574,9 +4578,9 @@ F_DEAL_B_WIL1					= 0x00000080
 									@bind.spr.frame = [@bind.spr.frame + 3,@bind.spr.frame + 3,@bind.spr.frame,@bind.spr.frame,@bind.spr.frame + 3,@bind.spr.frame + 3,@bind.spr.frame,NULL]
 								
 							if wdmg > 0
-								(new game.Main.Label()).damage(@bind,wdmg.toFixed(2),"#0020FF",N_200MS)
+								(new game.Main.Label()).damage(@bind,wdmg.toFixed(2),"#DF2000",N_200MS)
 							if mdmg > 0
-								(new game.Main.Label()).damage(@bind,mdmg.toFixed(2),"#00DF00")
+								(new game.Main.Label()).damage(@bind,mdmg.toFixed(2),"#0020FF")
 							@bind.hex()
 						).delay(N_1500MS)
 
@@ -4743,6 +4747,3 @@ F_DEAL_B_WIL1					= 0x00000080
 		NOP
 	game.prepare()
 	game.start()
-)()
-
-
