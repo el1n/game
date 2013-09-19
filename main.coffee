@@ -9,6 +9,7 @@ C_GAMEMODE = "MamiTomoe"
 C_GAMEMODE = "HomuraAkemi"
 C_GAMEMODE = "KyoukoSakura"
 C_GAMEMODE = "MadokaMagika"
+C_GAMEMODE = "defense1"
 #ir< C_GAMEMODE = "defense1"
 
 C_FONT_FAMILY = "Georgia"
@@ -1683,7 +1684,7 @@ F_DEAL_B_WIL1					= 0x00000080
 
 											for i in [1..cnt]
 												n = game.Main.UnitContainer.find(serial:unit.template ? sn).grep((_) -> _.b.is(b,F_UNIT_FACTION_MASK)).len()
-												if (lim == 0 || (n + i) < lim) && n < i && (Math.xor128(100) < (percentage[i - 1] ? percentage[0]))
+												if (lim == 0 || (n + i) < lim) && (Math.xor128(100) < (percentage[n + i - 1] ? percentage[0]))
 													[x,y,radius,n] = (crds[i - 1] ? crds[0]).split(" ").map((_) -> if !isNaN(parseInt(_)) then parseInt(_) else NULL)
 	
 													if x & F_FLAG_BANK
@@ -1707,19 +1708,17 @@ F_DEAL_B_WIL1					= 0x00000080
 														a &= !game.Main.UnitContainer.find(serial:unit.template ? sn).grep((_) -> _.b.is(b,F_UNIT_FACTION_MASK)).len()
 	
 													if a
-														@tl.exec((b,template,crd,radius,st) ->
+														@tl.exec((b,template,crd,radius,st,sn) ->
 															if template?
 																(unit = game.Main.UnitContainer.create().readchar(template,b)).spawn(crd,radius)
 															else
 																(unit = game.Main.UnitContainer.create().makechar(b)).spawn(crd,radius)
 																unit.serial = sn
 															if st.option?.match(/essential/)
-																unit.b.is(F_HEX_ESSENTIAL)
+																unit.b.on(F_HEX_ESSENTIAL)
 															if st.target?
 																unit.target = st.target
-															if st.serial?
-																unit.serial = st.serial
-														,[b,unit.template,crd,radius,unit]).delay(N_200MS)
+														,[b,unit.template,crd,radius,unit,sn]).delay(N_200MS)
 						next:() ->
 							if !@benchmark?
 								@benchmark = for i in [0..18]
@@ -2998,6 +2997,12 @@ F_DEAL_B_WIL1					= 0x00000080
 									@draw("",0,"left",@window[2],5,i,7)
 									++i
 								++b
+
+							@draw("Target",0,"left",@window[1],0,4)
+							@draw(elem.target,0,"left",@window[1],1,4,3)
+							@draw("Serial",0,"left",@window[1],0,5)
+							@draw(elem.serial,0,"left",@window[1],1,5,3)
+
 							@move(1)
 						close:() ->
 							@childNodes[1].image.clear()

@@ -355,6 +355,7 @@ defense1:
       crd:
       - 1 18 4
       spawn: 3 0 0.084
+      target: MadokaKaname
   - spawninterval: F_UNIT_FACTION_BLACK 4 0 32
     unit:
     - template: NULL
