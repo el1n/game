@@ -896,6 +896,23 @@ F_DEAL_B_WIL1					= 0x00000080
 					#@prepareLabelContainer()
 					@addChild(@Pool2 = new enchant.Group())
 
+					@addChild(new enchant.Label())
+					@lastChild.color = "#FF0000"
+					@lastChild.text = "00"
+					@lastChild.font = "bold #{C_FONT_SIZE + 24}px monospace"
+					@time = for i in [0..N_GAME_SPEED * 2 - 1]
+						window.getTime()
+					@lastChild.addEventListener(enchant.Event.ENTER_FRAME,() ->
+						game.Main.time.push(window.getTime())
+
+						@text = parseInt(N_GAME_SPEED * 2 / (game.Main.time[N_GAME_SPEED * 2] - game.Main.time[0]) * 1000)
+						
+						game.Main.time.shift()
+					)
+
+					@time = for i in [0..N_GAME_SPEED * 2 - 1]
+						window.getTime()
+
 					@score =
 						energy:0
 						mk:0
@@ -4653,11 +4670,11 @@ F_DEAL_B_WIL1					= 0x00000080
 							w *= N_X_WND / 16
 							h *= N_Y_WND / 16
 	
-							j = new enchant.Sprite(w,h)
+							j = new enchant.Sprite(parseInt(w),parseInt(h))
 							j.x = x
 							j.y = y
 							j.opacity = 0.000
-							j.image = new enchant.Surface(w,h)
+							j.image = new enchant.Surface(parseInt(w),parseInt(h))
 							j.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + z}px '#{C_FONT_FAMILY}'"
 							j.image.context.textAlign = 'center'
 							j.image.context.fillStyle = '#FFFFFF'

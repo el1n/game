@@ -1,4 +1,4 @@
-build/a: build/main.js build/lang.json build/name.json build/rule.json
+build/a: build/main.js build/lang.json build/name.json build/rule.json enchant.js.patch
 	@echo 1
 
 build/main.js: main.coffee

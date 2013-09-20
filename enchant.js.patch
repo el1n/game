@@ -1,5 +1,5 @@
 *** enchant.js-builds-0.7.0/build/enchant.js	2013-06-07 19:46:24.000000000 +0900
---- enchant.js	2013-09-17 17:01:26.616802707 +0900
+--- enchant.js	2013-09-20 13:04:36.196782869 +0900
 ***************
 *** 7,12 ****
 --- 7,17 ----
@@ -65,8 +65,20 @@
                   var bounding = stage.getBoundingClientRect();
                   this._pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
 ***************
+*** 1493,1498 ****
+--- 1502,1510 ----
+              this.frame++;
+              now = window.getTime();
+              this.currentTime = now;
++ 
++ 			//this.frame += parseInt(1000 / this.fps / (now - this._calledTime))
++ 			//this._requestNextFrame(1000 / this.fps % (now - this._calledTime));
+              this._requestNextFrame(1000 / this.fps - (now - this._calledTime));
+          },
+          getTime: function() {
+***************
 *** 2730,2735 ****
---- 2739,2745 ----
+--- 2742,2748 ----
                           }
                           increase = increase / 2 | 0;
                       }
@@ -76,7 +88,7 @@
                       c += length;
 ***************
 *** 2742,2747 ****
---- 2752,2758 ----
+--- 2755,2761 ----
                   } else {
                       x = 0;
                   }
@@ -86,7 +98,7 @@
               }
 ***************
 *** 3223,3228 ****
---- 3234,3240 ----
+--- 3237,3243 ----
               var addedToScene = new enchant.Event('addedtoscene');
               node.dispatchEvent(addedToScene);
           }
@@ -96,10 +108,14 @@
        * Incorporates Node into Group.
 ***************
 *** 3269,3274 ****
---- 3281,3290 ----
+--- 3284,3297 ----
                   var removedFromScene = new enchant.Event('removedfromscene');
                   node.dispatchEvent(removedFromScene);
               }
++             if (this._element)
++                 node._element = null;
++             if (this.context)
++                 node.context = null;
 + 			while(node.childNodes != null && node.childNodes.length > 0)
 + 				node.removeChild(node.childNodes[0])
 + 			node.clearEventListener()
@@ -107,6 +123,23 @@
           }
       },
       /**
+***************
+*** 4624,4630 ****
+          this.context = null;
+  
+          var id = 'enchant-surface' + core._surfaceID++;
+!         if (document.getCSSCanvasContext) {
+              this.context = document.getCSSCanvasContext('2d', id, width, height);
+              this._element = this.context.canvas;
+              this._css = '-webkit-canvas(' + id + ')';
+--- 4647,4653 ----
+          this.context = null;
+  
+          var id = 'enchant-surface' + core._surfaceID++;
+!         if (0 && document.getCSSCanvasContext) {
+              this.context = document.getCSSCanvasContext('2d', id, width, height);
+              this._element = this.context.canvas;
+              this._css = '-webkit-canvas(' + id + ')';
 ***************
 *** 5806,5816 ****
               e.timeline = this;
@@ -120,7 +153,7 @@
       },
       /**
        */
---- 5822,5842 ----
+--- 5829,5849 ----
               e.timeline = this;
               action.dispatchEvent(e);
           }

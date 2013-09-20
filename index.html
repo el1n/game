@@ -10,7 +10,7 @@ DEBUG = function(m){
 		id = RegExp.$1;
 	}
 	if(elem = document.getElementById("info")){
-		if(elem[id] == null)
+		if(!document.getElementById(id))
 			(elem.appendChild(document.createElement("div"))).id = id
 		document.getElementById(id).innerHTML = m;
 	}
