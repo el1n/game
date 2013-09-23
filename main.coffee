@@ -660,6 +660,82 @@ F_DEAL_B_WIL1					= 0x00000080
 						@MOUSE_HOLD?(@ACTION.crd.clone())
 				)
 
+	Control = class
+		constructor:(a) ->
+			@CTL_OPEN_ST =
+				b:3
+				alpha:1
+				time:N_333MS
+			@CTL_CLOSE_ST =
+				b:3
+				alpha:1
+				time:N_333MS
+
+			if @open?
+				@CTL_OPEN = @open
+			if @close?
+				@CTL_CLOSE = @close
+
+			@open = () ->
+				if !@visible
+					@CTL_STATE = 2
+					for elem in [@].concat(@childNodes)
+						if !elem?
+							continue
+						if @CTL_OPEN_ST.b & 2
+							elem.tl.clear()
+						if @CTL_OPEN_ST.b & 1
+							elem.opacity = 0
+							elem.tl.fadeTo(@CTL_OPEN_ST.alpha,@CTL_OPEN_ST.time,enchant.Easing.QUINT_EASEOUT).exec(->
+								@CTL_STATE = 4
+							)
+						else
+							@CTL_STATE = 4
+						elem.touchEnabled = !!elem.ACTION?
+						elem.visible = 1
+
+					@CTL_OPEN?.apply(@,arguments)
+				return(@)
+
+			@close = () ->
+				if 1
+					@CTL_STATE = 8
+					for elem in [@].concat(@childNodes)
+						if !elem?
+							continue
+						if @CTL_CLOSE_ST.b & 2
+							elem.tl.clear()
+						if @CTL_CLOSE_ST.b & 1
+							elem.tl.fadeTo(0,@CTL_CLOSE_ST.time,enchant.Easing.QUINT_EASEOUT).exec(->
+								@visible = 0
+								@CTL_STATE = 1
+							)
+						else
+							elem.visible = 0
+							@CTL_STATE = 1
+						elem.touchEnabled = 0
+
+					@CTL_CLOSE?.apply(@,arguments)
+				return(@)
+			@CTL_STATE = 1
+
+			@open2 = () ->
+				@CTL_STATE = 4
+				return(@)
+
+			@close2 = () ->
+				for elem in [@].concat(@childNodes)
+					if !elem?
+						continue
+					elem.visible = 0
+					elem.touchEnabled = 0
+				return(@)
+
+			@close2()
+
+			@used = () ->
+				return(@visible)
+
 	game = new class extends enchant.Game
 		constructor:() ->
 			super(N_X_WND,N_Y_WND)
@@ -776,81 +852,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				@_pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
 				@_pageY = Math.round(window.scrollY || window.pageYOffset + bounding.top);
 			)
-		Control:class
-			constructor:(a) ->
-				@CTL_OPEN_ST =
-					b:3
-					alpha:1
-					time:N_333MS
-				@CTL_CLOSE_ST =
-					b:3
-					alpha:1
-					time:N_333MS
-
-				if @open?
-					@CTL_OPEN = @open
-				if @close?
-					@CTL_CLOSE = @close
-
-				@open = () ->
-					if !@visible
-						@CTL_STATE = 2
-						for elem in [@].concat(@childNodes)
-							if !elem?
-								continue
-							if @CTL_OPEN_ST.b & 2
-								elem.tl.clear()
-							if @CTL_OPEN_ST.b & 1
-								elem.opacity = 0
-								elem.tl.fadeTo(@CTL_OPEN_ST.alpha,@CTL_OPEN_ST.time,enchant.Easing.QUINT_EASEOUT).exec(->
-									@CTL_STATE = 4
-								)
-							else
-								@CTL_STATE = 4
-							elem.touchEnabled = !!elem.ACTION?
-							elem.visible = 1
-	
-						@CTL_OPEN?.apply(@,arguments)
-					return(@)
-
-				@close = () ->
-					if 1
-						@CTL_STATE = 8
-						for elem in [@].concat(@childNodes)
-							if !elem?
-								continue
-							if @CTL_CLOSE_ST.b & 2
-								elem.tl.clear()
-							if @CTL_CLOSE_ST.b & 1
-								elem.tl.fadeTo(0,@CTL_CLOSE_ST.time,enchant.Easing.QUINT_EASEOUT).exec(->
-									@visible = 0
-									@CTL_STATE = 1
-								)
-							else
-								elem.visible = 0
-								@CTL_STATE = 1
-							elem.touchEnabled = 0
-
-						@CTL_CLOSE?.apply(@,arguments)
-					return(@)
-				@CTL_STATE = 1
-
-				@open2 = () ->
-					@CTL_STATE = 4
-					return(@)
-
-				@close2 = () ->
-					for elem in [@].concat(@childNodes)
-						if !elem?
-							continue
-						elem.visible = 0
-						elem.touchEnabled = 0
-					return(@)
-
-				@close2()
-
-				@used = () ->
-					return(@visible)
 		cache:(sv,f) ->
 			@_cache ?= new Object()
 
