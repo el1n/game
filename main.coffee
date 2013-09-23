@@ -376,6 +376,225 @@ F_DEAL_B_WIL1					= 0x00000080
 		hex:(bank = 0) ->
 			return(("00000000#{@get(NULL,bank).toString(16)}".slice(-8))
 
+	Coordinates = class
+		class:"Coordinates"
+		constructor:(x = 0,y = 0,b = 0) ->
+			if x.match?(/^(\d+)[ ,\.:;](\d+)$/)
+				x = parseInt(RegExp.$1)
+				y = parseInt(RegExp.$2)
+			@x = [x]
+			@y = [y]
+			@b = new game.Flag(b)
+		clone:() ->
+			crd = new game.Coordinates()
+			crd.x = @x.slice()
+			crd.y = @y.slice()
+			crd.b = @b.clone()
+			return(crd)
+		isvalid:(i = 0) ->
+			return(@x[i] == Math.lim(@x[i],0,N_X_FIELD - 1) && @y[i] == Math.lim(@y[i],0,N_Y_FIELD - 1))
+		push:(i = 1) ->
+			@x[i] = @x[0]
+			@y[i] = @y[0]
+			return(@)
+		pull:(i = 1) ->
+			@x[0] = @x[i]
+			@y[0] = @y[i]
+			return(@)
+		swap:(i = 1) ->
+			x = @x[i]
+			y = @y[i]
+			@x[i] = @x[0]
+			@y[i] = @y[0]
+			@x[0] = x
+			@y[0] = y
+			return(@)
+		same:(crd = @,i = 0) ->
+			return(crd.x[0] == @x[i] && crd.y[0] == @y[i])
+		distance:(crd = @,i = 0) ->
+			return(Math.abs(crd.x[0] - @x[i]) + Math.abs(crd.y[0] - @y[i]))
+		distance2:(crd = @,i = 0) ->
+			return(Math.sqrt(Math.pow2(Math.abs(crd.x[0] - @x[i]),2) + Math.pow2(Math.abs(crd.y[0] - @y[i]),2)))
+		around:(n,min = 1) ->
+			r = new Array()
+
+			if n == min == 1
+				if (crd = @clone().add(new game.Coordinates(-1,0,F_VEC_SETAS_GRID_GRID))).isvalid()
+					r.push(crd)
+				if (crd = @clone().add(new game.Coordinates(0,-1,F_VEC_SETAS_GRID_GRID))).isvalid()
+					r.push(crd)
+				if (crd = @clone().add(new game.Coordinates(0,1,F_VEC_SETAS_GRID_GRID))).isvalid()
+					r.push(crd)
+				if (crd = @clone().add(new game.Coordinates(1,0,F_VEC_SETAS_GRID_GRID))).isvalid()
+					r.push(crd)
+			else
+				for x in [-n..n]
+					for y in [-n..n]
+						if Math.abs(x) + Math.abs(y) <= n && Math.abs(x) + Math.abs(y) >= min
+							if (crd = @clone().add(new game.Coordinates(x,y,F_VEC_SETAS_GRID_GRID))).isvalid()
+								r.push(crd)
+			return(r)
+		add:(crd = @,i = 0) ->
+			@x[1] = @x[i] + crd.x[0]
+			@y[1] = @y[i] + crd.y[0]
+			@swap()
+			return(@)
+		sub:(crd = @,i = 0) ->
+			@x[1] = @x[i] - crd.x[0]
+			@y[1] = @y[i] - crd.y[0]
+			@swap()
+			return(@)
+		mul:(crd = @,i = 0) ->
+			@x[1] = @x[i] * crd.x[0]
+			@y[1] = @y[i] * crd.y[0]
+			@swap()
+			return(@)
+		div:(crd = @,i = 0) ->
+			@x[1] = @x[i] / crd.x[0]
+			@y[1] = @y[i] / crd.y[0]
+			@swap()
+			return(@)
+		abs:(i = 0) ->
+			@x[1] = Math.abs(@x[i])
+			@y[1] = Math.abs(@y[i])
+			@swap()
+			return(@)
+		neg:(i = 0) ->
+			@push()
+			@x[1] = -@x[i]
+			@y[1] = -@y[i]
+			@swap()
+			return(@)
+		dif:(crd = @,i = 1) ->
+			@sub(crd,i)
+			return(@)
+		min:(crd = @,i = 0) ->
+			@x[1] = Math.max(crd.x[0],@x[i])
+			@y[1] = Math.max(crd.y[0],@y[i])
+			@swap()
+			return(@)
+		max:(crd = @,i = 0) ->
+			@x[1] = Math.min(crd.x[0],@x[i])
+			@y[1] = Math.min(crd.y[0],@y[i])
+			@swap()
+			return(@)
+		round:(i = 0) ->
+			@x[1] = Math.round(@x[i])
+			@y[1] = Math.round(@y[i])
+			@swap()
+			return(@)
+		lim:(min = @,max = @,i = 0) ->
+			@x[1] = Math.min(max.x[0],Math.max(min.x[0],@x[i]))
+			@y[1] = Math.min(max.y[0],Math.max(min.y[0],@y[i]))
+			@swap()
+			return(@)
+		setas:(o,i = 0,n = 0) ->
+			switch @b.get(F_VEC_SET_MASK)|F_VEC_BANK
+				when F_VEC_SET_FIELD
+					x = @x[i]
+					y = @y[i]
+				when F_VEC_SET_DISPLAY
+					x = @x[i] + game.Main.FieldContainer.x
+					y = @y[i] + game.Main.FieldContainer.y
+				when F_VEC_SET_GRID
+					x = @x[i] * N_X_GRID
+					y = @y[i] * N_Y_GRID
+				when F_VEC_SET_INPUT
+					x = @x[i] - game.Main.FieldContainer.x
+					y = @y[i] - game.Main.FieldContainer.y
+				when F_VEC_BANK
+					x = @x[i]
+					y = @y[i]
+				else
+					console.log("! Invalid VEC flag value #{@b.get(F_VEC_SET_MASK)}.")
+
+			switch @b.get(F_VEC_SETAS_MASK)|F_VEC_BANK
+				when F_VEC_SETAS_FIELD
+					NOP
+				when F_VEC_SETAS_DISPLAY
+					x = Math.min(N_X_WND / 4,Math.max(-N_X_MAP + N_X_WND / 4 * 3,-x + N_X_WND / 2))
+					y = Math.min(N_Y_WND / 4,Math.max(-N_Y_MAP + N_Y_WND / 4 * 3,-y + N_Y_WND / 2))
+				when F_VEC_SETAS_GRID
+					NOP
+				when F_VEC_SETAS_INPUT
+					x = Math.min(N_X_WND / 4,Math.max(-N_X_MAP + N_X_WND / 4 * 3,o.x + x))
+					y = Math.min(N_Y_WND / 4,Math.max(-N_Y_MAP + N_Y_WND / 4 * 3,o.y + y))
+				when F_VEC_BANK
+				else
+					console.log("! Invalid VEC flag value #{@b.get(F_VEC_SETAS_MASK)}.")
+
+			if o.class? && o.class == @class
+				@push()
+				@x[0] = x
+				@y[0] = y
+			else if o.tl? && n > 0
+				o.tl.clear().moveTo(x,y,n,enchant.Easing.QUINT_EASEOUT)
+			else
+				o.x = x
+				o.y = y
+			return(@)
+		set:(o,i = 0) ->
+			if !i
+				@push()
+			if o.class? && o.class == @class
+				@x[i] = o.x[0]
+				@y[i] = o.y[0]
+			else
+				@x[i] = o.x
+				@y[i] = o.y
+			return(@)
+		cnv:(b,i = 0) ->
+			b = new game.Flag(b)
+
+			switch @b.get(F_VEC_SET_MASK)|F_VEC_BANK
+				when F_VEC_SET_FIELD
+					x = @x[i]
+					y = @y[i]
+				when F_VEC_SET_DISPLAY
+					x = @x[i] + game.Main.FieldContainer.x
+					y = @y[i] + game.Main.FieldContainer.y
+				when F_VEC_SET_GRID
+					x = @x[i] * N_X_GRID
+					y = @y[i] * N_Y_GRID
+				when F_VEC_SET_INPUT
+					x = @x[i] - game.Main.FieldContainer.x
+					y = @y[i] - game.Main.FieldContainer.y
+				when F_VEC_BANK
+					x = @x[i]
+					y = @y[i]
+				else
+					console.log("[E] Invalid VEC flag value #{b.hex()}.")
+
+			switch b.get(F_VEC_SET_MASK)|F_VEC_BANK
+				when F_VEC_SET_FIELD
+					NOP
+				when F_VEC_SET_DISPLAY
+					NOP
+				when F_VEC_SET_GRID
+					x = parseInt(x / N_X_GRID)
+					y = parseInt(y / N_Y_GRID)
+				when F_VEC_SET_INPUT
+					NOP
+				else
+					console.log("[E] Invalid VEC flag value #{b.hex()}.")
+
+			@b.on(b.get(F_VEC_MASK)|F_VEC_BANK,F_VEC_MASK)
+
+			@push()
+			@x[0] = x
+			@y[0] = y
+
+			return(@)
+		c2a:(i = 0) ->
+			return(@x[i] + "." + @y[i])
+		a2c:(xy = "0.000",i = 0) ->
+			if xy.match(/^(\d+).(\d+)$/)
+				@push()
+				@x[i] = RegExp.$1
+				@y[i] = RegExp.$2
+		print:(i = 0) ->
+			console.log("[#{i}] #{@x[i]}.#{@y[i]} (0x#{@b.hex()})")
+
 	game = new class extends enchant.Game
 		constructor:() ->
 			super(N_X_WND,N_Y_WND)
@@ -492,224 +711,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				@_pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
 				@_pageY = Math.round(window.scrollY || window.pageYOffset + bounding.top);
 			)
-		Coordinates:class
-			constructor:(x = 0,y = 0,b = 0) ->
-				if x.match?(/^(\d+)[ ,\.:;](\d+)$/)
-					x = parseInt(RegExp.$1)
-					y = parseInt(RegExp.$2)
-				@x = [x]
-				@y = [y]
-				@b = new game.Flag(b)
-				@Coordinates = 1
-			clone:() ->
-				crd = new game.Coordinates()
-				crd.x = @x.slice()
-				crd.y = @y.slice()
-				crd.b = @b.clone()
-				return(crd)
-			isvalid:(i = 0) ->
-				return(@x[i] == Math.lim(@x[i],0,N_X_FIELD - 1) && @y[i] == Math.lim(@y[i],0,N_Y_FIELD - 1))
-			push:(i = 1) ->
-				@x[i] = @x[0]
-				@y[i] = @y[0]
-				return(@)
-			pull:(i = 1) ->
-				@x[0] = @x[i]
-				@y[0] = @y[i]
-				return(@)
-			swap:(i = 1) ->
-				x = @x[i]
-				y = @y[i]
-				@x[i] = @x[0]
-				@y[i] = @y[0]
-				@x[0] = x
-				@y[0] = y
-				return(@)
-			same:(crd = @,i = 0) ->
-				return(crd.x[0] == @x[i] && crd.y[0] == @y[i])
-			distance:(crd = @,i = 0) ->
-				return(Math.abs(crd.x[0] - @x[i]) + Math.abs(crd.y[0] - @y[i]))
-			distance2:(crd = @,i = 0) ->
-				return(Math.sqrt(Math.pow2(Math.abs(crd.x[0] - @x[i]),2) + Math.pow2(Math.abs(crd.y[0] - @y[i]),2)))
-			around:(n,min = 1) ->
-				r = new Array()
-
-				if n == min == 1
-					if (crd = @clone().add(new game.Coordinates(-1,0,F_VEC_SETAS_GRID_GRID))).isvalid()
-						r.push(crd)
-					if (crd = @clone().add(new game.Coordinates(0,-1,F_VEC_SETAS_GRID_GRID))).isvalid()
-						r.push(crd)
-					if (crd = @clone().add(new game.Coordinates(0,1,F_VEC_SETAS_GRID_GRID))).isvalid()
-						r.push(crd)
-					if (crd = @clone().add(new game.Coordinates(1,0,F_VEC_SETAS_GRID_GRID))).isvalid()
-						r.push(crd)
-				else
-					for x in [-n..n]
-						for y in [-n..n]
-							if Math.abs(x) + Math.abs(y) <= n && Math.abs(x) + Math.abs(y) >= min
-								if (crd = @clone().add(new game.Coordinates(x,y,F_VEC_SETAS_GRID_GRID))).isvalid()
-									r.push(crd)
-				return(r)
-			add:(crd = @,i = 0) ->
-				@x[1] = @x[i] + crd.x[0]
-				@y[1] = @y[i] + crd.y[0]
-				@swap()
-				return(@)
-			sub:(crd = @,i = 0) ->
-				@x[1] = @x[i] - crd.x[0]
-				@y[1] = @y[i] - crd.y[0]
-				@swap()
-				return(@)
-			mul:(crd = @,i = 0) ->
-				@x[1] = @x[i] * crd.x[0]
-				@y[1] = @y[i] * crd.y[0]
-				@swap()
-				return(@)
-			div:(crd = @,i = 0) ->
-				@x[1] = @x[i] / crd.x[0]
-				@y[1] = @y[i] / crd.y[0]
-				@swap()
-				return(@)
-			abs:(i = 0) ->
-				@x[1] = Math.abs(@x[i])
-				@y[1] = Math.abs(@y[i])
-				@swap()
-				return(@)
-			neg:(i = 0) ->
-				@push()
-				@x[1] = -@x[i]
-				@y[1] = -@y[i]
-				@swap()
-				return(@)
-			dif:(crd = @,i = 1) ->
-				@sub(crd,i)
-				return(@)
-			min:(crd = @,i = 0) ->
-				@x[1] = Math.max(crd.x[0],@x[i])
-				@y[1] = Math.max(crd.y[0],@y[i])
-				@swap()
-				return(@)
-			max:(crd = @,i = 0) ->
-				@x[1] = Math.min(crd.x[0],@x[i])
-				@y[1] = Math.min(crd.y[0],@y[i])
-				@swap()
-				return(@)
-			round:(i = 0) ->
-				@x[1] = Math.round(@x[i])
-				@y[1] = Math.round(@y[i])
-				@swap()
-				return(@)
-			lim:(min = @,max = @,i = 0) ->
-				@x[1] = Math.min(max.x[0],Math.max(min.x[0],@x[i]))
-				@y[1] = Math.min(max.y[0],Math.max(min.y[0],@y[i]))
-				@swap()
-				return(@)
-			setas:(elem,i = 0,n = 0) ->
-				switch @b.get(F_VEC_SET_MASK)|F_VEC_BANK
-					when F_VEC_SET_FIELD
-						x = @x[i]
-						y = @y[i]
-					when F_VEC_SET_DISPLAY
-						x = @x[i] + game.Main.FieldContainer.x
-						y = @y[i] + game.Main.FieldContainer.y
-					when F_VEC_SET_GRID
-						x = @x[i] * N_X_GRID
-						y = @y[i] * N_Y_GRID
-					when F_VEC_SET_INPUT
-						x = @x[i] - game.Main.FieldContainer.x
-						y = @y[i] - game.Main.FieldContainer.y
-					when F_VEC_BANK
-						x = @x[i]
-						y = @y[i]
-					else
-						console.log("! Invalid VEC flag value #{@b.get(F_VEC_SET_MASK)}.")
-
-				switch @b.get(F_VEC_SETAS_MASK)|F_VEC_BANK
-					when F_VEC_SETAS_FIELD
-						NOP
-					when F_VEC_SETAS_DISPLAY
-						x = Math.min(N_X_WND / 4,Math.max(-N_X_MAP + N_X_WND / 4 * 3,-x + N_X_WND / 2))
-						y = Math.min(N_Y_WND / 4,Math.max(-N_Y_MAP + N_Y_WND / 4 * 3,-y + N_Y_WND / 2))
-					when F_VEC_SETAS_GRID
-						NOP
-					when F_VEC_SETAS_INPUT
-						x = Math.min(N_X_WND / 4,Math.max(-N_X_MAP + N_X_WND / 4 * 3,elem.x + x))
-						y = Math.min(N_Y_WND / 4,Math.max(-N_Y_MAP + N_Y_WND / 4 * 3,elem.y + y))
-					when F_VEC_BANK
-					else
-						console.log("! Invalid VEC flag value #{@b.get(F_VEC_SETAS_MASK)}.")
-
-				if elem.Coordinates?
-					@push()
-					@x[0] = x
-					@y[0] = y
-				else if elem.tl? && n > 0
-					elem.tl.clear().moveTo(x,y,n,enchant.Easing.QUINT_EASEOUT)
-				else
-					elem.x = x
-					elem.y = y
-				return(@)
-			set:(elem,i = 0) ->
-				if !i
-					@push()
-				if elem.Coordinates?
-					@x[i] = elem.x[0]
-					@y[i] = elem.y[0]
-				else
-					@x[i] = elem.x
-					@y[i] = elem.y
-				return(@)
-			cnv:(b,i = 0) ->
-				b = new game.Flag(b)
-
-				switch @b.get(F_VEC_SET_MASK)|F_VEC_BANK
-					when F_VEC_SET_FIELD
-						x = @x[i]
-						y = @y[i]
-					when F_VEC_SET_DISPLAY
-						x = @x[i] + game.Main.FieldContainer.x
-						y = @y[i] + game.Main.FieldContainer.y
-					when F_VEC_SET_GRID
-						x = @x[i] * N_X_GRID
-						y = @y[i] * N_Y_GRID
-					when F_VEC_SET_INPUT
-						x = @x[i] - game.Main.FieldContainer.x
-						y = @y[i] - game.Main.FieldContainer.y
-					when F_VEC_BANK
-						x = @x[i]
-						y = @y[i]
-					else
-						console.log("[E] Invalid VEC flag value #{b.hex()}.")
-
-				switch b.get(F_VEC_SET_MASK)|F_VEC_BANK
-					when F_VEC_SET_FIELD
-						NOP
-					when F_VEC_SET_DISPLAY
-						NOP
-					when F_VEC_SET_GRID
-						x = parseInt(x / N_X_GRID)
-						y = parseInt(y / N_Y_GRID)
-					when F_VEC_SET_INPUT
-						NOP
-					else
-						console.log("[E] Invalid VEC flag value #{b.hex()}.")
-
-				@b.on(b.get(F_VEC_MASK)|F_VEC_BANK,F_VEC_MASK)
-
-				@push()
-				@x[0] = x
-				@y[0] = y
-
-				return(@)
-			c2a:(i = 0) ->
-				return(@x[i] + "." + @y[i])
-			a2c:(xy = "0.000",i = 0) ->
-				if xy.match(/^(\d+).(\d+)$/)
-					@push()
-					@x[i] = RegExp.$1
-					@y[i] = RegExp.$2
-			print:(i = 0) ->
-				console.log("[#{i}] #{@x[i]}.#{@y[i]} (0x#{@b.hex()})")
 		Action:class
 			constructor:() ->
 				@ACTION = 
