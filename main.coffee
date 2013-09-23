@@ -307,6 +307,75 @@ F_DEAL_B_WIL1					= 0x00000080
 	else
 		Math.w = 1
 
+	Flag = class
+		class:"game.Flag"
+		constructor:(a...) ->
+			@value = for i in [0..15]
+				0
+			for _ in a
+				@on(_)
+		clone:() ->
+			b = new game.Flag()
+			b.value = @value.clone()
+			return(b)
+		bank:(b = 0) ->
+			b2 = b
+			if (b & F_FLAG_BANK) == 0
+				b = 0
+				#console.log("! Bank is zero.")
+			#else if (b = Math.log((b & F_FLAG_BANK) >> 24) / Math.LN2) % 1 != 0
+			else if (b = Math.log((b & F_FLAG_BANK) >>> 24) / Math.LN2) % 1 != 0
+				b = 0
+				console.log("! Bank has Multipul bits. #{b2}")
+			return(b)
+		on:(b = 0,mask = 0x00000000) ->
+			if b.class? && b.class == @class
+				if mask
+					@mask(mask & F_FLAG_BANK | (~mask & F_FLAG_FLAG))
+					@value[@bank(mask)] |= b.get(mask) & F_FLAG_FLAG
+				else
+					for i in [0..15]
+						@on(b.get(1 << 24 + i | F_FLAG_FLAG) | (1 << 24 + i))
+			else
+				if mask
+					b &= mask
+				@mask(mask & F_FLAG_BANK | (~mask & F_FLAG_FLAG))
+				@value[@bank(b)] |= b & F_FLAG_FLAG
+		off:(b = 0,mask = 0xFFFFFFFF) ->
+			if 0
+				NOP
+			else
+				#@mask(mask & F_FLAG_BANK | ~(mask & F_FLAG_FLAG))
+				@value[@bank(b)] &= ~b & F_FLAG_FLAG
+		mask:(mask = 0x00000000) ->
+			@value[@bank(mask)] &= mask & F_FLAG_FLAG
+		is:(b = 0,mask) ->
+			if b.class? && b.class == @class
+				if(mask?)
+					return(@is(b.get(mask,N_IMP_BANK)))
+				else
+					r = !1
+					for i in [0..15]
+						r ||= @is(b.get(1 << 24 + i | F_FLAG_FLAG,N_IMP_BANK))
+					return(r)
+			else
+				if(mask?)
+					return((@value[@bank(b)] & mask & F_FLAG_FLAG) == (b & F_FLAG_FLAG))
+				else
+					return((@value[@bank(b)] & b & F_FLAG_FLAG) != 0)
+		get:(b = F_FLAG_FLAG,bank = 0) ->
+			if bank
+				return(@value[@bank(b)] & b | (b & F_FLAG_BANK))
+			else
+				return(@value[@bank(b)] & b & F_FLAG_FLAG)
+		geti:(b = F_FLAG_FLAG,shift = 0) ->
+			if (@value[@bank(b)] & b & F_FLAG_FLAG) != 0
+				return(1 + Math.log((@value[@bank(b)] & b & F_FLAG_FLAG) >>> Math.log(b & -b & F_FLAG_FLAG) / Math.LN2) / Math.LN2)
+			else
+				return(0)
+		hex:(bank = 0) ->
+			return(("00000000#{@get(NULL,bank).toString(16)}".slice(-8))
+
 	game = new class extends enchant.Game
 		constructor:() ->
 			super(N_X_WND,N_Y_WND)
@@ -423,78 +492,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				@_pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
 				@_pageY = Math.round(window.scrollY || window.pageYOffset + bounding.top);
 			)
-		Flag:class
-			constructor:(g...) ->
-				@class = 'game.Flag'
-				@value = for i in [0..15]
-					0
-				for _ in g
-					@on(_)
-			clone:() ->
-				b = new game.Flag()
-				b.value = @value.slice()
-				return(b)
-			bank:(b = 0) ->
-				b2 = b
-				if (b & F_FLAG_BANK) == 0
-					b = 0
-					#console.log("! Bank is zero.")
-				#else if (b = Math.log((b & F_FLAG_BANK) >> 24) / Math.LN2) % 1 != 0
-				else if (b = Math.log((b & F_FLAG_BANK) >>> 24) / Math.LN2) % 1 != 0
-					b = 0
-					console.log("! Bank has Multipul bits. #{b2}")
-				return(b)
-			on:(b = 0,mask = 0x00000000) ->
-				if b.class? && b.class == @class
-					if mask
-						@mask(mask & F_FLAG_BANK | (~mask & F_FLAG_FLAG))
-						@value[@bank(mask)] |= b.get(mask) & F_FLAG_FLAG
-					else
-						for i in [0..15]
-							@on(b.get(1 << 24 + i | F_FLAG_FLAG) | (1 << 24 + i))
-				else
-					if mask
-						b &= mask
-					@mask(mask & F_FLAG_BANK | (~mask & F_FLAG_FLAG))
-					@value[@bank(b)] |= b & F_FLAG_FLAG
-			off:(b = 0,mask = 0xFFFFFFFF) ->
-				if 0
-					NOP
-				else
-					#@mask(mask & F_FLAG_BANK | ~(mask & F_FLAG_FLAG))
-					@value[@bank(b)] &= ~b & F_FLAG_FLAG
-			mask:(mask = 0x00000000) ->
-				@value[@bank(mask)] &= mask & F_FLAG_FLAG
-			is:(b = 0,mask) ->
-				if b.class? && b.class == @class
-					if(mask?)
-						return(@is(b.get(mask,N_IMP_BANK)))
-					else
-						r = !1
-						for i in [0..15]
-							r ||= @is(b.get(1 << 24 + i | F_FLAG_FLAG,N_IMP_BANK))
-						return(r)
-				else
-					if(mask?)
-						return((@value[@bank(b)] & mask & F_FLAG_FLAG) == (b & F_FLAG_FLAG))
-					else
-						return((@value[@bank(b)] & b & F_FLAG_FLAG) != 0)
-			get:(b = F_FLAG_FLAG,bank = 0) ->
-				if bank
-					return(@value[@bank(b)] & b | (b & F_FLAG_BANK))
-				else
-					return(@value[@bank(b)] & b & F_FLAG_FLAG)
-			geti:(b = F_FLAG_FLAG,shift = 0) ->
-				if (@value[@bank(b)] & b & F_FLAG_FLAG) != 0
-					return(1 + Math.log((@value[@bank(b)] & b & F_FLAG_FLAG) >>> Math.log(b & -b & F_FLAG_FLAG) / Math.LN2) / Math.LN2)
-				else
-					return(0)
-			hex:(b = F_FLAG_FLAG) ->
-				return(@value.toString(16))
-			print:() ->
-				for i in [0..15]
-					if @value[i] != 0
-						console.log("? Bank #{i} : #{@value[i].toString(16)}")
 		Coordinates:class
 			constructor:(x = 0,y = 0,b = 0) ->
 				if x.match?(/^(\d+)[ ,\.:;](\d+)$/)
