@@ -201,14 +201,14 @@ F_DEAL_B_WIL1					= 0x00000080
 	DEBUG("enchant.js/NODE: -")
 	DEBUG("enchant.js/CALLSTACK: -")
 
-	arm = (object,g = new Object()) ->
-		for p,f of g
-			if object.prototype?
-				if object.prototype[p]?
-					object.prototype["$#{p}"] = object.prototype[p]
-				object.prototype[p] = f
+	arm = (o,a = new Object()) ->
+		for p,f of a
+			if o::?
+				if o::[p]?
+					o::["$#{p}"] = o::[p]
+				o::[p] = f
 			else
-				object[p] = f
+				o[p] = f
 
 	arm(Array,
 		clone:() ->
@@ -300,21 +300,6 @@ F_DEAL_B_WIL1					= 0x00000080
 			)
 			return(@)
 	)
-
-	Hash = class
-		constructor:() ->
-			NOP
-		keys:() ->
-			r = new Array()
-			for k,v of @
-				r.push(k)
-			return(r)
-		values:() ->
-			r = new Array()
-			for k,v of @
-				r.push(v)
-			return(r)
-
 
 	if window.location.toString().match(/#(\d+)$/)
 		Math.w = parseInt(RegExp.$1)
@@ -4784,13 +4769,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@parentNode.dead()
 							@parentNode.removeChild(@)
 						)
-	if 1
-		if 1
-			NOP
-		else
-			NOP
-	else
-		NOP
+
 	game.prepare()
 	game.start()
 )() #ir<
