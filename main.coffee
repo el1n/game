@@ -595,6 +595,71 @@ F_DEAL_B_WIL1					= 0x00000080
 		print:(i = 0) ->
 			console.log("[#{i}] #{@x[i]}.#{@y[i]} (0x#{@b.hex()})")
 
+	Action = class
+		constructor:() ->
+			@ACTION = 
+				crd:new game.Coordinates(0,0,F_VEC_SET_INPUT)
+				b:new game.Flag(0)
+				elapse:0
+
+			@addEventListener(enchant.Event.TOUCH_START,(a) ->
+				@ACTION.crd.set(a)
+				@ACTION.crd.set(a,2)
+
+				if !@ACTION.b.is(F_ACTION_CLICK|F_ACTION_DCLICK|F_ACTION_TCLICK) || game.Main.age - @ACTION.elapse > N_200MS
+					@ACTION.b.off(F_ACTION_MASK)
+
+				@ACTION.b.on(F_ACTION_DOWN)
+				@MOUSE_DOWN?(@ACTION.crd.clone())
+
+				@ACTION.elapse = game.Main.age
+			)
+
+			@addEventListener(enchant.Event.TOUCH_MOVE,(e) ->
+				@ACTION.crd.set(e)
+
+				if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse > N_1000MS
+					@ACTION.b.on(F_ACTION_HOLD,F_ACTION_MASK)
+					@MOUSE_HOLD?(@ACTION.crd.clone())
+				else if !@ACTION.b.is(F_ACTION_HOLD) && @ACTION.crd.distance(NULL,2)
+					@ACTION.b.on(F_ACTION_DRAG,F_ACTION_MASK)
+					@MOUSE_DRAG?(@ACTION.crd.clone())
+				else if @ACTION.b.is(F_ACTION_HOLD) && @ACTION.crd.distance(NULL,2)
+					@ACTION.b.on(F_ACTION_HOLD_DRAG)
+					@MOUSE_HOLD_DRAG?(@ACTION.crd.clone())
+			)
+
+			@addEventListener(enchant.Event.TOUCH_END,(e) ->
+				@ACTION.crd.set(e)
+
+				if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse < N_200MS
+					if @ACTION.b.is(F_ACTION_CLICK) && @MOUSE_DCLICK?
+						@ACTION.b.on(F_ACTION_DCLICK,F_ACTION_MASK)
+						@MOUSE_DCLICK?(@ACTION.crd.clone())
+					else if @ACTION.b.is(F_ACTION_DCLICK) && @MOUSE_TCLICK?
+						@ACTION.b.on(F_ACTION_TCLICK,F_ACTION_MASK)
+						@MOUSE_TCLICK?(@ACTION.crd.clone())
+					else
+						@ACTION.b.on(F_ACTION_CLICK,F_ACTION_MASK)
+						@MOUSE_CLICK?(@ACTION.crd.clone())
+				else if @ACTION.b.is(F_ACTION_DRAG) || @ACTION.b.is(F_ACTION_HOLD_DRAG)
+					@ACTION.b.on(F_ACTION_DROP,F_ACTION_MASK)
+					@MOUSE_DROP?(@ACTION.crd.clone())
+
+				@MOUSE_UP?(@ACTION.crd.clone())
+
+				@ACTION.b.off(F_ACTION_DOWN)
+				@ACTION.elapse = game.Main.age
+			)
+
+			if @MOUSE_HOLD?
+				@addEventListener(enchant.Event.ENTER_FRAME,(e) ->
+					#if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse > N_1000MS
+					if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse > N_500MS
+						@ACTION.b.on(F_ACTION_HOLD,F_ACTION_MASK)
+						@MOUSE_HOLD?(@ACTION.crd.clone())
+				)
+
 	game = new class extends enchant.Game
 		constructor:() ->
 			super(N_X_WND,N_Y_WND)
@@ -711,70 +776,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				@_pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
 				@_pageY = Math.round(window.scrollY || window.pageYOffset + bounding.top);
 			)
-		Action:class
-			constructor:() ->
-				@ACTION = 
-					crd:new game.Coordinates(0,0,F_VEC_SET_INPUT)
-					b:new game.Flag(0)
-					elapse:0
-
-				@addEventListener(enchant.Event.TOUCH_START,(a) ->
-					@ACTION.crd.set(a)
-					@ACTION.crd.set(a,2)
-
-					if !@ACTION.b.is(F_ACTION_CLICK|F_ACTION_DCLICK|F_ACTION_TCLICK) || game.Main.age - @ACTION.elapse > N_200MS
-						@ACTION.b.off(F_ACTION_MASK)
-
-					@ACTION.b.on(F_ACTION_DOWN)
-					@MOUSE_DOWN?(@ACTION.crd.clone())
-
-					@ACTION.elapse = game.Main.age
-				)
-
-				@addEventListener(enchant.Event.TOUCH_MOVE,(e) ->
-					@ACTION.crd.set(e)
-
-					if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse > N_1000MS
-						@ACTION.b.on(F_ACTION_HOLD,F_ACTION_MASK)
-						@MOUSE_HOLD?(@ACTION.crd.clone())
-					else if !@ACTION.b.is(F_ACTION_HOLD) && @ACTION.crd.distance(NULL,2)
-						@ACTION.b.on(F_ACTION_DRAG,F_ACTION_MASK)
-						@MOUSE_DRAG?(@ACTION.crd.clone())
-					else if @ACTION.b.is(F_ACTION_HOLD) && @ACTION.crd.distance(NULL,2)
-						@ACTION.b.on(F_ACTION_HOLD_DRAG)
-						@MOUSE_HOLD_DRAG?(@ACTION.crd.clone())
-				)
-
-				@addEventListener(enchant.Event.TOUCH_END,(e) ->
-					@ACTION.crd.set(e)
-
-					if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse < N_200MS
-						if @ACTION.b.is(F_ACTION_CLICK) && @MOUSE_DCLICK?
-							@ACTION.b.on(F_ACTION_DCLICK,F_ACTION_MASK)
-							@MOUSE_DCLICK?(@ACTION.crd.clone())
-						else if @ACTION.b.is(F_ACTION_DCLICK) && @MOUSE_TCLICK?
-							@ACTION.b.on(F_ACTION_TCLICK,F_ACTION_MASK)
-							@MOUSE_TCLICK?(@ACTION.crd.clone())
-						else
-							@ACTION.b.on(F_ACTION_CLICK,F_ACTION_MASK)
-							@MOUSE_CLICK?(@ACTION.crd.clone())
-					else if @ACTION.b.is(F_ACTION_DRAG) || @ACTION.b.is(F_ACTION_HOLD_DRAG)
-						@ACTION.b.on(F_ACTION_DROP,F_ACTION_MASK)
-						@MOUSE_DROP?(@ACTION.crd.clone())
-
-					@MOUSE_UP?(@ACTION.crd.clone())
-
-					@ACTION.b.off(F_ACTION_DOWN)
-					@ACTION.elapse = game.Main.age
-				)
-
-				if @MOUSE_HOLD?
-					@addEventListener(enchant.Event.ENTER_FRAME,(e) ->
-						#if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse > N_1000MS
-						if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse > N_500MS
-							@ACTION.b.on(F_ACTION_HOLD,F_ACTION_MASK)
-							@MOUSE_HOLD?(@ACTION.crd.clone())
-					)
 		Control:class
 			constructor:(a) ->
 				@CTL_OPEN_ST =
