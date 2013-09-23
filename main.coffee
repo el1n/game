@@ -308,14 +308,14 @@ F_DEAL_B_WIL1					= 0x00000080
 		Math.w = 1
 
 	Flag = class
-		class:"game.Flag"
+		class:"Flag"
 		constructor:(a...) ->
 			@value = for i in [0..15]
 				0
 			for _ in a
 				@on(_)
 		clone:() ->
-			b = new game.Flag()
+			b = new Flag()
 			b.value = @value.clone()
 			return(b)
 		bank:(b = 0) ->
@@ -374,7 +374,7 @@ F_DEAL_B_WIL1					= 0x00000080
 			else
 				return(0)
 		hex:(bank = 0) ->
-			return(("00000000#{@get(NULL,bank).toString(16)}".slice(-8))
+			return("00000000#{@get(NULL,bank).toString(16)}".slice(-8))
 
 	Coordinates = class
 		class:"Coordinates"
@@ -384,9 +384,9 @@ F_DEAL_B_WIL1					= 0x00000080
 				y = parseInt(RegExp.$2)
 			@x = [x]
 			@y = [y]
-			@b = new game.Flag(b)
+			@b = new Flag(b)
 		clone:() ->
-			crd = new game.Coordinates()
+			crd = new Coordinates()
 			crd.x = @x.slice()
 			crd.y = @y.slice()
 			crd.b = @b.clone()
@@ -419,19 +419,19 @@ F_DEAL_B_WIL1					= 0x00000080
 			r = new Array()
 
 			if n == min == 1
-				if (crd = @clone().add(new game.Coordinates(-1,0,F_VEC_SETAS_GRID_GRID))).isvalid()
+				if (crd = @clone().add(new Coordinates(-1,0,F_VEC_SETAS_GRID_GRID))).isvalid()
 					r.push(crd)
-				if (crd = @clone().add(new game.Coordinates(0,-1,F_VEC_SETAS_GRID_GRID))).isvalid()
+				if (crd = @clone().add(new Coordinates(0,-1,F_VEC_SETAS_GRID_GRID))).isvalid()
 					r.push(crd)
-				if (crd = @clone().add(new game.Coordinates(0,1,F_VEC_SETAS_GRID_GRID))).isvalid()
+				if (crd = @clone().add(new Coordinates(0,1,F_VEC_SETAS_GRID_GRID))).isvalid()
 					r.push(crd)
-				if (crd = @clone().add(new game.Coordinates(1,0,F_VEC_SETAS_GRID_GRID))).isvalid()
+				if (crd = @clone().add(new Coordinates(1,0,F_VEC_SETAS_GRID_GRID))).isvalid()
 					r.push(crd)
 			else
 				for x in [-n..n]
 					for y in [-n..n]
 						if Math.abs(x) + Math.abs(y) <= n && Math.abs(x) + Math.abs(y) >= min
-							if (crd = @clone().add(new game.Coordinates(x,y,F_VEC_SETAS_GRID_GRID))).isvalid()
+							if (crd = @clone().add(new Coordinates(x,y,F_VEC_SETAS_GRID_GRID))).isvalid()
 								r.push(crd)
 			return(r)
 		add:(crd = @,i = 0) ->
@@ -544,7 +544,7 @@ F_DEAL_B_WIL1					= 0x00000080
 				@y[i] = o.y
 			return(@)
 		cnv:(b,i = 0) ->
-			b = new game.Flag(b)
+			b = new Flag(b)
 
 			switch @b.get(F_VEC_SET_MASK)|F_VEC_BANK
 				when F_VEC_SET_FIELD
@@ -598,8 +598,8 @@ F_DEAL_B_WIL1					= 0x00000080
 	Action = class
 		constructor:() ->
 			@ACTION = 
-				crd:new game.Coordinates(0,0,F_VEC_SET_INPUT)
-				b:new game.Flag(0)
+				crd:new Coordinates(0,0,F_VEC_SET_INPUT)
+				b:new Flag(0)
 				elapse:0
 
 			@addEventListener(enchant.Event.TOUCH_START,(a) ->
@@ -927,19 +927,19 @@ F_DEAL_B_WIL1					= 0x00000080
 							@_lock = 0
 
 							@heap = new Hash()
-							@phase = new game.Flag()
+							@phase = new Flag()
 						init2:() ->
 							for i in [0..7]
-								@phase = new game.Flag(1 << 16 + i & F_UNIT_FACTION_MASK | F_UNIT_FACTION_BANK)
+								@phase = new Flag(1 << 16 + i & F_UNIT_FACTION_MASK | F_UNIT_FACTION_BANK)
 								@phaseendrun()
 							@turn = 1
 							@wave = 0
 
 							@i = game.Main.ctrl.index(0)
 							if MODE[C_GAMEMODE].phase?
-								@i = new game.Flag(MODE[C_GAMEMODE].phase).geti(F_UNIT_FACTION_MASK) - 1
+								@i = new Flag(MODE[C_GAMEMODE].phase).geti(F_UNIT_FACTION_MASK) - 1
 							@i ?= 0
-							@phase = new game.Flag(1 << 16 + @i & F_UNIT_FACTION_MASK | F_UNIT_FACTION_BANK)
+							@phase = new Flag(1 << 16 + @i & F_UNIT_FACTION_MASK | F_UNIT_FACTION_BANK)
 
 							if game.Main.ctrl[@i] != 0
 								@tl.exec(-> @phaseinit())
@@ -1043,7 +1043,7 @@ F_DEAL_B_WIL1					= 0x00000080
 									)
 									phase = @phase
 								when 1
-									b = new game.Flag()
+									b = new Flag()
 									for elem in game.Main.UnitContainer.childNodes
 										b.on(elem.b)
 	
@@ -1069,11 +1069,11 @@ F_DEAL_B_WIL1					= 0x00000080
 										for i in [1.._.count]
 											@tl.exec((b,xyr,target) ->
 												[x,y,around] = xyr.split(" ").map((_) -> parseInt(_))
-												(unit = game.Main.UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|b)).spawn(new game.Coordinates(x,y,F_VEC_SETAS_GRID_GRID),around)
+												(unit = game.Main.UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|b)).spawn(new Coordinates(x,y,F_VEC_SETAS_GRID_GRID),around)
 												if target?
 													unit.target = target.name
 											,[_.faction,_.crd,game.Main.UnitContainer.find(id:_.target,name:_.target).fv()]).delay(N_200MS)
-											#,[_.faction,new game.Coordinates(_.crd,NULL,F_VEC_SETAS_GRID_GRID),_.around]).delay(N_200MS)
+											#,[_.faction,new Coordinates(_.crd,NULL,F_VEC_SETAS_GRID_GRID),_.around]).delay(N_200MS)
 									@tl.exec(-> @phaseend())
 									###
 									@tl.exec(-> @role())
@@ -1138,10 +1138,10 @@ F_DEAL_B_WIL1					= 0x00000080
 										@next()
 								when N_STEP_LIST_GROUP
 									@heap.grp = for i in [0..8]
-										b:new game.Flag(((1 << 15 + i)|F_UNIT_FACTION_BANK) & F_UNIT_FACTION_MASK)
+										b:new Flag(((1 << 15 + i)|F_UNIT_FACTION_BANK) & F_UNIT_FACTION_MASK)
 										pwr:0.000
 										ppl:0
-										pos:new game.Coordinates(0,0,F_VEC_SETAS_GRID_GRID)
+										pos:new Coordinates(0,0,F_VEC_SETAS_GRID_GRID)
 
 									for $ in game.Main.UnitContainer.childNodes
 										@heap.grp[$.b.geti(F_UNIT_FACTION_MASK)].pwr += Math.max(0,$.perf())
@@ -1151,7 +1151,7 @@ F_DEAL_B_WIL1					= 0x00000080
 										@heap.grp[0].ppl += 1
 
 									for $ in @heap.grp
-										$.pos.div(new game.Coordinates($.ppl,$.ppl))
+										$.pos.div(new Coordinates($.ppl,$.ppl))
 
 									for $ in @heap.grp
 										DEBUG("Grp##{$.b.geti(F_UNIT_FACTION_MASK)} P:#{$.pwr.toFixed(2)} N:#{$.ppl}")
@@ -1163,10 +1163,10 @@ F_DEAL_B_WIL1					= 0x00000080
 									if unit = game.Main.UnitContainer.childNodes[@heap.i++]
 										if !(sqd = @heap.sqd.grep((_) -> _.unit.grep(unit).len()).fv())
 											sqd =
-												b:new game.Flag(unit.b.get(F_UNIT_FACTION_MASK,N_IMP_BANK))
+												b:new Flag(unit.b.get(F_UNIT_FACTION_MASK,N_IMP_BANK))
 												pwr:0.000
 												ppl:0
-												pos:new game.Coordinates(0,0,F_VEC_SETAS_GRID_GRID)
+												pos:new Coordinates(0,0,F_VEC_SETAS_GRID_GRID)
 												unit:new Array()
 											@heap.sqd.push(sqd)
 											sqd.unit.push(unit)
@@ -1184,7 +1184,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												sqd.pwr += Math.max(0,unit.perf())
 												sqd.pos.add(unit.crd)
 												sqd.ppl += 1
-											sqd.pos.div(new game.Coordinates(sqd.ppl,sqd.ppl))
+											sqd.pos.div(new Coordinates(sqd.ppl,sqd.ppl))
 
 										#for i in [0..@heap.sqd.idx()]
 										for i in [0..23]
@@ -1207,13 +1207,13 @@ F_DEAL_B_WIL1					= 0x00000080
 												@heap.risk[crd.c2a()] ?= 0
 												@heap.risk[crd.c2a()] -= unit.perf()
 											if crd.b.is(F_ZONE_MARK_ATTACK)
-												@heap.supp[crd.c2a()] ?= new game.Flag()
+												@heap.supp[crd.c2a()] ?= new Flag()
 												@heap.supp[crd.c2a()].on(unit.b.get(F_UNIT_FACTION_MASK,N_IMP_BANK))
 									else
 										if C_TEST
 											for crd,n of @heap.risk
 												xy = crd.split(".")
-												(new game.Main.Label()).info(new game.Coordinates(xy[0],xy[1],F_VEC_SETAS_GRID_GRID),n.toFixed(2))
+												(new game.Main.Label()).info(new Coordinates(xy[0],xy[1],F_VEC_SETAS_GRID_GRID),n.toFixed(2))
 										@next()
 								when N_STEP_LIST_UNIT
 									@heap.unit = game.Main.UnitContainer.childNodes.grep((_) -> _.b.is(phase) && !_.b.is(F_UNIT_STATE_END))
@@ -1281,7 +1281,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
 													if target.crd.distance(crd) <= unit.range && (game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !game.Main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
 														@heap.cand.push(
-															b:new game.Flag(F_ZONE_MARK_ATTACK)
+															b:new Flag(F_ZONE_MARK_ATTACK)
 															unit:unit
 															target:target
 															crd:crd
@@ -1297,7 +1297,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
 													if target.crd.distance(crd) <= unit.range && (game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !game.Main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
 														@heap.cand.push(
-															b:new game.Flag(F_ZONE_MARK_ATTACK)
+															b:new Flag(F_ZONE_MARK_ATTACK)
 															unit:unit
 															target:target
 															crd:crd
@@ -1314,7 +1314,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
 													if target.crd.distance(crd) <= unit.range && (game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !game.Main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
 														@heap.cand.push(
-															b:new game.Flag(F_ZONE_MARK_ATTACK)
+															b:new Flag(F_ZONE_MARK_ATTACK)
 															unit:unit
 															target:target
 															crd:crd
@@ -1329,7 +1329,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
 													if target.crd.distance(crd) <= unit.range && (game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !game.Main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
 														@heap.cand.push(
-															b:new game.Flag(F_ZONE_MARK_CONTRACT)
+															b:new Flag(F_ZONE_MARK_CONTRACT)
 															unit:unit
 															target:target
 															crd:crd
@@ -1342,7 +1342,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
 													if target.crd.distance(crd) <= unit.range
 														@heap.cand.push(
-															b:new game.Flag(F_ZONE_MARK_ATTACK)
+															b:new Flag(F_ZONE_MARK_ATTACK)
 															unit:unit
 															target:target
 															crd:crd
@@ -1369,7 +1369,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
 													if target.crd.distance(crd) <= unit.range
 														@heap.cand.push(
-															b:new game.Flag(F_ZONE_MARK_ATTACK)
+															b:new Flag(F_ZONE_MARK_ATTACK)
 															unit:unit
 															target:target
 															crd:crd
@@ -1410,7 +1410,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												for i in [0..end.x.idx()]
 													if (crd = route[end.c2a(i)]).b.is(F_ZONE_MARK_MOVE)
 														@heap.cand.push(
-															b:new game.Flag(F_ZONE_MARK_MOVE)
+															b:new Flag(F_ZONE_MARK_MOVE)
 															unit:unit
 															crd:crd
 															pri:new Array()
@@ -1434,7 +1434,7 @@ F_DEAL_B_WIL1					= 0x00000080
 											when F_UNIT_CLASS_MADOKAMAGIKA,F_UNIT_CLASS_ORIKOMAGIKA,F_UNIT_CLASS_KAZUMIMAGIKA,F_UNIT_CLASS_LYRICALNANOHA,F_UNIT_CLASS_TOUHOU
 												for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE) && @heap.node[crd.c2a()]? && @heap.node[crd.c2a()] == @heap.node[target.crd.c2a()]
 													@heap.cand.push(
-														b:new game.Flag(F_ZONE_MARK_MOVE)
+														b:new Flag(F_ZONE_MARK_MOVE)
 														unit:unit
 														crd:crd
 														pri:new Array()
@@ -1494,7 +1494,7 @@ F_DEAL_B_WIL1					= 0x00000080
 													for i in [0..end.x.idx()]
 														if (crd = route[end.c2a(i)]).b.is(F_ZONE_MARK_MOVE)
 															@heap.cand.push(
-																b:new game.Flag(F_ZONE_MARK_MOVE)
+																b:new Flag(F_ZONE_MARK_MOVE)
 																unit:unit
 																crd:crd
 																pri:new Array()
@@ -1514,7 +1514,7 @@ F_DEAL_B_WIL1					= 0x00000080
 													for i in [0..end.x.idx()]
 														if (crd = route[end.c2a(i)]).b.is(F_ZONE_MARK_MOVE)
 															@heap.cand.push(
-																b:new game.Flag(F_ZONE_MARK_MOVE)
+																b:new Flag(F_ZONE_MARK_MOVE)
 																unit:unit
 																crd:crd
 																pri:new Array()
@@ -1528,7 +1528,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												for i in [0..end.x.idx()]
 													if (crd = route[end.c2a(i)]).b.is(F_ZONE_MARK_MOVE)
 														@heap.cand.push(
-															b:new game.Flag(F_ZONE_MARK_MOVE)
+															b:new Flag(F_ZONE_MARK_MOVE)
 															unit:unit
 															crd:crd
 															pri:new Array()
@@ -1577,7 +1577,7 @@ F_DEAL_B_WIL1					= 0x00000080
 													for i in [0..end.x.idx()]
 														if (crd = route[end.c2a(i)]).b.is(F_ZONE_MARK_MOVE)
 															@heap.cand.push(
-																b:new game.Flag(F_ZONE_MARK_MOVE)
+																b:new Flag(F_ZONE_MARK_MOVE)
 																unit:unit
 																crd:crd
 																pri:new Array()
@@ -1591,7 +1591,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												for i in [0..end.x.idx()]
 													if (crd = route[end.c2a(i)]).b.is(F_ZONE_MARK_MOVE)
 														@heap.cand.push(
-															b:new game.Flag(F_ZONE_MARK_MOVE)
+															b:new Flag(F_ZONE_MARK_MOVE)
 															unit:unit
 															crd:crd
 															pri:new Array()
@@ -1606,7 +1606,7 @@ F_DEAL_B_WIL1					= 0x00000080
 											when F_UNIT_CLASS_HUMAN
 												for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
 													@heap.cand.push(
-														b:new game.Flag(F_ZONE_MARK_MOVE)
+														b:new Flag(F_ZONE_MARK_MOVE)
 														unit:unit
 														crd:crd
 														pri:new Array()
@@ -1667,9 +1667,9 @@ F_DEAL_B_WIL1					= 0x00000080
 									if _.unit?
 										for unit in _.unit
 											if unit.faction?
-												b = new game.Flag(unit.faction)
+												b = new Flag(unit.faction)
 											else
-												b = new game.Flag(phase)
+												b = new Flag(phase)
 											if unit.class?
 												b.on(unit.class)
 
@@ -1690,10 +1690,10 @@ F_DEAL_B_WIL1					= 0x00000080
 													[x,y,radius,n] = (crds[i - 1] ? crds[0]).split(" ").map((_) -> if !isNaN(parseInt(_)) then parseInt(_) else NULL)
 	
 													if x & F_FLAG_BANK
-														crd = @heap.grp[(new game.Flag(x)).geti(F_UNIT_FACTION_MASK)].pos.clone().round()
+														crd = @heap.grp[(new Flag(x)).geti(F_UNIT_FACTION_MASK)].pos.clone().round()
 														radius = y
 													else
-														crd = new game.Coordinates(x,y,F_VEC_SETAS_GRID_GRID)
+														crd = new Coordinates(x,y,F_VEC_SETAS_GRID_GRID)
 													if unit.option?.match(/safe/)
 														around = new Array()
 														for crd in crd.around(radius)
@@ -1804,7 +1804,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					@addChild(@Input = new class extends enchant.Entity
 						constructor:() ->
 							super()
-							game.Action.apply(@)
+							Action.apply(@)
 
 							@x = 0
 							@y = 0
@@ -1873,8 +1873,8 @@ F_DEAL_B_WIL1					= 0x00000080
 						constructor:() ->
 							super()
 						scroll:(crd,b) ->
-							crd.min(new game.Coordinates(N_X_MIN_SCR,N_Y_MIN_SCR))
-							crd.max(new game.Coordinates(N_X_MAX_SCR,N_Y_MAX_SCR))
+							crd.min(new Coordinates(N_X_MIN_SCR,N_Y_MIN_SCR))
+							crd.max(new Coordinates(N_X_MAX_SCR,N_Y_MAX_SCR))
 							crd.setas(@,NULL,b)
 						look:(crd) ->
 							crd = crd.clone()
@@ -1889,25 +1889,25 @@ F_DEAL_B_WIL1					= 0x00000080
 
 								for e in game.Main.ZoneContainer.childNodes
 									if e.CTL_STATE & 6
-										@fd.b[e.crd.c2a()] ?= new game.Flag()
+										@fd.b[e.crd.c2a()] ?= new Flag()
 										@fd.b[e.crd.c2a()].on(e.crd.b)
 										@fd.z[e.crd.c2a()] ?= new Array()
 										@fd.z[e.crd.c2a()].push(e)
 								for e in game.Main.UnitContainer.childNodes
 									#if e.CTL_STATE & 6
 									if e.crd2?
-										@fd.b[e.crd2.c2a()] ?= new game.Flag()
+										@fd.b[e.crd2.c2a()] ?= new Flag()
 										@fd.b[e.crd2.c2a()].on(e.b)
 										@fd.c[e.crd2.c2a()] = e
 									else
-										@fd.b[e.crd.c2a()] ?= new game.Flag()
+										@fd.b[e.crd.c2a()] ?= new Flag()
 										@fd.b[e.crd.c2a()].on(e.b)
 										@fd.c[e.crd.c2a()] = e
 
 						getb:(crd) ->
 							@scan(1)
 
-							@fd.b[crd.c2a()] ?= new game.Flag()
+							@fd.b[crd.c2a()] ?= new Flag()
 							return(@fd.b[crd.c2a()])
 						getc:(crd) ->
 							@scan(1)
@@ -1969,7 +1969,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							for _ in @childNodes
 								b = 0
 								for k,v of param
-									if b = (_[k]?.class? == "game.Flag" && _.b.is(v))
+									if b = (_[k]?.class? == "Flag" && _.b.is(v))
 										break
 									else if b = _[k] == v
 										break
@@ -1996,7 +1996,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							setb:(b) ->
 								return(@set(null,b))
 							test:(a = @a,b = @b,m = 0) ->
-								m = new game.Flag(m|F_DEAL_TEST)
+								m = new Flag(m|F_DEAL_TEST)
 
 								if b == C_DEAL_DOLL
 									b =
@@ -2007,8 +2007,8 @@ F_DEAL_B_WIL1					= 0x00000080
 										def:0
 										speed:0
 										range:0
-										b:new game.Flag(0)
-										crd:new game.Coordinates(100,100,F_VEC_SETAS_GRID_GRID)
+										b:new Flag(0)
+										crd:new Coordinates(100,100,F_VEC_SETAS_GRID_GRID)
 									m.on(F_DEAL_A_IGNORE_DISTANCE)
 
 								a =
@@ -2019,7 +2019,7 @@ F_DEAL_B_WIL1					= 0x00000080
 									def:a.def
 									speed:a.speed
 									range:a.range
-									b:new game.Flag(a.b)
+									b:new Flag(a.b)
 									crd:a.crd.clone()
 									src:a
 
@@ -2031,7 +2031,7 @@ F_DEAL_B_WIL1					= 0x00000080
 									def:b.def
 									speed:b.speed
 									range:b.range
-									b:new game.Flag(b.b)
+									b:new Flag(b.b)
 									crd:b.crd.clone()
 									src:b
 
@@ -2061,7 +2061,7 @@ F_DEAL_B_WIL1					= 0x00000080
 									isdead:!a.ref.mgk
 								)
 							deal:(a = @a,b = @b,m = 0) ->
-								m = new game.Flag(m)
+								m = new Flag(m)
 
 								a =
 									ref:a
@@ -2110,7 +2110,7 @@ F_DEAL_B_WIL1					= 0x00000080
 											game.Main.ZoneContainer.clear(F_ZONE_ZOC_GIALLO_NASTRO,a.ref)
 											game.Main.ZoneContainer.create(1).open(crd,a.ref)
 										)
-										game.Main.FieldContainer.fd.b[b.ref.crd.c2a()] ?= new game.Flag()
+										game.Main.FieldContainer.fd.b[b.ref.crd.c2a()] ?= new Flag()
 										game.Main.FieldContainer.fd.b[b.ref.crd.c2a()].on(F_ZONE_ZOC_GIALLO_NASTRO)
 									if b.b.is(F_ABILITY_GIALLO_NASTRO)
 										a.bar?.exec(->
@@ -2118,71 +2118,71 @@ F_DEAL_B_WIL1					= 0x00000080
 											game.Main.ZoneContainer.clear(F_ZONE_ZOC_GIALLO_NASTRO,b.ref)
 											game.Main.ZoneContainer.create(1).open(crd,b.ref)
 										)
-										game.Main.FieldContainer.fd.b[a.ref.crd.c2a()] ?= new game.Flag()
+										game.Main.FieldContainer.fd.b[a.ref.crd.c2a()] ?= new Flag()
 										game.Main.FieldContainer.fd.b[a.ref.crd.c2a()].on(F_ZONE_ZOC_GIALLO_NASTRO)
 
 								if (canab() && b.ref.mgk == 0)
-									@calc(a,b,new game.Flag(F_UNIT_TURN_ATTACK))
+									@calc(a,b,new Flag(F_UNIT_TURN_ATTACK))
 									after()
 									a.bar?.update(a,2)
 									b.bar?.update(b,3)
 
 								if (canab() && a.ref.mgk > 0 && b.ref.mgk > 0) && !(!a.ref.b.is(F_ABILITY_STAIRWAY_TO_HEAVEN) && b.ref.b.is(F_ABILITY_STAIRWAY_TO_HEAVEN))
-									@calc(a,b,new game.Flag(F_UNIT_TURN_ATTACK))
+									@calc(a,b,new Flag(F_UNIT_TURN_ATTACK))
 									after()
 									a.bar?.update(a,2)
 									b.bar?.update(b,3)
 
 								if (canab() && a.ref.mgk > 0 && b.ref.mgk > 0) && !(!a.ref.b.is(F_ABILITY_STAIRWAY_TO_HEAVEN) && b.ref.b.is(F_ABILITY_STAIRWAY_TO_HEAVEN)) && a.ref.b.is(F_ABILITY_DOUBLE_STRIKE)
-									@calc(a,b,new game.Flag(F_UNIT_TURN_ATTACK,F_ABILITY_DOUBLE_STRIKE))
+									@calc(a,b,new Flag(F_UNIT_TURN_ATTACK,F_ABILITY_DOUBLE_STRIKE))
 									after()
 									a.bar?.update(a,2)
 									b.bar?.update(b,3)
 
 								if (canba() && a.ref.mgk > 0 && b.ref.mgk > 0)
-									@calc(b,a,new game.Flag(F_UNIT_TURN_COUNTERATTACK))
+									@calc(b,a,new Flag(F_UNIT_TURN_COUNTERATTACK))
 									after()
 									a.bar?.update(a,3)
 									b.bar?.update(b,2)
 
 								if (canba() && a.ref.mgk > 0 && b.ref.mgk > 0) && b.ref.b.is(F_ABILITY_DOUBLE_STRIKE)
-									@calc(b,a,new game.Flag(F_UNIT_TURN_COUNTERATTACK,F_ABILITY_DOUBLE_STRIKE))
+									@calc(b,a,new Flag(F_UNIT_TURN_COUNTERATTACK,F_ABILITY_DOUBLE_STRIKE))
 									after()
 									a.bar?.update(a,3)
 									b.bar?.update(b,2)
 
 								if (canab() && a.ref.mgk > 0 && b.ref.mgk > 0) && (!a.ref.b.is(F_ABILITY_STAIRWAY_TO_HEAVEN) && b.ref.b.is(F_ABILITY_STAIRWAY_TO_HEAVEN))
-									@calc(a,b,new game.Flag(F_UNIT_TURN_ATTACK))
+									@calc(a,b,new Flag(F_UNIT_TURN_ATTACK))
 									after()
 									a.bar?.update(a,2)
 									b.bar?.update(b,3)
 
 								if (canab() && a.ref.mgk > 0 && b.ref.mgk > 0) && (!a.ref.b.is(F_ABILITY_STAIRWAY_TO_HEAVEN) && b.ref.b.is(F_ABILITY_STAIRWAY_TO_HEAVEN)) && a.ref.b.is(F_ABILITY_DOUBLE_STRIKE)
-									@calc(a,b,new game.Flag(F_UNIT_TURN_ATTACK,F_ABILITY_DOUBLE_STRIKE))
+									@calc(a,b,new Flag(F_UNIT_TURN_ATTACK,F_ABILITY_DOUBLE_STRIKE))
 									after()
 									a.bar?.update(a,2)
 									b.bar?.update(b,3)
 
 								if (canab() && a.ref.mgk > 0 && b.ref.mgk > 0) && (a.ref.b.is(F_ABILITY_SURPRISE) && a.ref.wil < b.ref.wil)
-									@calc(a,b,new game.Flag(F_UNIT_TURN_COUNTERATTACK,F_ABILITY_SURPRISE))
+									@calc(a,b,new Flag(F_UNIT_TURN_COUNTERATTACK,F_ABILITY_SURPRISE))
 									after()
 									a.bar?.update(a,2)
 									b.bar?.update(b,3)
 
 								if (canab() && a.ref.mgk > 0 && b.ref.mgk > 0) && (a.ref.b.is(F_ABILITY_SURPRISE) && a.ref.wil < b.ref.wil) && a.ref.b.is(F_ABILITY_DOUBLE_STRIKE)
-									@calc(a,b,new game.Flag(F_UNIT_TURN_COUNTERATTACK,F_ABILITY_SURPRISE,F_ABILITY_DOUBLE_STRIKE))
+									@calc(a,b,new Flag(F_UNIT_TURN_COUNTERATTACK,F_ABILITY_SURPRISE,F_ABILITY_DOUBLE_STRIKE))
 									after()
 									a.bar?.update(a,2)
 									b.bar?.update(b,3)
 
 								if (canba() && a.ref.mgk > 0 && b.ref.mgk > 0) && (b.ref.b.is(F_ABILITY_SURPRISE) && a.ref.wil > b.ref.wil)
-									@calc(b,a,new game.Flag(F_UNIT_TURN_COUNTERATTACK,F_ABILITY_SURPRISE))
+									@calc(b,a,new Flag(F_UNIT_TURN_COUNTERATTACK,F_ABILITY_SURPRISE))
 									after()
 									a.bar?.update(a,3)
 									b.bar?.update(b,2)
 
 								if (canba() && a.ref.mgk > 0 && b.ref.mgk > 0) && (b.ref.b.is(F_ABILITY_SURPRISE) && a.ref.wil > b.ref.wil) && b.ref.b.is(F_ABILITY_DOUBLE_STRIKE)
-									@calc(b,a,new game.Flag(F_UNIT_TURN_COUNTERATTACK,F_ABILITY_SURPRISE,F_ABILITY_DOUBLE_STRIKE))
+									@calc(b,a,new Flag(F_UNIT_TURN_COUNTERATTACK,F_ABILITY_SURPRISE,F_ABILITY_DOUBLE_STRIKE))
 									after()
 									a.bar?.update(a,3)
 									b.bar?.update(b,2)
@@ -2228,7 +2228,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								a.wil = a.ref.wil
 								a.exp = a.ref.exp
 								a.mg2 = a.ref.mg2
-								a.b = new game.Flag()
+								a.b = new Flag()
 								a.mdmg = 0.000
 								a.mpwr = 0.000
 								a.meff = 0.000
@@ -2238,7 +2238,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								b.wil = b.ref.wil
 								b.exp = b.ref.exp
 								b.mg2 = b.ref.mg2
-								b.b = new game.Flag()
+								b.b = new Flag()
 								b.mdmg = 0.000
 								b.mpwr = 0.000
 								b.meff = 0.000
@@ -2363,7 +2363,7 @@ F_DEAL_B_WIL1					= 0x00000080
 									a.wdmg += Math.max(0,a.wil - b.wil)
 								if b.ref.b.is(F_ABILITY_LAST_STAND) && Math.max(0,a.mgk - a.mdmg) == 0 && Math.max(0,b.mgk - b.mdmg) == 0
 									NOP
-									#@calc(ref:b,ref:a,new game.Flag(F_UNIT_TURN_COUNTERATTACK))
+									#@calc(ref:b,ref:a,new Flag(F_UNIT_TURN_COUNTERATTACK))
 
 								if a.ref.b.is(F_UNIT_CLASS_WITCH)
 									a.wdmg = 0
@@ -2446,8 +2446,8 @@ F_DEAL_B_WIL1					= 0x00000080
 						N_MARGIN = 20
 						constructor:() ->
 							super()
-							game.Action.apply(@)
-							#game.Control.apply(@)
+							Action.apply(@)
+							#Control.apply(@)
 							#@CTL_OPEN_ST.b = 0
 							#@CTL_CLOSE_ST.b = 0
 							@ref = new Object()
@@ -3026,7 +3026,7 @@ F_DEAL_B_WIL1					= 0x00000080
 						Circle:class extends enchant.Group
 							constructor:(n = 3,@button) ->
 								super()
-								game.Control.apply(@)
+								Control.apply(@)
 								@CTL_OPEN_ST.alpha = 0.750
 								@CTL_CLOSE_ST.b = 1
 								@n = n
@@ -3089,7 +3089,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								@addChild(@Input = new class extends enchant.Entity
 									constructor:() ->
 										super()
-										game.Action.apply(@)
+										Action.apply(@)
 				
 										@x = 0
 										@y = 0
@@ -3140,7 +3140,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								@addChild(new class extends enchant.Sprite
 									constructor:() ->
 										super(N_X_WND,N_Y_WND)
-										game.Control.apply(@)
+										Control.apply(@)
 										@CTL_OPEN_ST.b = 1
 										@CTL_OPEN_ST.time = N_1000MS
 										@CTL_CLOSE_ST.b = 1
@@ -3157,8 +3157,8 @@ F_DEAL_B_WIL1					= 0x00000080
 							@addChild(@Mask = new class extends enchant.Entity
 								constructor:() ->
 									super()
-									game.Action.apply(@)
-									game.Control.apply(@)
+									Action.apply(@)
+									Control.apply(@)
 									@CTL_OPEN_ST.b = 0
 									@CTL_CLOSE_ST.b = 0
 
@@ -3174,8 +3174,8 @@ F_DEAL_B_WIL1					= 0x00000080
 							@addChild(@Mask = new class extends enchant.Sprite
 								constructor:() ->
 									super(N_X_WND,N_Y_WND)
-									game.Action.apply(@)
-									game.Control.apply(@)
+									Action.apply(@)
+									Control.apply(@)
 									@CTL_OPEN_ST.b = 0
 									@CTL_CLOSE_ST.b = 0
 
@@ -3615,12 +3615,12 @@ F_DEAL_B_WIL1					= 0x00000080
 				Unit:class extends enchant.Group
 					constructor:(@id) ->
 						super(N_X_UNIT,N_Y_UNIT)
-						game.Action.apply(@)
-						game.Control.apply(@,[3,N_333MS])
+						Action.apply(@)
+						Control.apply(@,[3,N_333MS])
 						@CTL_CLOSE_ST.b = 1
 						@CTL_OPEN_ST.b = 1
 
-						@crd = new game.Coordinates(0,0,F_VEC_SETAS_GRID_GRID)
+						@crd = new Coordinates(0,0,F_VEC_SETAS_GRID_GRID)
 						@speed = 1
 						@range = 1
 						@atk = 0
@@ -3629,7 +3629,7 @@ F_DEAL_B_WIL1					= 0x00000080
 						@mgk = 1
 						@mg2 = 0
 						@wil = 1
-						@b = new game.Flag()
+						@b = new Flag()
 						@queue = new Array()
 						@icon = new Object()
 
@@ -3849,12 +3849,12 @@ F_DEAL_B_WIL1					= 0x00000080
 							@spr.frame = 0
 							@spr.scaleY = 1
 						@move(crd,0)
-						if (new game.Coordinates(N_X_WND / 2,N_Y_WND / 2,F_VEC_SET_INPUT)).cnv(F_VEC_SETAS_GRID_GRID).distance(@crd) > 4
+						if (new Coordinates(N_X_WND / 2,N_Y_WND / 2,F_VEC_SET_INPUT)).cnv(F_VEC_SETAS_GRID_GRID).distance(@crd) > 4
 							game.Main.FieldContainer.look(@crd)
 						@open()
 						#unit = @
 						#game.Main.UnitContainer.tl.exec(->
-						#	crd = new game.Coordinates(N_X_WND / 2,N_Y_WND / 2,F_VEC_SET_INPUT).cnv(F_VEC_SETAS_GRID_GRID)
+						#	crd = new Coordinates(N_X_WND / 2,N_Y_WND / 2,F_VEC_SET_INPUT).cnv(F_VEC_SETAS_GRID_GRID)
 						#	if crd.distance(unit.crd) > 4
 						#		game.Main.FieldContainer.look(unit.crd)
 						#	unit.open()
@@ -3866,7 +3866,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							unit.morph(F_UNIT_CLASS_KAZUMIMAGIKA|@b.get(F_UNIT_FACTION_MASK,N_IMP_BANK))
 						unit.spawn()
 					morph:(b) ->
-						b = new game.Flag(b)
+						b = new Flag(b)
 
 						if !@b.is(F_UNIT_CLASS_MASK)
 							@range = [1,1,1,2,2,2,2,2,3,3][Math.xor128() % 10]
@@ -3995,7 +3995,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					closezoc:() ->
 						game.Main.ZoneContainer.clear(F_ZONE_ZOC_MASK2,@)
 					calcrange2:(b) ->
-						if (new game.Flag(b)).is(F_CACHE) && @_calcrange2?
+						if (new Flag(b)).is(F_CACHE) && @_calcrange2?
 							return(@_calcrange2)
 
 						game.Main.FieldContainer.clearfd()
@@ -4024,7 +4024,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							#		process[crd.c2a()].y = crd.y * N_Y_GRID + crd.x * 16
 							#		process[crd.c2a()].color = '#FFFFFF'
 							#	process[crd.c2a()].text += '[' + i + ']'
-							if !crd.lim(new game.Coordinates(0,0),new game.Coordinates(N_X_FIELD - 1,N_Y_FIELD - 1)).same(NULL,1)
+							if !crd.lim(new Coordinates(0,0),new game.Coordinates(N_X_FIELD - 1,N_Y_FIELD - 1)).same(NULL,1)
 								continue
 							if r[crd.c2a()]? && r[crd.c2a()].n <= n
 								continue
@@ -4111,7 +4111,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							#		process[crd.c2a()].y = crd.y * N_Y_GRID + crd.x * 16
 							#		process[crd.c2a()].color = '#FFFFFF'
 							#	process[crd.c2a()].text += '[' + i + ']'
-							if !crd.lim(new game.Coordinates(0,0),new game.Coordinates(N_X_FIELD - 1,N_Y_FIELD - 1)).same(NULL,1)
+							if !crd.lim(new Coordinates(0,0),new game.Coordinates(N_X_FIELD - 1,N_Y_FIELD - 1)).same(NULL,1)
 								continue
 							if r[crd.c2a()]? && r[crd.c2a()].n <= n
 								continue
@@ -4247,8 +4247,8 @@ F_DEAL_B_WIL1					= 0x00000080
 				Zone:class extends enchant.Sprite
 					constructor:() ->
 						super(N_X_CELL,N_Y_CELL)
-						game.Action.apply(@)
-						game.Control.apply(@)
+						Action.apply(@)
+						Control.apply(@)
 						#@CTL.open.alpha = 0.500
 						@CTL_OPEN_ST.alpha = 0.500
 						@CTL_OPEN_ST.time = N_200MS
@@ -4350,7 +4350,7 @@ F_DEAL_B_WIL1					= 0x00000080
 						)
 				Label:class extends enchant.Sprite
 					constructor:() ->
-						#game.Control.apply(@)
+						#Control.apply(@)
 						super(160,160)
 
 						@touchEnabled = 0
@@ -4535,7 +4535,7 @@ F_DEAL_B_WIL1					= 0x00000080
 				Bar:class extends enchant.Group
 					constructor:(@bind) ->
 						super()
-						game.Control.apply(@)
+						Control.apply(@)
 						@CTL_CLOSE_ST.b = 1
 
 						@_width = N_X_GRID - 4
