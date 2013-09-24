@@ -494,14 +494,14 @@ F_DEAL_B_WIL1					= 0x00000080
 					x = @x[i]
 					y = @y[i]
 				when F_VEC_SET_DISPLAY
-					x = @x[i] + game.Main.FieldContainer.x
-					y = @y[i] + game.Main.FieldContainer.y
+					x = @x[i] + main.FieldContainer.x
+					y = @y[i] + main.FieldContainer.y
 				when F_VEC_SET_GRID
 					x = @x[i] * N_X_GRID
 					y = @y[i] * N_Y_GRID
 				when F_VEC_SET_INPUT
-					x = @x[i] - game.Main.FieldContainer.x
-					y = @y[i] - game.Main.FieldContainer.y
+					x = @x[i] - main.FieldContainer.x
+					y = @y[i] - main.FieldContainer.y
 				when F_VEC_BANK
 					x = @x[i]
 					y = @y[i]
@@ -551,14 +551,14 @@ F_DEAL_B_WIL1					= 0x00000080
 					x = @x[i]
 					y = @y[i]
 				when F_VEC_SET_DISPLAY
-					x = @x[i] + game.Main.FieldContainer.x
-					y = @y[i] + game.Main.FieldContainer.y
+					x = @x[i] + main.FieldContainer.x
+					y = @y[i] + main.FieldContainer.y
 				when F_VEC_SET_GRID
 					x = @x[i] * N_X_GRID
 					y = @y[i] * N_Y_GRID
 				when F_VEC_SET_INPUT
-					x = @x[i] - game.Main.FieldContainer.x
-					y = @y[i] - game.Main.FieldContainer.y
+					x = @x[i] - main.FieldContainer.x
+					y = @y[i] - main.FieldContainer.y
 				when F_VEC_BANK
 					x = @x[i]
 					y = @y[i]
@@ -606,19 +606,19 @@ F_DEAL_B_WIL1					= 0x00000080
 				@ACTION.crd.set(a)
 				@ACTION.crd.set(a,2)
 
-				if !@ACTION.b.is(F_ACTION_CLICK|F_ACTION_DCLICK|F_ACTION_TCLICK) || game.Main.age - @ACTION.elapse > N_200MS
+				if !@ACTION.b.is(F_ACTION_CLICK|F_ACTION_DCLICK|F_ACTION_TCLICK) || main.age - @ACTION.elapse > N_200MS
 					@ACTION.b.off(F_ACTION_MASK)
 
 				@ACTION.b.on(F_ACTION_DOWN)
 				@MOUSE_DOWN?(@ACTION.crd.clone())
 
-				@ACTION.elapse = game.Main.age
+				@ACTION.elapse = main.age
 			)
 
 			@addEventListener(enchant.Event.TOUCH_MOVE,(e) ->
 				@ACTION.crd.set(e)
 
-				if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse > N_1000MS
+				if @ACTION.b.is(F_ACTION_DOWN) && main.age - @ACTION.elapse > N_1000MS
 					@ACTION.b.on(F_ACTION_HOLD,F_ACTION_MASK)
 					@MOUSE_HOLD?(@ACTION.crd.clone())
 				else if !@ACTION.b.is(F_ACTION_HOLD) && @ACTION.crd.distance(NULL,2)
@@ -632,7 +632,7 @@ F_DEAL_B_WIL1					= 0x00000080
 			@addEventListener(enchant.Event.TOUCH_END,(e) ->
 				@ACTION.crd.set(e)
 
-				if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse < N_200MS
+				if @ACTION.b.is(F_ACTION_DOWN) && main.age - @ACTION.elapse < N_200MS
 					if @ACTION.b.is(F_ACTION_CLICK) && @MOUSE_DCLICK?
 						@ACTION.b.on(F_ACTION_DCLICK,F_ACTION_MASK)
 						@MOUSE_DCLICK?(@ACTION.crd.clone())
@@ -649,13 +649,13 @@ F_DEAL_B_WIL1					= 0x00000080
 				@MOUSE_UP?(@ACTION.crd.clone())
 
 				@ACTION.b.off(F_ACTION_DOWN)
-				@ACTION.elapse = game.Main.age
+				@ACTION.elapse = main.age
 			)
 
 			if @MOUSE_HOLD?
 				@addEventListener(enchant.Event.ENTER_FRAME,(e) ->
-					#if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse > N_1000MS
-					if @ACTION.b.is(F_ACTION_DOWN) && game.Main.age - @ACTION.elapse > N_500MS
+					#if @ACTION.b.is(F_ACTION_DOWN) && main.age - @ACTION.elapse > N_1000MS
+					if @ACTION.b.is(F_ACTION_DOWN) && main.age - @ACTION.elapse > N_500MS
 						@ACTION.b.on(F_ACTION_HOLD,F_ACTION_MASK)
 						@MOUSE_HOLD?(@ACTION.crd.clone())
 				)
@@ -858,10 +858,8 @@ F_DEAL_B_WIL1					= 0x00000080
 			if !@_cache[sv]?
 				@_cache[sv] = f()
 			return(@_cache[sv])
-		prepare:() ->
-			#@debug()
-		prepareMain:() ->
-	@Main = new class extends enchant.Scene
+
+	@main = new class extends enchant.Scene
 		constructor:() ->
 			super()
 			@backgroundColor = '#666666';
@@ -888,11 +886,11 @@ F_DEAL_B_WIL1					= 0x00000080
 			@time = for i in [0..N_GAME_SPEED * 2 - 1]
 				window.getTime()
 			@lastChild.addEventListener(enchant.Event.ENTER_FRAME,() ->
-				game.Main.time.push(window.getTime())
+				main.time.push(window.getTime())
 
-				@text = parseInt(N_GAME_SPEED * 2 / (game.Main.time[N_GAME_SPEED * 2] - game.Main.time[0]) * 1000)
+				@text = parseInt(N_GAME_SPEED * 2 / (main.time[N_GAME_SPEED * 2] - main.time[0]) * 1000)
 				
-				game.Main.time.shift()
+				main.time.shift()
 			)
 
 			@time = for i in [0..N_GAME_SPEED * 2 - 1]
@@ -906,7 +904,7 @@ F_DEAL_B_WIL1					= 0x00000080
 
 			@addEventListener(enchant.Event.ENTER,() ->
 				@ctrl = MODE[C_GAMEMODE].control
-				game.Main.MaskContainer.Mask.open()
+				main.MaskContainer.Mask.open()
 				@System.init2()
 			)
 
@@ -935,16 +933,16 @@ F_DEAL_B_WIL1					= 0x00000080
 					@turn = 1
 					@wave = 0
 
-					@i = game.Main.ctrl.index(0)
+					@i = main.ctrl.index(0)
 					if MODE[C_GAMEMODE].phase?
 						@i = new Flag(MODE[C_GAMEMODE].phase).geti(F_UNIT_FACTION_MASK) - 1
 					@i ?= 0
 					@phase = new Flag(1 << 16 + @i & F_UNIT_FACTION_MASK | F_UNIT_FACTION_BANK)
 
-					if game.Main.ctrl[@i] != 0
+					if main.ctrl[@i] != 0
 						@tl.exec(-> @phaseinit())
 					else
-						game.Main.MaskContainer.Mask.close()
+						main.MaskContainer.Mask.close()
 					#@tl.exec(-> ++@turn)
 				lock:() ->
 					++@_lock
@@ -968,13 +966,13 @@ F_DEAL_B_WIL1					= 0x00000080
 					).delay(time)
 				gameover:() ->
 					@tl.clear()
-					game.Main.MaskContainer.addChild(new enchant.Sprite(N_X_WND,N_Y_WND))
-					game.Main.MaskContainer.lastChild.opacity = 0
-					game.Main.MaskContainer.lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND)
-					game.Main.MaskContainer.lastChild.image.context.fillStyle = '#000000'
-					game.Main.MaskContainer.lastChild.image.context.fillStyle = '#000000'
-					game.Main.MaskContainer.lastChild.image.context.fillRect(0,0,N_X_WND,N_Y_WND)
-					game.Main.MaskContainer.lastChild.tl.delay(N_500MS).tween(
+					main.MaskContainer.addChild(new enchant.Sprite(N_X_WND,N_Y_WND))
+					main.MaskContainer.lastChild.opacity = 0
+					main.MaskContainer.lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND)
+					main.MaskContainer.lastChild.image.context.fillStyle = '#000000'
+					main.MaskContainer.lastChild.image.context.fillStyle = '#000000'
+					main.MaskContainer.lastChild.image.context.fillRect(0,0,N_X_WND,N_Y_WND)
+					main.MaskContainer.lastChild.tl.delay(N_500MS).tween(
 						opacity:0.333
 						time:N_1000MS
 						easing:enchant.Easing.QUINT_EASEOUT
@@ -986,27 +984,27 @@ F_DEAL_B_WIL1					= 0x00000080
 						@parentNode.removeChild(@)
 						game.replaceScene(game.Gameover)
 					)
-					(new game.Main.Label()).defeat("Player Phase",NULL,@i)
+					(new main.Label()).defeat("Player Phase",NULL,@i)
 				phaseend:() ->
-					game.Main.MaskContainer.Mask.open()
-					@i = ++@i % game.Main.ctrl.len()
+					main.MaskContainer.Mask.open()
+					@i = ++@i % main.ctrl.len()
 					@heap = {}
 
-					for unit in game.Main.UnitContainer.childNodes when unit.b.is(@phase)
+					for unit in main.UnitContainer.childNodes when unit.b.is(@phase)
 						unit.sync()
 
-					for unit in game.Main.UnitContainer.childNodes when unit.b.is(@phase)
+					for unit in main.UnitContainer.childNodes when unit.b.is(@phase)
 						unit.b.off(F_UNIT_STATE_END)
 						unit.spr.frame = unit.spr.frame & 0xFFFFFFFC
 
-					for unit in game.Main.UnitContainer.childNodes when unit.b.is(@phase) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO)
-						game.Main.UnitContainer.Damage.deal2(unit,unit,0.010,0.000,0)
-					for unit in game.Main.UnitContainer.childNodes when unit.b.is(@phase) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO) && unit.wil < 0.333
-						game.Main.UnitContainer.Damage.deal2(unit,unit,0.333 - unit.wil,0)
-					for unit in game.Main.UnitContainer.childNodes when unit.b.is(@phase) && game.Main.FieldContainer.getb(unit.crd).is(F_ZONE_ZOC_MAZE) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_HUMAN)
-						game.Main.UnitContainer.Damage.deal2(unit,unit,0.000,unit.wil * 0.050)
-					for unit in game.Main.UnitContainer.childNodes when unit.b.is(@phase) && game.Main.FieldContainer.getb(unit.crd).is(F_ZONE_ZOC_COUNTERCLOCKWISE) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_HUMAN)
-						game.Main.UnitContainer.Damage.deal2(unit,unit,0.000,unit.wil * 0.100)
+					for unit in main.UnitContainer.childNodes when unit.b.is(@phase) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO)
+						main.UnitContainer.Damage.deal2(unit,unit,0.010,0.000,0)
+					for unit in main.UnitContainer.childNodes when unit.b.is(@phase) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO) && unit.wil < 0.333
+						main.UnitContainer.Damage.deal2(unit,unit,0.333 - unit.wil,0)
+					for unit in main.UnitContainer.childNodes when unit.b.is(@phase) && main.FieldContainer.getb(unit.crd).is(F_ZONE_ZOC_MAZE) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_HUMAN)
+						main.UnitContainer.Damage.deal2(unit,unit,0.000,unit.wil * 0.050)
+					for unit in main.UnitContainer.childNodes when unit.b.is(@phase) && main.FieldContainer.getb(unit.crd).is(F_ZONE_ZOC_COUNTERCLOCKWISE) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_HUMAN)
+						main.UnitContainer.Damage.deal2(unit,unit,0.000,unit.wil * 0.100)
 
 					@phase.on(1 << 16 + @i & F_UNIT_FACTION_MASK | F_UNIT_FACTION_BANK,F_UNIT_FACTION_MASK)
 					if @phase.is(MODE[C_GAMEMODE].phase)
@@ -1017,45 +1015,45 @@ F_DEAL_B_WIL1					= 0x00000080
 					DEBUG("Phase: #{@phase.geti(F_UNIT_FACTION_MASK)}")
 					DEBUG("Wave: #{@wave}")
 
-					for unit in game.Main.UnitContainer.childNodes when unit.b.is(@phase)
+					for unit in main.UnitContainer.childNodes when unit.b.is(@phase)
 						if unit.mgk < 1 && unit.mg2 > 0
-							bar = (new game.Main.Bar(unit)).open().sleep(N_500MS)
+							bar = (new main.Bar(unit)).open().sleep(N_500MS)
 							mres = Math.min(unit.mg2,1 - unit.mgk)
 							wres = Math.min(1.000,unit.wil * (1 + mres))
 							unit.mgk += mres
 							unit.wil = wres
 							unit.mg2 -= mres
-							game.Main.score.energy += mres
+							main.score.energy += mres
 
 							bar.update(
 								mdmg:-mres
 								wdmg:-wres
 							).sleep(N_500MS).close()
 
-					switch game.Main.ctrl[@i]
+					switch main.ctrl[@i]
 						when 0
-							#@tl.exec(-> game.Main.FieldContainer.look(game.Main.UnitContainer.childNodes.grep((_) -> _.b.is(phase)).fv().crd))
-							game.Main.FieldContainer.look(game.Main.UnitContainer.childNodes.grep((_) => _.b.is(@phase)).fv().crd)
+							#@tl.exec(-> main.FieldContainer.look(main.UnitContainer.childNodes.grep((_) -> _.b.is(phase)).fv().crd))
+							main.FieldContainer.look(main.UnitContainer.childNodes.grep((_) => _.b.is(@phase)).fv().crd)
 							@lock()
-							(new game.Main.Label()).phase(NULL,NULL,@i)
+							(new main.Label()).phase(NULL,NULL,@i)
 							@tl.exec(->
-								game.Main.MaskContainer.Mask.close()
+								main.MaskContainer.Mask.close()
 							)
 							phase = @phase
 						when 1
 							b = new Flag()
-							for elem in game.Main.UnitContainer.childNodes
+							for elem in main.UnitContainer.childNodes
 								b.on(elem.b)
 	
 							if b.is(@phase,F_UNIT_FACTION_MASK)
 								@lock()
-								(new game.Main.Label()).phase(NULL,NULL,@i)
+								(new main.Label()).phase(NULL,NULL,@i)
 								@tl.exec(-> @role())
 							else
 								@phaseend()
 						when 2
 							@lock()
-							(new game.Main.Label()).phase(NULL,NULL,@i)
+							(new main.Label()).phase(NULL,NULL,@i)
 							@tl.exec(-> @role())
 						when 3
 							###
@@ -1064,15 +1062,15 @@ F_DEAL_B_WIL1					= 0x00000080
 							for _ in MODE[C_GAMEMODE].foo when !_.default && _.respawn && @turn % _.respawninterval == 0
 								if label++
 									@lock()
-									(new game.Main.Label()).phase("Wave #{@wave++}",NULL,8)
+									(new main.Label()).phase("Wave #{@wave++}",NULL,8)
 
 								for i in [1.._.count]
 									@tl.exec((b,xyr,target) ->
 										[x,y,around] = xyr.split(" ").map((_) -> parseInt(_))
-										(unit = game.Main.UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|b)).spawn(new Coordinates(x,y,F_VEC_SETAS_GRID_GRID),around)
+										(unit = main.UnitContainer.create().makechar(F_UNIT_CLASS_MADOKAMAGIKA|b)).spawn(new Coordinates(x,y,F_VEC_SETAS_GRID_GRID),around)
 										if target?
 											unit.target = target.name
-									,[_.faction,_.crd,game.Main.UnitContainer.find(id:_.target,name:_.target).fv()]).delay(N_200MS)
+									,[_.faction,_.crd,main.UnitContainer.find(id:_.target,name:_.target).fv()]).delay(N_200MS)
 									#,[_.faction,new Coordinates(_.crd,NULL,F_VEC_SETAS_GRID_GRID),_.around]).delay(N_200MS)
 							@tl.exec(-> @phaseend())
 							###
@@ -1132,7 +1130,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								stack:new Array()
 							@next()
 						when N_STEP_INIT2
-							if unit = game.Main.UnitContainer.childNodes[@heap.i++]
+							if unit = main.UnitContainer.childNodes[@heap.i++]
 								unit.calcrange2()
 							else
 								@next()
@@ -1143,7 +1141,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								ppl:0
 								pos:new Coordinates(0,0,F_VEC_SETAS_GRID_GRID)
 
-							for $ in game.Main.UnitContainer.childNodes
+							for $ in main.UnitContainer.childNodes
 								@heap.grp[$.b.geti(F_UNIT_FACTION_MASK)].pwr += Math.max(0,$.perf())
 								@heap.grp[$.b.geti(F_UNIT_FACTION_MASK)].pos.add($.crd)
 								@heap.grp[$.b.geti(F_UNIT_FACTION_MASK)].ppl += 1
@@ -1159,8 +1157,8 @@ F_DEAL_B_WIL1					= 0x00000080
 						when N_STEP_LIST_SQUAD
 							@heap.sqd ?= new Array()
 
-							#if unit = game.Main.UnitContainer.childNodes.grep((_) -> _.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_WITCH|F_UNIT_CLASS_MINION|F_UNIT_CLASS_KUMA))[@heap.i++]
-							if unit = game.Main.UnitContainer.childNodes[@heap.i++]
+							#if unit = main.UnitContainer.childNodes.grep((_) -> _.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_WITCH|F_UNIT_CLASS_MINION|F_UNIT_CLASS_KUMA))[@heap.i++]
+							if unit = main.UnitContainer.childNodes[@heap.i++]
 								if !(sqd = @heap.sqd.grep((_) -> _.unit.grep(unit).len()).fv())
 									sqd =
 										b:new Flag(unit.b.get(F_UNIT_FACTION_MASK,N_IMP_BANK))
@@ -1171,7 +1169,7 @@ F_DEAL_B_WIL1					= 0x00000080
 									@heap.sqd.push(sqd)
 									sqd.unit.push(unit)
 
-								for target in unit.calcrange2(F_CACHE).grep((_) -> _.b.is(F_ZONE_MARK_ATTACK|F_ZONE_MARK_THROUGH,F_ZONE_MARK_MASK)).map((_) -> game.Main.FieldContainer.getc(_)).grep((_) -> _.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_WITCH|F_UNIT_CLASS_MINION|F_UNIT_CLASS_KUMA))
+								for target in unit.calcrange2(F_CACHE).grep((_) -> _.b.is(F_ZONE_MARK_ATTACK|F_ZONE_MARK_THROUGH,F_ZONE_MARK_MASK)).map((_) -> main.FieldContainer.getc(_)).grep((_) -> _.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_WITCH|F_UNIT_CLASS_MINION|F_UNIT_CLASS_KUMA))
 									if !sqd.unit.grep(target).len()
 										if sqd2 = @heap.sqd.grep((_) -> _.unit.grep(target).len()).fv()
 											@heap.sqd = @heap.sqd.grep((_) -> _ != sqd2)
@@ -1198,7 +1196,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								@heap.risk = new Object()
 								@heap.supp = new Object()
 
-							if unit = game.Main.UnitContainer.childNodes[@heap.i++]
+							if unit = main.UnitContainer.childNodes[@heap.i++]
 								for crd in unit.calcrange2(F_CACHE)
 									if unit.b.is(phase) && crd.b.is(F_ZONE_MARK_MOVE|F_ZONE_MARK_THROUGH)
 										@heap.risk[crd.c2a()] ?= 0
@@ -1213,11 +1211,11 @@ F_DEAL_B_WIL1					= 0x00000080
 								if C_TEST
 									for crd,n of @heap.risk
 										xy = crd.split(".")
-										(new game.Main.Label()).info(new Coordinates(xy[0],xy[1],F_VEC_SETAS_GRID_GRID),n.toFixed(2))
+										(new main.Label()).info(new Coordinates(xy[0],xy[1],F_VEC_SETAS_GRID_GRID),n.toFixed(2))
 								@next()
 						when N_STEP_LIST_UNIT
-							@heap.unit = game.Main.UnitContainer.childNodes.grep((_) -> _.b.is(phase) && !_.b.is(F_UNIT_STATE_END))
-							@heap.unit2 = game.Main.UnitContainer.childNodes.grep((_) -> _.b.is(phase) && _.b.is(F_UNIT_STATE_END))
+							@heap.unit = main.UnitContainer.childNodes.grep((_) -> _.b.is(phase) && !_.b.is(F_UNIT_STATE_END))
+							@heap.unit2 = main.UnitContainer.childNodes.grep((_) -> _.b.is(phase) && _.b.is(F_UNIT_STATE_END))
 
 							#for _ in @heap.unit
 							#	console.log("[?] Unit #{_.name}")
@@ -1228,11 +1226,11 @@ F_DEAL_B_WIL1					= 0x00000080
 								@heap.node = new Object()
 
 							node = 1
-							for crd in game.Main.ZoneContainer.childNodes.map((_) -> _.crd)
+							for crd in main.ZoneContainer.childNodes.map((_) -> _.crd)
 								q = new Array()
 								q.push(crd)
 								while crd = q.shift()
-									if !@heap.node[crd.c2a()]? && game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE)
+									if !@heap.node[crd.c2a()]? && main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE)
 										@heap.node[crd.c2a()] = node
 
 										q = q.concat(crd.around(1))
@@ -1248,21 +1246,21 @@ F_DEAL_B_WIL1					= 0x00000080
 							if unit = @heap.unit[@heap.i++]
 								switch unit.b.get(F_UNIT_CLASS_MASK,N_IMP_BANK)
 									when F_UNIT_CLASS_MADOKAMAGIKA,F_UNIT_CLASS_ORIKOMAGIKA,F_UNIT_CLASS_KAZUMIMAGIKA,F_UNIT_CLASS_LYRICALNANOHA,F_UNIT_CLASS_TOUHOU
-										for target in unit.calcrange2(F_CACHE).map((_) -> game.Main.FieldContainer.getc(_)).grep()
+										for target in unit.calcrange2(F_CACHE).map((_) -> main.FieldContainer.getc(_)).grep()
 											if unit.isenemy(target)
 												@heap.cont.push(
 													unit:unit
 													target:target
 												)
 									when F_UNIT_CLASS_INCUBATOR
-										for target in unit.calcrange2(F_CACHE).map((_) -> game.Main.FieldContainer.getc(_)).grep()
+										for target in unit.calcrange2(F_CACHE).map((_) -> main.FieldContainer.getc(_)).grep()
 											if target.b.is(F_UNIT_CLASS_HUMAN) && (unit.isallies(target) || target.b.is(F_UNIT_FACTION_GREEN))
 												@heap.cont.push(
 													unit:unit
 													target:target
 												)
 									when F_UNIT_CLASS_WITCH,F_UNIT_CLASS_MINION,F_UNIT_CLASS_KUMA
-										for target in unit.calcrange2(F_CACHE).map((_) -> game.Main.FieldContainer.getc(_)).grep()
+										for target in unit.calcrange2(F_CACHE).map((_) -> main.FieldContainer.getc(_)).grep()
 											if !unit.isallies(target) && !target.b.is(F_UNIT_CLASS_INCUBATOR)
 												@heap.cont.push(
 													unit:unit
@@ -1279,7 +1277,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								switch unit.b.get(F_UNIT_CLASS_MASK,N_IMP_BANK)
 									when F_UNIT_CLASS_MADOKAMAGIKA,F_UNIT_CLASS_TOUHOU
 										for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
-											if target.crd.distance(crd) <= unit.range && (game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !game.Main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
+											if target.crd.distance(crd) <= unit.range && (main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
 												@heap.cand.push(
 													b:new Flag(F_ZONE_MARK_ATTACK)
 													unit:unit
@@ -1287,15 +1285,15 @@ F_DEAL_B_WIL1					= 0x00000080
 													crd:crd
 													pri:new Array()
 												)
-												@heap.cand.lv().pri.push(game.Main.UnitContainer.Damage.test(unit,target).prio)
-												if target.b.is(F_UNIT_CLASS_WITCH) && game.Main.UnitContainer.Damage.test(unit,target).iskill
+												@heap.cand.lv().pri.push(main.UnitContainer.Damage.test(unit,target).prio)
+												if target.b.is(F_UNIT_CLASS_WITCH) && main.UnitContainer.Damage.test(unit,target).iskill
 													@heap.cand.lv().pri.push((1.000 - unit.mgk) * 3.000)
 												@heap.cand.lv().pri.push(@heap.risk[crd.c2a()])
 												@heap.cand.lv().pri.push(@heap.grp[target.b.geti(F_UNIT_FACTION_MASK)].pwr / @heap.grp[unit.b.geti(F_UNIT_FACTION_MASK)].pwr)
 												@heap.cand.lv().pri.push(unit.mgk - 1.000)
 									when F_UNIT_CLASS_ORIKOMAGIKA,F_UNIT_CLASS_KAZUMIMAGIKA
 										for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
-											if target.crd.distance(crd) <= unit.range && (game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !game.Main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
+											if target.crd.distance(crd) <= unit.range && (main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
 												@heap.cand.push(
 													b:new Flag(F_ZONE_MARK_ATTACK)
 													unit:unit
@@ -1303,8 +1301,8 @@ F_DEAL_B_WIL1					= 0x00000080
 													crd:crd
 													pri:new Array()
 												)
-												@heap.cand.lv().pri.push(game.Main.UnitContainer.Damage.test(unit,target).prio)
-												if target.b.is(F_UNIT_CLASS_WITCH) && game.Main.UnitContainer.Damage.test(unit,target).iskill
+												@heap.cand.lv().pri.push(main.UnitContainer.Damage.test(unit,target).prio)
+												if target.b.is(F_UNIT_CLASS_WITCH) && main.UnitContainer.Damage.test(unit,target).iskill
 													@heap.cand.lv().pri.push((1.000 - unit.mgk) * 3.000)
 												@heap.cand.lv().pri.push(@heap.risk[crd.c2a()])
 												@heap.cand.lv().pri.push(@heap.grp[target.b.geti(F_UNIT_FACTION_MASK)].pwr / @heap.grp[unit.b.geti(F_UNIT_FACTION_MASK)].pwr)
@@ -1312,7 +1310,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												@heap.cand.lv().pri.push(0.250)
 									when F_UNIT_CLASS_LYRICALNANOHA,F_UNIT_CLASS_KUMA
 										for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
-											if target.crd.distance(crd) <= unit.range && (game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !game.Main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
+											if target.crd.distance(crd) <= unit.range && (main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
 												@heap.cand.push(
 													b:new Flag(F_ZONE_MARK_ATTACK)
 													unit:unit
@@ -1320,14 +1318,14 @@ F_DEAL_B_WIL1					= 0x00000080
 													crd:crd
 													pri:new Array()
 												)
-												@heap.cand.lv().pri.push(game.Main.UnitContainer.Damage.test(unit,target).prio)
+												@heap.cand.lv().pri.push(main.UnitContainer.Damage.test(unit,target).prio)
 												@heap.cand.lv().pri.push(@heap.risk[crd.c2a()])
 												@heap.cand.lv().pri.push(@heap.grp[target.b.geti(F_UNIT_FACTION_MASK)].pwr / @heap.grp[unit.b.geti(F_UNIT_FACTION_MASK)].pwr)
 												@heap.cand.lv().pri.push(unit.mgk - 1.000)
 												@heap.cand.lv().pri.push(0.500)
 									when F_UNIT_CLASS_INCUBATOR
 										for crd in unit.calcrange2(F_CACHE) when crd.b.is(F_ZONE_MARK_MOVE)
-											if target.crd.distance(crd) <= unit.range && (game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !game.Main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
+											if target.crd.distance(crd) <= unit.range && (main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !main.FieldContainer.getb(target.crd).is(F_ZONE_ZOC_MAZE))
 												@heap.cand.push(
 													b:new Flag(F_ZONE_MARK_CONTRACT)
 													unit:unit
@@ -1455,7 +1453,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							if unit = @heap.unit[@heap.i++]
 								switch unit.b.get(F_UNIT_CLASS_MASK,N_IMP_BANK)
 									when F_UNIT_CLASS_MADOKAMAGIKA,F_UNIT_CLASS_ORIKOMAGIKA,F_UNIT_CLASS_KAZUMIMAGIKA,F_UNIT_CLASS_LYRICALNANOHA,F_UNIT_CLASS_TOUHOU
-										for target in game.Main.UnitContainer.childNodes when !target.b.is(F_UNIT_CLASS_INCUBATOR)
+										for target in main.UnitContainer.childNodes when !target.b.is(F_UNIT_CLASS_INCUBATOR)
 											if (unit.isallies(target) || unit.isenemy(target)) && !@heap.sqd.grep((_) -> _.unit.grep(unit).len()).fv().unit.grep(target).len()
 												@heap.cont.push(
 													unit:unit
@@ -1463,7 +1461,7 @@ F_DEAL_B_WIL1					= 0x00000080
 													crd:target.crd
 												)
 									when F_UNIT_CLASS_INCUBATOR
-										for target in game.Main.UnitContainer.childNodes when target.b.is(F_UNIT_CLASS_HUMAN)
+										for target in main.UnitContainer.childNodes when target.b.is(F_UNIT_CLASS_HUMAN)
 											if unit.isallies(target) || target.b.is(F_UNIT_FACTION_GREEN)
 												@heap.cont.push(
 													unit:unit
@@ -1471,7 +1469,7 @@ F_DEAL_B_WIL1					= 0x00000080
 													crd:target.crd
 												)
 									when F_UNIT_CLASS_MINION
-										for target in game.Main.UnitContainer.childNodes when target.b.is(F_UNIT_CLASS_WITCH)
+										for target in main.UnitContainer.childNodes when target.b.is(F_UNIT_CLASS_WITCH)
 											if unit.isallies(target)
 												@heap.cont.push(
 													unit:unit
@@ -1535,7 +1533,7 @@ F_DEAL_B_WIL1					= 0x00000080
 												)
 												@heap.cand.lv().pri.push(-unit.crd.distance(end) * 1.000)
 												@heap.cand.lv().pri.push(unit.crd.distance(crd) * 1.000)
-												if !game.Main.FieldContainer.getb(unit.crd).is(F_ZONE_ZOC_MAZE)
+												if !main.FieldContainer.getb(unit.crd).is(F_ZONE_ZOC_MAZE)
 													@heap.cand.lv().pri.push(200.000)
 							else
 								@next()
@@ -1546,7 +1544,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							if unit = @heap.unit[@heap.i++]
 								switch unit.b.get(F_UNIT_CLASS_MASK,N_IMP_BANK)
 									when F_UNIT_CLASS_MADOKAMAGIKA,F_UNIT_CLASS_ORIKOMAGIKA,F_UNIT_CLASS_KAZUMIMAGIKA,F_UNIT_CLASS_LYRICALNANOHA,F_UNIT_CLASS_TOUHOU
-										for target in game.Main.UnitContainer.childNodes when target.serial == unit.target
+										for target in main.UnitContainer.childNodes when target.serial == unit.target
 											if !unit.isallies(target)
 												@heap.cont.push(
 													unit:unit
@@ -1554,7 +1552,7 @@ F_DEAL_B_WIL1					= 0x00000080
 													crd:target.crd
 												)
 									when F_UNIT_CLASS_WITCH
-										for target in game.Main.UnitContainer.childNodes
+										for target in main.UnitContainer.childNodes
 											if !unit.isallies(target) && !target.b.is(F_UNIT_CLASS_INCUBATOR)
 												@heap.cont.push(
 													unit:unit
@@ -1685,7 +1683,7 @@ F_DEAL_B_WIL1					= 0x00000080
 										percentage.push(100)
 
 									for i in [1..cnt]
-										n = game.Main.UnitContainer.find(serial:unit.template ? sn).grep((_) -> _.b.is(b,F_UNIT_FACTION_MASK)).len()
+										n = main.UnitContainer.find(serial:unit.template ? sn).grep((_) -> _.b.is(b,F_UNIT_FACTION_MASK)).len()
 										if (lim == 0 || (n + i) < lim) && (Math.xor128(100) < (percentage[n + i - 1] ? percentage[0]))
 											[x,y,radius,n] = (crds[i - 1] ? crds[0]).split(" ").map((_) -> if !isNaN(parseInt(_)) then parseInt(_) else NULL)
 	
@@ -1697,7 +1695,7 @@ F_DEAL_B_WIL1					= 0x00000080
 											if unit.option?.match(/safe/)
 												around = new Array()
 												for crd in crd.around(radius)
-													if !game.Main.FieldContainer.getc(crd)?
+													if !main.FieldContainer.getc(crd)?
 														around.push(
 															crd:crd
 															prio:@heap.risk[crd.c2a()]
@@ -1707,14 +1705,14 @@ F_DEAL_B_WIL1					= 0x00000080
 	
 											a = 1
 											if unit.option?.match(/unique/)
-												a &= !game.Main.UnitContainer.find(serial:unit.template ? sn).grep((_) -> _.b.is(b,F_UNIT_FACTION_MASK)).len()
+												a &= !main.UnitContainer.find(serial:unit.template ? sn).grep((_) -> _.b.is(b,F_UNIT_FACTION_MASK)).len()
 	
 											if a
 												@tl.exec((b,template,crd,radius,st,sn) ->
 													if template?
-														(unit = game.Main.UnitContainer.create().readchar(template,b)).spawn(crd,radius)
+														(unit = main.UnitContainer.create().readchar(template,b)).spawn(crd,radius)
 													else
-														(unit = game.Main.UnitContainer.create().makechar(b)).spawn(crd,radius)
+														(unit = main.UnitContainer.create().makechar(b)).spawn(crd,radius)
 														unit.serial = sn
 													if st.option?.match(/essential/)
 														unit.b.on(F_HEX_ESSENTIAL)
@@ -1751,7 +1749,7 @@ F_DEAL_B_WIL1					= 0x00000080
 						@self.move(@pos)
 					)
 					@tl.delay(N_500MS).exec(->
-						game.Main.ZoneContainer.clear(F_ZONE_MARK_MASK)
+						main.ZoneContainer.clear(F_ZONE_MARK_MASK)
 					)
 					@tl.delay(N_333MS)
 				attack:(unit,crd,target) ->
@@ -1769,9 +1767,9 @@ F_DEAL_B_WIL1					= 0x00000080
 							@self.move(@pos)
 						)
 						@tl.delay(N_500MS).exec(->
-							game.Main.ZoneContainer.clear(F_ZONE_MARK_MASK)
+							main.ZoneContainer.clear(F_ZONE_MARK_MASK)
 							@self.look()
-							game.Main.UnitContainer.Damage.deal(@self,@target)
+							main.UnitContainer.Damage.deal(@self,@target)
 						)
 						@tl.delay(N_333MS)
 					else
@@ -1791,7 +1789,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@self.move(@pos,N_500MS)
 						)
 						@tl.delay(N_500MS).exec(->
-							game.Main.ZoneContainer.clear(F_ZONE_MARK_MASK)
+							main.ZoneContainer.clear(F_ZONE_MARK_MASK)
 							@self.look()
 							@self.contract(@target)
 							console.log(@target.name)
@@ -1811,25 +1809,25 @@ F_DEAL_B_WIL1					= 0x00000080
 					@width = game.width
 					@height = game.height
 				MOUSE_DOWN:(crd) ->
-					game.Main.ZoneContainer.clear(F_ZONE_MARK_MASK)
-					game.Main.StatusContainer.close()
+					main.ZoneContainer.clear(F_ZONE_MARK_MASK)
+					main.StatusContainer.close()
 					if crd?
 						crd.cnv(F_VEC_SETAS_GRID_GRID)
 						console.log("? #{crd.c2a()}")
 				MOUSE_DRAG:(crd) ->
 					crd.b.on(F_VEC_SETAS_INPUT,F_VEC_MASK)
 					crd.dif().neg()
-					game.Main.FieldContainer.scroll(crd)
+					main.FieldContainer.scroll(crd)
 				MOUSE_DCLICK:(crd) ->
-					game.Main.DialogContainer.create(7,[
+					main.DialogContainer.create(7,[
 						{
 							text:"Phase End"
 							icon:"resources/icon/overhead.png"
 							exec:() ->
-								for unit in game.Main.UnitContainer.childNodes when unit.b.is(game.Main.System.phase)
+								for unit in main.UnitContainer.childNodes when unit.b.is(main.System.phase)
 									unit.b.on(F_UNIT_STATE_END)
-								game.Main.System.role()
-								#game.Main.System.phaseend()
+								main.System.role()
+								#main.System.phaseend()
 						}
 						{
 							text:"Cancel"
@@ -1843,28 +1841,28 @@ F_DEAL_B_WIL1					= 0x00000080
 							text:"Mask Switch"
 							icon:"resources/icon/pointing.png"
 							exec:() ->
-								if game.Main.MaskContainer.Mask.CTL_STATE == 1
-									game.Main.MaskContainer.Mask.open()
-								else if game.Main.MaskContainer.Mask.CTL_STATE == 4
-									game.Main.MaskContainer.Mask.close()
+								if main.MaskContainer.Mask.CTL_STATE == 1
+									main.MaskContainer.Mask.open()
+								else if main.MaskContainer.Mask.CTL_STATE == 4
+									main.MaskContainer.Mask.close()
 						}
 						{
 							text:"Defeat"
 							icon:"resources/icon/pirate-grave_1.png"
 							exec:() ->
-								game.Main.System.gameover()
+								main.System.gameover()
 						}
 						{
 							text:"AI Suspend"
 							icon:"resources/icon/hazard-sign.png"
 							exec:() ->
-								game.Main.System.lock()
+								main.System.lock()
 						}
 						{
 							text:"AI Resume"
 							icon:"resources/icon/sands-of-time.png"
 							exec:() ->
-								game.Main.System.unlock()
+								main.System.unlock()
 						}
 					]).open()
 			)
@@ -1887,13 +1885,13 @@ F_DEAL_B_WIL1					= 0x00000080
 							c:new Object()
 							z:new Object()
 
-						for e in game.Main.ZoneContainer.childNodes
+						for e in main.ZoneContainer.childNodes
 							if e.CTL_STATE & 6
 								@fd.b[e.crd.c2a()] ?= new Flag()
 								@fd.b[e.crd.c2a()].on(e.crd.b)
 								@fd.z[e.crd.c2a()] ?= new Array()
 								@fd.z[e.crd.c2a()].push(e)
-						for e in game.Main.UnitContainer.childNodes
+						for e in main.UnitContainer.childNodes
 							#if e.CTL_STATE & 6
 							if e.crd2?
 								@fd.b[e.crd2.c2a()] ?= new Flag()
@@ -1939,7 +1937,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					super()
 				create:(n = 1) ->
 					r = for i in [1..n]
-						@addChild(new game.Main.Zone())
+						@addChild(new main.Zone())
 						@lastChild
 					return(if n > 1 then r else r[0])
 				clear:(b,elem) ->
@@ -1960,7 +1958,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					@id = 0
 				create:(n = 1) ->
 					r = for i in [1..n]
-						@addChild(new game.Main.Unit(@id++))
+						@addChild(new main.Unit(@id++))
 						@lastChild
 					return(if n > 1 then r else r[0])
 				find:(param) ->
@@ -2074,10 +2072,10 @@ F_DEAL_B_WIL1					= 0x00000080
 							a.ref.killer = b.ref
 							b.ref.killer = a.ref
 
-							game.Main.System.lock()
-							game.Main.System.lock()
-							a.bar = (new game.Main.Bar(a.ref)).open().sleep(N_500MS)
-							b.bar = (new game.Main.Bar(b.ref)).open().sleep(N_500MS)
+							main.System.lock()
+							main.System.lock()
+							a.bar = (new main.Bar(a.ref)).open().sleep(N_500MS)
+							b.bar = (new main.Bar(b.ref)).open().sleep(N_500MS)
 
 						canab = () ->
 							r = 1
@@ -2085,7 +2083,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								r &= !(a.ref.crd.distance(b.ref.crd) > a.ref.range)
 							if !m.is(F_DEAL_TEST)
 								r &= !a.ref.b.is(F_HEX_GIALLO_NASTRO)
-								r &= !game.Main.FieldContainer.getb(a.ref.crd).is(F_ZONE_ZOC_GIALLO_NASTRO)
+								r &= !main.FieldContainer.getb(a.ref.crd).is(F_ZONE_ZOC_GIALLO_NASTRO)
 							return(r)
 
 						canba = () ->
@@ -2100,26 +2098,26 @@ F_DEAL_B_WIL1					= 0x00000080
 							r &= !(!a.ref.b.is(F_ABILITY_MARTIAL_ARTS) && b.ref.b.is(F_ABILITY_MARTIAL_ARTS))
 							if !m.is(F_DEAL_TEST)
 								r &= !b.ref.b.is(F_HEX_GIALLO_NASTRO)
-								r &= !game.Main.FieldContainer.getb(b.ref.crd).is(F_ZONE_ZOC_GIALLO_NASTRO)
+								r &= !main.FieldContainer.getb(b.ref.crd).is(F_ZONE_ZOC_GIALLO_NASTRO)
 							return(r)
 
 						after = () ->
 							if a.b.is(F_ABILITY_GIALLO_NASTRO)
 								b.bar?.exec(->
 									(crd = b.ref.crd.clone()).b.on(F_ZONE_ZOC_GIALLO_NASTRO)
-									game.Main.ZoneContainer.clear(F_ZONE_ZOC_GIALLO_NASTRO,a.ref)
-									game.Main.ZoneContainer.create(1).open(crd,a.ref)
+									main.ZoneContainer.clear(F_ZONE_ZOC_GIALLO_NASTRO,a.ref)
+									main.ZoneContainer.create(1).open(crd,a.ref)
 								)
-								game.Main.FieldContainer.fd.b[b.ref.crd.c2a()] ?= new Flag()
-								game.Main.FieldContainer.fd.b[b.ref.crd.c2a()].on(F_ZONE_ZOC_GIALLO_NASTRO)
+								main.FieldContainer.fd.b[b.ref.crd.c2a()] ?= new Flag()
+								main.FieldContainer.fd.b[b.ref.crd.c2a()].on(F_ZONE_ZOC_GIALLO_NASTRO)
 							if b.b.is(F_ABILITY_GIALLO_NASTRO)
 								a.bar?.exec(->
 									(crd = a.ref.crd.clone()).b.on(F_ZONE_ZOC_GIALLO_NASTRO)
-									game.Main.ZoneContainer.clear(F_ZONE_ZOC_GIALLO_NASTRO,b.ref)
-									game.Main.ZoneContainer.create(1).open(crd,b.ref)
+									main.ZoneContainer.clear(F_ZONE_ZOC_GIALLO_NASTRO,b.ref)
+									main.ZoneContainer.create(1).open(crd,b.ref)
 								)
-								game.Main.FieldContainer.fd.b[a.ref.crd.c2a()] ?= new Flag()
-								game.Main.FieldContainer.fd.b[a.ref.crd.c2a()].on(F_ZONE_ZOC_GIALLO_NASTRO)
+								main.FieldContainer.fd.b[a.ref.crd.c2a()] ?= new Flag()
+								main.FieldContainer.fd.b[a.ref.crd.c2a()].on(F_ZONE_ZOC_GIALLO_NASTRO)
 
 						if (canab() && b.ref.mgk == 0)
 							@calc(a,b,new Flag(F_UNIT_TURN_ATTACK))
@@ -2199,17 +2197,17 @@ F_DEAL_B_WIL1					= 0x00000080
 						).sleep(N_500MS).close()
 						return([a,b])
 					deal2:(a,b,mdmg = 0,wdmg = 0,bar) ->
-						game.Main.System.lock()
+						main.System.lock()
 						a.killer = b
 						b.killer = a
 
-						bar ?= (new game.Main.Bar(b)).open().sleep(N_500MS)
+						bar ?= (new main.Bar(b)).open().sleep(N_500MS)
 						b.mgk = Math.max(0,b.mgk - Math.max(0,mdmg))
 						b.wil = Math.max(0,b.wil - Math.max(0,wdmg))
 						if bar == 0
 							if b.mgk == 0
 								b.close()
-							game.Main.System.unlock()
+							main.System.unlock()
 						else if mdmg > 0
 							bar.update(
 								mdmg:mdmg
@@ -3168,7 +3166,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@height = N_Y_WND
 							@opacity = 0.000
 						MOUSE_DCLICK:() ->
-							game.Main.Input.MOUSE_DCLICK()
+							main.Input.MOUSE_DCLICK()
 					)
 					###
 					@addChild(@Mask = new class extends enchant.Sprite
@@ -3190,7 +3188,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@image.context.strokeText("Input blocked",N_X_WND,N_Y_WND - 12)
 
 						MOUSE_DCLICK:() ->
-							game.Main.Input.MOUSE_DCLICK()
+							main.Input.MOUSE_DCLICK()
 					)
 			)
 		UnitTemplate:{
@@ -3638,17 +3636,17 @@ F_DEAL_B_WIL1					= 0x00000080
 
 				@addChild(@spr = new enchant.Sprite(N_X_UNIT,N_Y_UNIT))
 			MOUSE_DOWN:(crd) ->
-				game.Main.FieldContainer.clearfd()
+				main.FieldContainer.clearfd()
 				crd.cnv(F_VEC_SETAS_GRID_GRID)
 
-				if (a = game.Main.UnitContainer.Damage.a)? && !a.isallies(@) && !a.b.is(F_UNIT_STATE_END) && a.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK) && game.Main.FieldContainer.getb(crd).is(F_ZONE_MARK_ATTACK)
-					game.Main.UnitContainer.Damage.setb(b = @)
+				if (a = main.UnitContainer.Damage.a)? && !a.isallies(@) && !a.b.is(F_UNIT_STATE_END) && a.b.is(main.System.phase,F_UNIT_FACTION_MASK) && main.FieldContainer.getb(crd).is(F_ZONE_MARK_ATTACK)
+					main.UnitContainer.Damage.setb(b = @)
 
 					a.crd2 ?= a.crd.clone()
 
 					if a.crd2.distance(b.crd) > a.range
 						crd = a.calcrange2()
-							.grep((_) -> game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !game.Main.FieldContainer.getb(_).is(F_ZONE_ZOC_MAZE))
+							.grep((_) -> main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE) ^ !main.FieldContainer.getb(_).is(F_ZONE_ZOC_MAZE))
 							.grep((_) -> _.b.is(F_ZONE_MARK_MOVE))
 							.grep((_) -> _.distance(b.crd) <= a.range)
 							.sort((a,b) -> a.distance(crd) - b.distance(crd))
@@ -3656,17 +3654,17 @@ F_DEAL_B_WIL1					= 0x00000080
 						if crd?
 							a.move_(crd)
 					else
-						game.Main.DialogContainer.create(2,[
+						main.DialogContainer.create(2,[
 							{
 								text:"Attack"
 								icon:a.icon.a || "resources/icon/crossed-swords.png"
 								rotation:270
 								exec:() ->
-									game.Main.ZoneContainer.clear(F_ZONE_MARK_MASK)
+									main.ZoneContainer.clear(F_ZONE_MARK_MASK)
 									a.b.on(F_UNIT_STATE_END)
 									a.sync()
 									b.sync()
-									game.Main.UnitContainer.Damage.deal()
+									main.UnitContainer.Damage.deal()
 									#a.spr.frame += 1
 							}
 							{
@@ -3677,13 +3675,13 @@ F_DEAL_B_WIL1					= 0x00000080
 								text:"Move End"
 								icon:"resources/icon/journey.png"
 								exec:() ->
-									game.Main.ZoneContainer.clear(F_ZONE_MARK_MASK)
+									main.ZoneContainer.clear(F_ZONE_MARK_MASK)
 									a.b.on(F_UNIT_STATE_END)
 									a.spr.frame += 1
 							}
 						]).open()
-				else if (a = game.Main.UnitContainer.Damage.a)? && !a.isenemy(@) && !a.b.is(F_UNIT_STATE_END) && a.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK) && game.Main.FieldContainer.getb(crd).is(F_ZONE_MARK_CONTRACT) && @b.is(F_UNIT_CLASS_HUMAN)
-					game.Main.UnitContainer.Damage.setb(b = @)
+				else if (a = main.UnitContainer.Damage.a)? && !a.isenemy(@) && !a.b.is(F_UNIT_STATE_END) && a.b.is(main.System.phase,F_UNIT_FACTION_MASK) && main.FieldContainer.getb(crd).is(F_ZONE_MARK_CONTRACT) && @b.is(F_UNIT_CLASS_HUMAN)
+					main.UnitContainer.Damage.setb(b = @)
 
 					a.crd2 ?= a.crd.clone()
 
@@ -3696,18 +3694,18 @@ F_DEAL_B_WIL1					= 0x00000080
 						if crd?
 							a.move_(crd)
 					else
-						game.Main.DialogContainer.create(2,[
+						main.DialogContainer.create(2,[
 							{
 								text:"Contract"
-								icon:game.Main.UnitContainer.Damage.a.icon.c || "resources/icon/tied-scroll.png"
+								icon:main.UnitContainer.Damage.a.icon.c || "resources/icon/tied-scroll.png"
 								rotation:270
 								exec:() ->
-									game.Main.ZoneContainer.clear(F_ZONE_MARK_MASK)
-									game.Main.UnitContainer.Damage.a.b.on(F_UNIT_STATE_END)
-									game.Main.UnitContainer.Damage.a.sync()
-									game.Main.UnitContainer.Damage.b.sync()
-									game.Main.UnitContainer.Damage.a.contract(game.Main.UnitContainer.Damage.b)
-									game.Main.UnitContainer.Damage.a.spr.frame += 1
+									main.ZoneContainer.clear(F_ZONE_MARK_MASK)
+									main.UnitContainer.Damage.a.b.on(F_UNIT_STATE_END)
+									main.UnitContainer.Damage.a.sync()
+									main.UnitContainer.Damage.b.sync()
+									main.UnitContainer.Damage.a.contract(main.UnitContainer.Damage.b)
+									main.UnitContainer.Damage.a.spr.frame += 1
 							}
 							{
 								text:"Cancel"
@@ -3717,52 +3715,52 @@ F_DEAL_B_WIL1					= 0x00000080
 								text:"Move End"
 								icon:"resources/icon/journey.png"
 								exec:() ->
-									game.Main.ZoneContainer.clear(F_ZONE_MARK_MASK)
-									game.Main.UnitContainer.Damage.a.b.on(F_UNIT_STATE_END)
-									game.Main.UnitContainer.Damage.a.spr.frame += 1
+									main.ZoneContainer.clear(F_ZONE_MARK_MASK)
+									main.UnitContainer.Damage.a.b.on(F_UNIT_STATE_END)
+									main.UnitContainer.Damage.a.spr.frame += 1
 							}
 						]).open()
 				else
 					if !@b.is(F_UNIT_STATE_END)
 						@openrange()
-					game.Main.UnitContainer.Damage.seta(@)
-					game.Main.FieldContainer.clearfd()
-					game.Main.StatusContainer.open(@)
+					main.UnitContainer.Damage.seta(@)
+					main.FieldContainer.clearfd()
+					main.StatusContainer.open(@)
 			#MOUSE_CLICK:(crd) ->
 			MOUSE_DCLICK:(crd) ->
-				if @b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)
+				if @b.is(main.System.phase,F_UNIT_FACTION_MASK)
 					@look()
 			#MOUSE_DCLICK:(crd) ->
-			#	game.Main.StatusContainer.MOUSE_DOWN()
+			#	main.StatusContainer.MOUSE_DOWN()
 			MOUSE_DRAG:(crd) ->
 				# Moved MOUSE_DOWN(), Reason power save
-				#game.Main.FieldContainer.clearfd()
+				#main.FieldContainer.clearfd()
 				crd.cnv(F_VEC_SETAS_GRID_GRID)
 
-				if @b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)
-					if game.Main.FieldContainer.getb(crd).is(F_ZONE_MARK_MOVE)
+				if @b.is(main.System.phase,F_UNIT_FACTION_MASK)
+					if main.FieldContainer.getb(crd).is(F_ZONE_MARK_MOVE)
 						@move_(crd)
-				#if game.Main.DialogContainer.Circle3.used()
-				#	game.Main.DialogContainer.Circle3.Input.MOUSE_DRAG(crd.pull())
+				#if main.DialogContainer.Circle3.used()
+				#	main.DialogContainer.Circle3.Input.MOUSE_DRAG(crd.pull())
 				#else if @b.is(F_UNIT_FACTION_BLUE)
-				#	if game.Main.FieldContainer.getb(crd).is(F_ZONE_MARK_MOVE)
+				#	if main.FieldContainer.getb(crd).is(F_ZONE_MARK_MOVE)
 				#		#crd.setas(@,NULL,333)
 				#		console.log("move")
 				#		@move(crd)
-				#	else if game.Main.FieldContainer.getb(crd).is(F_ZONE_MARK_ATTACK) && game.Main.FieldContainer.getb(crd).is(F_UNIT_FACTION_BLUE)
+				#	else if main.FieldContainer.getb(crd).is(F_ZONE_MARK_ATTACK) && main.FieldContainer.getb(crd).is(F_UNIT_FACTION_BLUE)
 				#		NOP
-				#	else if game.Main.FieldContainer.getb(crd).is(F_ZONE_MARK_ATTACK) && game.Main.FieldContainer.getb(crd).is(F_UNIT_FACTION_MASK) && game.Main.UnitContainer.black.b.is(F_UNIT_FACTION_BLUE)
-				#		game.Main.UnitContainer.Damage.setb(game.Main.FieldContainer.getc(crd))
-				#		game.Main.DialogContainer.Circle3.open(ST_DIALOG_ATTACK)
+				#	else if main.FieldContainer.getb(crd).is(F_ZONE_MARK_ATTACK) && main.FieldContainer.getb(crd).is(F_UNIT_FACTION_MASK) && main.UnitContainer.black.b.is(F_UNIT_FACTION_BLUE)
+				#		main.UnitContainer.Damage.setb(main.FieldContainer.getc(crd))
+				#		main.DialogContainer.Circle3.open(ST_DIALOG_ATTACK)
 				#@openroute(crd)
 			MOUSE_DROP:(crd) ->
 				crd.cnv(F_VEC_SETAS_GRID_GRID)
 
-				#if game.Main.DialogContainer.Circle3.used()
-				#	game.Main.DialogContainer.Circle3.Input.MOUSE_UP(crd.pull())
+				#if main.DialogContainer.Circle3.used()
+				#	main.DialogContainer.Circle3.Input.MOUSE_UP(crd.pull())
 			readchar:(sz,b) ->
-				if game.Main.UnitTemplate[sz]?
-					game.Main.UnitTemplate[sz].apply(@,[b])
+				if main.UnitTemplate[sz]?
+					main.UnitTemplate[sz].apply(@,[b])
 					@serial = sz
 
 				@b.on(b,F_UNIT_FACTION_MASK)
@@ -3815,11 +3813,11 @@ F_DEAL_B_WIL1					= 0x00000080
 
 				return(@)
 			look:(crd) ->
-				game.Main.FieldContainer.look(@crd)
+				main.FieldContainer.look(@crd)
 			spawn:(crd = @crd,bounds) ->
 				if bounds?
-					game.Main.FieldContainer.clearfd()
-					around = crd.clone().around(bounds,0).grep((_) -> !game.Main.FieldContainer.getc(_)?)
+					main.FieldContainer.clearfd()
+					around = crd.clone().around(bounds,0).grep((_) -> !main.FieldContainer.getc(_)?)
 					crd = around[Math.xor128(around.len())]
 
 				#@b.off(F_UNIT_STATE_END)
@@ -3833,11 +3831,11 @@ F_DEAL_B_WIL1					= 0x00000080
 					@spr.frame = @b.geti(F_UNIT_FACTION_MASK) * 12 + 4
 					@spr.scaleY = -1
 					if @b.is(F_ABILITY_WALPURGISNACHT)
-						for unit in crd.around(@range).map((_) -> game.Main.FieldContainer.getc(_)).grep() when !@isallies(unit) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_HUMAN)
-							game.Main.UnitContainer.Damage.deal2(@,unit,0,unit.wil * 0.333)
+						for unit in crd.around(@range).map((_) -> main.FieldContainer.getc(_)).grep() when !@isallies(unit) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_HUMAN)
+							main.UnitContainer.Damage.deal2(@,unit,0,unit.wil * 0.333)
 					else
-						for unit in crd.around(@range).map((_) -> game.Main.FieldContainer.getc(_)).grep() when !@isallies(unit) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_HUMAN)
-							game.Main.UnitContainer.Damage.deal2(@,unit,0,unit.wil * 0.100)
+						for unit in crd.around(@range).map((_) -> main.FieldContainer.getc(_)).grep() when !@isallies(unit) && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO|F_UNIT_CLASS_HUMAN)
+							main.UnitContainer.Damage.deal2(@,unit,0,unit.wil * 0.100)
 				else if @b.is(F_UNIT_CLASS_MINION)
 					@spr.frame = @b.geti(F_UNIT_FACTION_MASK) * 12 + 4
 					@spr.scaleY = 1
@@ -3850,13 +3848,13 @@ F_DEAL_B_WIL1					= 0x00000080
 					@spr.scaleY = 1
 				@move(crd,0)
 				if (new Coordinates(N_X_WND / 2,N_Y_WND / 2,F_VEC_SET_INPUT)).cnv(F_VEC_SETAS_GRID_GRID).distance(@crd) > 4
-					game.Main.FieldContainer.look(@crd)
+					main.FieldContainer.look(@crd)
 				@open()
 				#unit = @
-				#game.Main.UnitContainer.tl.exec(->
+				#main.UnitContainer.tl.exec(->
 				#	crd = new Coordinates(N_X_WND / 2,N_Y_WND / 2,F_VEC_SET_INPUT).cnv(F_VEC_SETAS_GRID_GRID)
 				#	if crd.distance(unit.crd) > 4
-				#		game.Main.FieldContainer.look(unit.crd)
+				#		main.FieldContainer.look(unit.crd)
 				#	unit.open()
 				#).delay(N_200MS)
 			contract:(unit) ->
@@ -3910,10 +3908,10 @@ F_DEAL_B_WIL1					= 0x00000080
 					@b.on(b,F_UNIT_FACTION_MASK)
 
 					if @b.is(F_ABILITY_THE_LAST_DAY_DAWNS)
-						for unit in game.Main.UnitContainer.grep(F_UNIT_CLASS_WITCH)
-							game.Main.UnitContainer.Damage.deal2(@,unit,2.000,2.000)
-						for unit in game.Main.UnitContainer.grep(F_UNIT_CLASS_MINION)
-							game.Main.UnitContainer.Damage.deal2(@,unit,2.000,2.000)
+						for unit in main.UnitContainer.grep(F_UNIT_CLASS_WITCH)
+							main.UnitContainer.Damage.deal2(@,unit,2.000,2.000)
+						for unit in main.UnitContainer.grep(F_UNIT_CLASS_MINION)
+							main.UnitContainer.Damage.deal2(@,unit,2.000,2.000)
 
 				if @b.is(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_CLASS_ORIKOMAGIKA|F_UNIT_CLASS_KAZUMIMAGIKA) && b.is(F_UNIT_CLASS_WITCH)
 					@mgk = 1 + @wil
@@ -3930,13 +3928,13 @@ F_DEAL_B_WIL1					= 0x00000080
 					@b.off(F_ABILITY_MASK_2)
 
 					if @b.is(F_ABILITY_THE_WORLD_OF_SALVATION)
-						for unit in game.Main.UnitContainer when unit != @ && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO)
+						for unit in main.UnitContainer when unit != @ && unit.b.is(F_UNIT_CLASS_MAHOUSHOJO)
 							if unit.wil < 0.500
-								game.Main.UnitContainer.Damage.deal2(@,unit,2.000,2.000)
+								main.UnitContainer.Damage.deal2(@,unit,2.000,2.000)
 							else
-								game.Main.UnitContainer.Damage.deal2(@,unit,unit.mgk / 2,unit.wil / 2)
-						for unit in game.Main.UnitContainer.grep(F_UNIT_CLASS_HUMAN)
-							game.Main.UnitContainer.Damage.deal2(@,unit,2.000,2.000)
+								main.UnitContainer.Damage.deal2(@,unit,unit.mgk / 2,unit.wil / 2)
+						for unit in main.UnitContainer.grep(F_UNIT_CLASS_HUMAN)
+							main.UnitContainer.Damage.deal2(@,unit,2.000,2.000)
 
 				if b.is(F_UNIT_CLASS_MINION)
 					@mgk = 1
@@ -3972,18 +3970,18 @@ F_DEAL_B_WIL1					= 0x00000080
 			faction:() ->
 				return(@b.geti(F_UNIT_FACTION_MASK))
 			openrange:() ->
-				game.Main.Input.MOUSE_DOWN()
+				main.Input.MOUSE_DOWN()
 				for crd in @calcrange2()
 					if crd?
 						if crd.b.is(F_ZONE_MARK_MASK)
-							game.Main.ZoneContainer.create(1).open(crd,@)
+							main.ZoneContainer.create(1).open(crd,@)
 			openroute:(crd) ->
-				game.Main.ZoneContainer.clear(F_ZONE_MARK_MASK)
-				#game.Main.Input.MOUSE_DOWN()
+				main.ZoneContainer.clear(F_ZONE_MARK_MASK)
+				#main.Input.MOUSE_DOWN()
 				for _,crd of @calcroute(crd)
 					if crd?
 						if crd.b.is(F_ZONE_MARK_MASK)
-							game.Main.ZoneContainer.create(1).open(crd,@)
+							main.ZoneContainer.create(1).open(crd,@)
 			openzoc:() ->
 				@closezoc()
 				for crd in @crd.around(@range,0)
@@ -3991,14 +3989,14 @@ F_DEAL_B_WIL1					= 0x00000080
 						crd.b.on(F_ZONE_ZOC_COUNTERCLOCKWISE)
 					else
 						crd.b.on(F_ZONE_ZOC_MAZE)
-					game.Main.ZoneContainer.create(1).open(crd,@)
+					main.ZoneContainer.create(1).open(crd,@)
 			closezoc:() ->
-				game.Main.ZoneContainer.clear(F_ZONE_ZOC_MASK2,@)
+				main.ZoneContainer.clear(F_ZONE_ZOC_MASK2,@)
 			calcrange2:(b) ->
 				if (new Flag(b)).is(F_CACHE) && @_calcrange2?
 					return(@_calcrange2)
 
-				game.Main.FieldContainer.clearfd()
+				main.FieldContainer.clearfd()
 
 				r = {}
 				q = [@crd.clone()]
@@ -4019,7 +4017,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					#		process = []
 					#	if !process[crd.c2a()]?
 					#		process[crd.c2a()] = new enchant.Label()
-					#		game.Main.FieldContainer.addChild(process[crd.c2a()])
+					#		main.FieldContainer.addChild(process[crd.c2a()])
 					#		process[crd.c2a()].x = crd.x * N_X_GRID
 					#		process[crd.c2a()].y = crd.y * N_Y_GRID + crd.x * 16
 					#		process[crd.c2a()].color = '#FFFFFF'
@@ -4038,28 +4036,28 @@ F_DEAL_B_WIL1					= 0x00000080
 						crd.b.on(F_ZONE_MARK_CONTRACT)
 					if n > 0 && @b.is(F_HEX_GIALLO_NASTRO)
 						crd.b.off(F_ZONE_MARK_MASK)
-					if n > 0 && game.Main.FieldContainer.getb(@crd).is(F_ZONE_ZOC_GIALLO_NASTRO)
+					if n > 0 && main.FieldContainer.getb(@crd).is(F_ZONE_ZOC_GIALLO_NASTRO)
 						crd.b.off(F_ZONE_MARK_MASK)
 
 					if @b.is(F_UNIT_CLASS_INCUBATOR)
 						NOP
-					else if game.Main.FieldContainer.getb(@crd).is(F_ZONE_ZOC_MAZE)
-						if game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE)
+					else if main.FieldContainer.getb(@crd).is(F_ZONE_ZOC_MAZE)
+						if main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE)
 							NOP
 						else
 							crd.b.off(F_ZONE_MARK_MASK)
 							n += 100
 					else
-						if game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE)
+						if main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE)
 							crd.b.off(F_ZONE_MARK_ATTACK)
 							n += 200
 						else
 							NOP
 
-					#if game.Main.FieldContainer.getb(crd).is(@b.get(F_UNIT_FACTION_MASK),@b.get(F_UNIT_FACTION_MASK))
-					if @ == game.Main.FieldContainer.getc(crd) || (@crd2? && crd.same(@crd2))
+					#if main.FieldContainer.getb(crd).is(@b.get(F_UNIT_FACTION_MASK),@b.get(F_UNIT_FACTION_MASK))
+					if @ == main.FieldContainer.getc(crd) || (@crd2? && crd.same(@crd2))
 						NOP
-					else if game.Main.FieldContainer.getb(crd).is(@b.get(F_UNIT_FACTION_MASK,1))
+					else if main.FieldContainer.getb(crd).is(@b.get(F_UNIT_FACTION_MASK,1))
 						if crd.b.is(F_ZONE_MARK_MOVE)
 							crd.b.off(F_ZONE_MARK_MOVE)
 							crd.b.on(F_ZONE_MARK_THROUGH)
@@ -4067,7 +4065,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							crd.b.off(F_ZONE_MARK_MOVE)
 							crd.b.on(F_ZONE_MARK_THROUGH)
 							n += 1
-					else if game.Main.FieldContainer.getb(crd).is(F_UNIT_FACTION_MASK)
+					else if main.FieldContainer.getb(crd).is(F_UNIT_FACTION_MASK)
 						crd.b.off(F_ZONE_MARK_MOVE)
 						n += 400
 
@@ -4085,7 +4083,7 @@ F_DEAL_B_WIL1					= 0x00000080
 				@_calcrange2 = r
 				return(@_calcrange2)
 			calcroute:(dst) ->
-				game.Main.FieldContainer.clearfd()
+				main.FieldContainer.clearfd()
 
 				r = {}
 				q = [@crd.clone()]
@@ -4106,7 +4104,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					#		process = []
 					#	if !process[crd.c2a()]?
 					#		process[crd.c2a()] = new enchant.Label()
-					#		game.Main.FieldContainer.addChild(process[crd.c2a()])
+					#		main.FieldContainer.addChild(process[crd.c2a()])
 					#		process[crd.c2a()].x = crd.x * N_X_GRID
 					#		process[crd.c2a()].y = crd.y * N_Y_GRID + crd.x * 16
 					#		process[crd.c2a()].color = '#FFFFFF'
@@ -4123,36 +4121,36 @@ F_DEAL_B_WIL1					= 0x00000080
 						crd.b.on(F_ZONE_MARK_ATTACK)
 					if n > 0 && @b.is(F_HEX_GIALLO_NASTRO)
 						crd.b.off(F_ZONE_MARK_MASK)
-					if n > 0 && game.Main.FieldContainer.getb(@crd).is(F_ZONE_ZOC_GIALLO_NASTRO)
+					if n > 0 && main.FieldContainer.getb(@crd).is(F_ZONE_ZOC_GIALLO_NASTRO)
 						crd.b.off(F_ZONE_MARK_MASK)
 
 					if @b.is(F_UNIT_CLASS_INCUBATOR)
 						NOP
-					else if game.Main.FieldContainer.getb(@crd).is(F_ZONE_ZOC_MAZE)
-						if game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE)
+					else if main.FieldContainer.getb(@crd).is(F_ZONE_ZOC_MAZE)
+						if main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE)
 							NOP
 						else
 							crd.b.off(F_ZONE_MARK_MASK)
 							n += 100
 					else
-						if game.Main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE)
+						if main.FieldContainer.getb(crd).is(F_ZONE_ZOC_MAZE)
 							crd.b.off(F_ZONE_MARK_ATTACK)
 							n += 100
-							if game.Main.FieldContainer.getb(crd).is(F_UNIT_FACTION_MASK)
+							if main.FieldContainer.getb(crd).is(F_UNIT_FACTION_MASK)
 								crd.b.off(F_ZONE_MARK_MOVE)
 						else
 							NOP
 
-					if game.Main.FieldContainer.getb(crd).is(@b.get(F_UNIT_FACTION_MASK,1))
-						if @name == game.Main.FieldContainer.getc(crd).name
+					if main.FieldContainer.getb(crd).is(@b.get(F_UNIT_FACTION_MASK,1))
+						if @name == main.FieldContainer.getc(crd).name
 							NOP
 						else if crd.b.is(F_ZONE_MARK_MOVE)
 							crd.b.on(F_ZONE_MARK_THROUGH,F_ZONE_MARK_MASK)
 						if n == @speed
 							crd.b.on(F_ZONE_MARK_THROUGH,F_ZONE_MARK_MASK)
 							n += 1
-					else if n != 0 && game.Main.FieldContainer.getb(crd).is(F_UNIT_FACTION_MASK)
-					#if n != 0 && game.Main.FieldContainer.getb(crd).is(F_UNIT_FACTION_MASK)
+					else if n != 0 && main.FieldContainer.getb(crd).is(F_UNIT_FACTION_MASK)
+					#if n != 0 && main.FieldContainer.getb(crd).is(F_UNIT_FACTION_MASK)
 						crd.b.off(F_ZONE_MARK_MOVE)
 						n += 400
 
@@ -4177,7 +4175,7 @@ F_DEAL_B_WIL1					= 0x00000080
 				if @b.is(F_UNIT_CLASS_INCUBATOR)
 					return(0)
 				else
-					return(game.Main.UnitContainer.Damage.test(@,C_DEAL_DOLL,b).perf)
+					return(main.UnitContainer.Damage.test(@,C_DEAL_DOLL,b).perf)
 			chimage:() ->
 				#console.log('resources/' + @name.replace(/\ /g,'_') + '.gif')
 				if game.assets['resources/' + @name.replace(/\ /g,'_') + '.gif']?
@@ -4204,20 +4202,20 @@ F_DEAL_B_WIL1					= 0x00000080
 							name:@name
 							killer:@killer.name
 						)
-						game.Main.score.mk++
+						main.score.mk++
 					else if @b.is(F_UNIT_CLASS_WITCH|F_UNIT_CLASS_MINION)
-						game.Main.score.wk++
+						main.score.wk++
 					else if @b.is(F_UNIT_CLASS_HUMAN)
 						game.Gameover.deathtoll.push(
 							name:@name
 							killer:@killer.name
 						)
-						game.Main.score.hk++
+						main.score.hk++
 
 					@closezoc()
 
 					if @b.is(F_UNIT_CLASS_MADOKAMAGIKA|F_UNIT_CLASS_ORIKOMAGIKA|F_UNIT_CLASS_KAZUMIMAGIKA)
-						game.Main.score.energy += @perf(F_DEAL_A_MGK1|F_DEAL_A_WIL1)
+						main.score.energy += @perf(F_DEAL_A_MGK1|F_DEAL_A_WIL1)
 						@morph(F_UNIT_CLASS_WITCH)
 						@spawn()
 					else if @b.is(F_UNIT_CLASS_HUMAN) && @killer.b.is(F_UNIT_CLASS_WITCH)
@@ -4232,14 +4230,14 @@ F_DEAL_B_WIL1					= 0x00000080
 						@parentNode.removeChild(@)
 
 					if @b.is(F_HEX_ESSENTIAL)
-						game.Main.System.gameover()
+						main.System.gameover()
 
-					if !(MODE[C_GAMEMODE].option?.match("nodefeat")) && !game.Main.UnitContainer.childNodes.grep((_) -> _.b.is(F_UNIT_FACTION_BLUE) && !_.b.is(F_UNIT_CLASS_INCUBATOR)).len()
-						game.Main.System.gameover()
+					if !(MODE[C_GAMEMODE].option?.match("nodefeat")) && !main.UnitContainer.childNodes.grep((_) -> _.b.is(F_UNIT_FACTION_BLUE) && !_.b.is(F_UNIT_CLASS_INCUBATOR)).len()
+						main.System.gameover()
 				)
-				for zone in game.Main.ZoneContainer.childNodes when zone.crd.same(@crd) && zone.crd.b.is(F_ZONE_ZOC_GIALLO_NASTRO)
+				for zone in main.ZoneContainer.childNodes when zone.crd.same(@crd) && zone.crd.b.is(F_ZONE_ZOC_GIALLO_NASTRO)
 					zone.close()
-				game.Main.FieldContainer.clearfd()
+				main.FieldContainer.clearfd()
 			isallies:(unit) ->
 				return(unit.b.is(@b,F_UNIT_FACTION_MASK))
 			isenemy:(unit) ->
@@ -4289,9 +4287,9 @@ F_DEAL_B_WIL1					= 0x00000080
 						return(o)
 					)
 			MOUSE_DOWN:(crd) ->
-				if @crd.b.is(F_ZONE_MARK_MOVE) && @bind.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)
+				if @crd.b.is(F_ZONE_MARK_MOVE) && @bind.b.is(main.System.phase,F_UNIT_FACTION_MASK)
 					@bind.move_(@crd)
-				else if @crd.b.is(F_ZONE_MARK_ATTACK) && @bind.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)
+				else if @crd.b.is(F_ZONE_MARK_ATTACK) && @bind.b.is(main.System.phase,F_UNIT_FACTION_MASK)
 					unit = @bind
 					unit.crd2 ?= unit.crd.clone()
 					crd = @crd
@@ -4302,20 +4300,20 @@ F_DEAL_B_WIL1					= 0x00000080
 						.fv()
 					@bind.move_(crd)
 				else
-					game.Main.Input.MOUSE_DOWN(crd)
+					main.Input.MOUSE_DOWN(crd)
 			open:(crd,@bind) ->
-				if crd.b.is(F_ZONE_MARK_MOVE) && @bind.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK) && crd.same(@bind.crd)
+				if crd.b.is(F_ZONE_MARK_MOVE) && @bind.b.is(main.System.phase,F_UNIT_FACTION_MASK) && crd.same(@bind.crd)
 					@backgroundColor = '#007FFF'
 					@tl.loop2().fadeTo(0.333,N_1000MS).fadeTo(0.500,N_1000MS)
-				else if crd.b.is(F_ZONE_MARK_MOVE) && @bind.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)
+				else if crd.b.is(F_ZONE_MARK_MOVE) && @bind.b.is(main.System.phase,F_UNIT_FACTION_MASK)
 					@backgroundColor = '#003FFF'
 					@tl.loop2().fadeTo(0.333,N_1000MS).fadeTo(0.500,N_1000MS)
-				else if crd.b.is(F_ZONE_MARK_THROUGH) && @bind.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)
+				else if crd.b.is(F_ZONE_MARK_THROUGH) && @bind.b.is(main.System.phase,F_UNIT_FACTION_MASK)
 					@backgroundColor = '#003FFF'
 					@tl.loop2().fadeTo(0.333,N_1000MS).fadeTo(0.500,N_1000MS)
-				else if crd.b.is(F_ZONE_MARK_ATTACK) && @bind.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)
+				else if crd.b.is(F_ZONE_MARK_ATTACK) && @bind.b.is(main.System.phase,F_UNIT_FACTION_MASK)
 					@backgroundColor = '#FF7F00'
-				else if crd.b.is(F_ZONE_MARK_CONTRACT) && @bind.b.is(game.Main.System.phase,F_UNIT_FACTION_MASK)
+				else if crd.b.is(F_ZONE_MARK_CONTRACT) && @bind.b.is(main.System.phase,F_UNIT_FACTION_MASK)
 					@backgroundColor = '#FFBF00'
 					@tl.loop2().fadeTo(0.333,N_1000MS).fadeTo(0.500,N_1000MS)
 				else if crd.b.is(F_ZONE_MARK_MOVE|F_ZONE_MARK_THROUGH|F_ZONE_MARK_ATTACK|F_ZONE_MARK_CONTRACT)
@@ -4402,10 +4400,10 @@ F_DEAL_B_WIL1					= 0x00000080
 
 				@opacity = 0.000
 
-				game.Main.Pool2.addChild(@)
+				main.Pool2.addChild(@)
 
 				@addEventListener(enchant.Event.REMOVED,(a) ->
-					game.Main.System.unlock()
+					main.System.unlock()
 				)
 
 				@tl.delay(N_500MS).tween(
@@ -4445,10 +4443,10 @@ F_DEAL_B_WIL1					= 0x00000080
 				@image.context.globalAlpha = 1
 				@image.context.strokeText("DEFEAT",N_X_WND / 2,N_Y_WND / 2)
 				@opacity = 0.000
-				game.Main.Pool2.addChild(@)
+				main.Pool2.addChild(@)
 
 				@addEventListener(enchant.Event.REMOVED,(a) ->
-					game.Main.System.unlock()
+					main.System.unlock()
 				)
 
 				@tl.delay(N_500MS).tween(
@@ -4484,7 +4482,7 @@ F_DEAL_B_WIL1					= 0x00000080
 				@image.context.lineWidth = 1
 				@image.context.strokeText(m,@width / 2,@height / 2)
 
-				game.Main.Pool.addChild(@)
+				main.Pool.addChild(@)
 
 				@tl.delay(N_3000MS).tween(
 					opacity:0
@@ -4509,7 +4507,7 @@ F_DEAL_B_WIL1					= 0x00000080
 				@image.context.strokeText(m,@width / 2,@height / 2)
 				@opacity = 0.000
 
-				game.Main.Pool.addChild(@)
+				main.Pool.addChild(@)
 
 				x = (Math.xor128() % 100 / 100 - 0.500) * N_X_GRID / 2
 
@@ -4583,10 +4581,10 @@ F_DEAL_B_WIL1					= 0x00000080
 				@childNodes[2].width = (N_X_GRID - @childNodes[2].x * 2) * Math.lim(@bind.mgk,0,1)
 
 				@bind.addChild(@)
-				#game.Main.Pool.addChild(@)
+				#main.Pool.addChild(@)
 
 				@addEventListener(enchant.Event.REMOVED,(a) ->
-					game.Main.System.unlock()
+					main.System.unlock()
 				)
 
 				return(@)
@@ -4609,9 +4607,9 @@ F_DEAL_B_WIL1					= 0x00000080
 							@bind.spr.frame = [@bind.spr.frame + 3,@bind.spr.frame + 3,@bind.spr.frame,@bind.spr.frame,@bind.spr.frame + 3,@bind.spr.frame + 3,@bind.spr.frame,NULL]
 						
 					if wdmg > 0
-						(new game.Main.Label()).damage(@bind,wdmg.toFixed(2),"#DF2000",N_200MS)
+						(new main.Label()).damage(@bind,wdmg.toFixed(2),"#DF2000",N_200MS)
 					if mdmg > 0
-						(new game.Main.Label()).damage(@bind,mdmg.toFixed(2),"#0020FF")
+						(new main.Label()).damage(@bind,mdmg.toFixed(2),"#0020FF")
 					@bind.hex()
 				).delay(N_1500MS)
 
@@ -4640,14 +4638,13 @@ F_DEAL_B_WIL1					= 0x00000080
 					@parentNode.removeChild(@)
 				)
 
-		prepareGameover:() ->
-	@Gameover = new class extends enchant.Scene
+	@gameover = new class extends enchant.Scene
 		constructor:() ->
 			super()
 			@backgroundColor = '#000000';
 
 			@deathtoll = new Array()
-			#@deathtoll = game.Main.UnitContainer.childNodes
+			#@deathtoll = main.UnitContainer.childNodes
 
 			@addEventListener(enchant.Event.ENTER,() ->
 				make = (m,z,x = 0,y = 0,w = 16,h = 1) ->
@@ -4711,14 +4708,14 @@ F_DEAL_B_WIL1					= 0x00000080
 					@lastChild.image.context.shadowBlur = 0
 	
 				@addChild(make("Produced Energy:",48,0,0,10,2))
-				@addChild(make(game.Main.score.energy.toFixed(2),64,10,0,6,2))
+				@addChild(make(main.score.energy.toFixed(2),64,10,0,6,2))
 				@addChild(make("Died because of you",32,0,2,16,1))
 				@addChild(make("Maho Shojo Kills:",32,0,10,10))
-				@addChild(make(game.Main.score.mk,32,10,10,6))
+				@addChild(make(main.score.mk,32,10,10,6))
 				@addChild(make("Witch and Minion Kills:",32,0,11,10))
-				@addChild(make(game.Main.score.wk,32,10,11,6))
+				@addChild(make(main.score.wk,32,10,11,6))
 				@addChild(make("Human Murders:",32,0,12,10))
-				@addChild(make(game.Main.score.hk,32,10,12,6))
+				@addChild(make(main.score.hk,32,10,12,6))
 
 				i = 1
 				for _ in @childNodes
@@ -4771,6 +4768,5 @@ F_DEAL_B_WIL1					= 0x00000080
 					@parentNode.removeChild(@)
 				)
 
-	game.prepare()
 	game.start()
 )() #ir<
