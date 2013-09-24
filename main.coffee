@@ -741,9 +741,8 @@ F_DEAL_B_WIL1					= 0x00000080
 			super(N_X_WND,N_Y_WND)
 			@fps = N_GAME_SPEED
 			@onload = () ->
-				@prepareMain()
-				@prepareGameover()
-				@.replaceScene(@Main)
+				@replaceScene(main)
+				#@replaceScene(gameover)
 			@preload('resources/default.gif')
 			@preload('resources/Madoka_Kaname.gif')
 			@preload('resources/Sayaka_Miki.gif')
@@ -924,7 +923,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					@jobstack = new Array()
 					@_lock = 0
 
-					@heap = new Hash()
+					@heap = new Object()
 					@phase = new Flag()
 				init2:() ->
 					for i in [0..7]
@@ -2638,7 +2637,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					@lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND)
 
 					@addChild(new enchant.Sprite(1,1))
-					@lastChild.image = game.assets["resources/Mami_Tomoe.png"]
+					@lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND)
 					@lastChild.window = new Window().set(
 						x:0
 						y:0
@@ -4653,16 +4652,16 @@ F_DEAL_B_WIL1					= 0x00000080
 					w *= N_X_WND / 16
 					h *= N_Y_WND / 16
 	
-					j = new enchant.Sprite(parseInt(w),parseInt(h))
-					j.x = x
-					j.y = y
-					j.opacity = 0.000
-					j.image = new enchant.Surface(parseInt(w),parseInt(h))
-					j.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + z}px '#{C_FONT_FAMILY}'"
-					j.image.context.textAlign = 'center'
-					j.image.context.fillStyle = '#FFFFFF'
-					j.image.context.fillText(m,w / 2,(h + z) / 2)
-					return(j)
+					o = new enchant.Sprite(parseInt(w),parseInt(h))
+					o.x = x
+					o.y = y
+					o.opacity = 0.000
+					o.image = new enchant.Surface(parseInt(w),parseInt(h))
+					o.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + z}px '#{C_FONT_FAMILY}'"
+					o.image.context.textAlign = 'center'
+					o.image.context.fillStyle = '#FFFFFF'
+					o.image.context.fillText(m,w / 2,(h + z) / 2)
+					return(o)
 
 				@addChild(new enchant.Sprite(N_X_WND,N_Y_WND))
 				@lastChild.opacity = 0.000
