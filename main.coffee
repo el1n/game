@@ -4641,135 +4641,135 @@ F_DEAL_B_WIL1					= 0x00000080
 				)
 
 		prepareGameover:() ->
-			@Gameover = new class extends enchant.Scene
-				constructor:() ->
-					super()
-					@backgroundColor = '#000000';
+	@Gameover = new class extends enchant.Scene
+		constructor:() ->
+			super()
+			@backgroundColor = '#000000';
 
-					@deathtoll = new Array()
-					#@deathtoll = game.Main.UnitContainer.childNodes
+			@deathtoll = new Array()
+			#@deathtoll = game.Main.UnitContainer.childNodes
 
-					@addEventListener(enchant.Event.ENTER,() ->
-						make = (m,z,x = 0,y = 0,w = 16,h = 1) ->
-							x *= N_X_WND / 16
-							y *= N_Y_WND / 16
-							w *= N_X_WND / 16
-							h *= N_Y_WND / 16
+			@addEventListener(enchant.Event.ENTER,() ->
+				make = (m,z,x = 0,y = 0,w = 16,h = 1) ->
+					x *= N_X_WND / 16
+					y *= N_Y_WND / 16
+					w *= N_X_WND / 16
+					h *= N_Y_WND / 16
 	
-							j = new enchant.Sprite(parseInt(w),parseInt(h))
-							j.x = x
-							j.y = y
-							j.opacity = 0.000
-							j.image = new enchant.Surface(parseInt(w),parseInt(h))
-							j.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + z}px '#{C_FONT_FAMILY}'"
-							j.image.context.textAlign = 'center'
-							j.image.context.fillStyle = '#FFFFFF'
-							j.image.context.fillText(m,w / 2,(h + z) / 2)
-							return(j)
+					j = new enchant.Sprite(parseInt(w),parseInt(h))
+					j.x = x
+					j.y = y
+					j.opacity = 0.000
+					j.image = new enchant.Surface(parseInt(w),parseInt(h))
+					j.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + z}px '#{C_FONT_FAMILY}'"
+					j.image.context.textAlign = 'center'
+					j.image.context.fillStyle = '#FFFFFF'
+					j.image.context.fillText(m,w / 2,(h + z) / 2)
+					return(j)
 
-						@addChild(new enchant.Sprite(N_X_WND,N_Y_WND))
-						@lastChild.opacity = 0.000
-						@lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND)
-						#@lastChild.image.draw(
-						#	game.assets["resources/deathtoll.png"]
-						#	0
-						#	0
-						#	720
-						#	405
-						#	0
-						#	(N_Y_WND - 405) / 2
-						#	N_X_WND
-						#	405
-						#)
-						@lastChild.image.context.globalAlpha = 0.666
-						for i in [1,4]
-							@lastChild.image.context.beginPath()
-							@lastChild.image.context.arc(N_X_WND / 5 * i,N_Y_WND / 2,64,0,Math.PI * 2)
-							@lastChild.image.context.fillStyle = '#cc4776'
-							@lastChild.image.context.fill()
-							@lastChild.image.context.beginPath()
-							@lastChild.image.context.arc(N_X_WND / 5 * i,N_Y_WND / 2,32,0,Math.PI * 2)
-							@lastChild.image.context.fillStyle = '#581a1b'
-							@lastChild.image.context.fill()
-							@lastChild.image.context.beginPath()
-							@lastChild.image.context.arc(N_X_WND / 5 * i + 28,N_Y_WND / 2 - 28,18,0,Math.PI * 2)
-							@lastChild.image.context.fillStyle = '#ffffff'
-							@lastChild.image.context.shadowColor = '#ffffff'
-							@lastChild.image.context.shadowBlur = 16
-							@lastChild.image.context.fill()
-							@lastChild.image.context.fill()
-							#@lastChild.image.context.beginPath()
-							#@lastChild.image.context.arc(N_X_WND / 5 * i,N_Y_WND / 2,48,0,Math.PI * 2)
-							#@lastChild.image.context.fillStyle = '#FF0000'
-							#@lastChild.image.context.shadowColor = '#FF0000'
-							#@lastChild.image.context.shadowBlur = 32
-							#@lastChild.image.context.fill()
-							#@lastChild.image.context.fill()
-							#@lastChild.image.context.fill()
-							#@lastChild.image.context.fill()
+				@addChild(new enchant.Sprite(N_X_WND,N_Y_WND))
+				@lastChild.opacity = 0.000
+				@lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND)
+				#@lastChild.image.draw(
+				#	game.assets["resources/deathtoll.png"]
+				#	0
+				#	0
+				#	720
+				#	405
+				#	0
+				#	(N_Y_WND - 405) / 2
+				#	N_X_WND
+				#	405
+				#)
+				@lastChild.image.context.globalAlpha = 0.666
+				for i in [1,4]
+					@lastChild.image.context.beginPath()
+					@lastChild.image.context.arc(N_X_WND / 5 * i,N_Y_WND / 2,64,0,Math.PI * 2)
+					@lastChild.image.context.fillStyle = '#cc4776'
+					@lastChild.image.context.fill()
+					@lastChild.image.context.beginPath()
+					@lastChild.image.context.arc(N_X_WND / 5 * i,N_Y_WND / 2,32,0,Math.PI * 2)
+					@lastChild.image.context.fillStyle = '#581a1b'
+					@lastChild.image.context.fill()
+					@lastChild.image.context.beginPath()
+					@lastChild.image.context.arc(N_X_WND / 5 * i + 28,N_Y_WND / 2 - 28,18,0,Math.PI * 2)
+					@lastChild.image.context.fillStyle = '#ffffff'
+					@lastChild.image.context.shadowColor = '#ffffff'
+					@lastChild.image.context.shadowBlur = 16
+					@lastChild.image.context.fill()
+					@lastChild.image.context.fill()
+					#@lastChild.image.context.beginPath()
+					#@lastChild.image.context.arc(N_X_WND / 5 * i,N_Y_WND / 2,48,0,Math.PI * 2)
+					#@lastChild.image.context.fillStyle = '#FF0000'
+					#@lastChild.image.context.shadowColor = '#FF0000'
+					#@lastChild.image.context.shadowBlur = 32
+					#@lastChild.image.context.fill()
+					#@lastChild.image.context.fill()
+					#@lastChild.image.context.fill()
+					#@lastChild.image.context.fill()
 
-							@lastChild.image.context.shadowBlur = 0
+					@lastChild.image.context.shadowBlur = 0
 	
-						@addChild(make("Produced Energy:",48,0,0,10,2))
-						@addChild(make(game.Main.score.energy.toFixed(2),64,10,0,6,2))
-						@addChild(make("Died because of you",32,0,2,16,1))
-						@addChild(make("Maho Shojo Kills:",32,0,10,10))
-						@addChild(make(game.Main.score.mk,32,10,10,6))
-						@addChild(make("Witch and Minion Kills:",32,0,11,10))
-						@addChild(make(game.Main.score.wk,32,10,11,6))
-						@addChild(make("Human Murders:",32,0,12,10))
-						@addChild(make(game.Main.score.hk,32,10,12,6))
+				@addChild(make("Produced Energy:",48,0,0,10,2))
+				@addChild(make(game.Main.score.energy.toFixed(2),64,10,0,6,2))
+				@addChild(make("Died because of you",32,0,2,16,1))
+				@addChild(make("Maho Shojo Kills:",32,0,10,10))
+				@addChild(make(game.Main.score.mk,32,10,10,6))
+				@addChild(make("Witch and Minion Kills:",32,0,11,10))
+				@addChild(make(game.Main.score.wk,32,10,11,6))
+				@addChild(make("Human Murders:",32,0,12,10))
+				@addChild(make(game.Main.score.hk,32,10,12,6))
 
-						i = 1
-						for _ in @childNodes
-							_.tl.delay(N_333MS * i++).fadeIn(N_1000MS,enchant.Easing.QUINT_EASEOUT)
+				i = 1
+				for _ in @childNodes
+					_.tl.delay(N_333MS * i++).fadeIn(N_1000MS,enchant.Easing.QUINT_EASEOUT)
 
-						@dead(N_333MS * i)
-						@dead(N_333MS * i + N_1000MS)
-						@dead(N_333MS * i + N_2000MS)
-						@dead(N_333MS * i + N_3000MS)
-						@dead(N_333MS * i + N_4000MS)
-						@dead(N_333MS * i + N_5000MS)
-					)
-				dead:(w = 0) ->
-					if unit = @deathtoll.shift()
-						@addChild(new enchant.Sprite(N_X_WND,N_Y_WND / 16))
-						@lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND / 16)
-						@lastChild.unit = unit
-						@lastChild.image.draw(
-							game.assets["resources/icon/pirate-grave_1.png"]
-							0
-							0
-							512
-							512
-							N_Y_WND / 16 * 0.100 + N_X_WND / 16 + 2
-							N_Y_WND / 16 * 0.100
-							N_Y_WND / 16 * 0.800
-							N_Y_WND / 16 * 0.800
-						)
-						@lastChild.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 32}px '#{C_FONT_FAMILY}'"
-						@lastChild.image.context.textAlign = 'left'
-						@lastChild.image.context.fillStyle = '#FFFFFF'
-						@lastChild.image.context.fillText(unit.name,N_X_WND / 16 * 3,(N_Y_WND / 16 + 32) / 2)
+				@dead(N_333MS * i)
+				@dead(N_333MS * i + N_1000MS)
+				@dead(N_333MS * i + N_2000MS)
+				@dead(N_333MS * i + N_3000MS)
+				@dead(N_333MS * i + N_4000MS)
+				@dead(N_333MS * i + N_5000MS)
+			)
+		dead:(w = 0) ->
+			if unit = @deathtoll.shift()
+				@addChild(new enchant.Sprite(N_X_WND,N_Y_WND / 16))
+				@lastChild.image = new enchant.Surface(N_X_WND,N_Y_WND / 16)
+				@lastChild.unit = unit
+				@lastChild.image.draw(
+					game.assets["resources/icon/pirate-grave_1.png"]
+					0
+					0
+					512
+					512
+					N_Y_WND / 16 * 0.100 + N_X_WND / 16 + 2
+					N_Y_WND / 16 * 0.100
+					N_Y_WND / 16 * 0.800
+					N_Y_WND / 16 * 0.800
+				)
+				@lastChild.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 32}px '#{C_FONT_FAMILY}'"
+				@lastChild.image.context.textAlign = 'left'
+				@lastChild.image.context.fillStyle = '#FFFFFF'
+				@lastChild.image.context.fillText(unit.name,N_X_WND / 16 * 3,(N_Y_WND / 16 + 32) / 2)
 
-						@lastChild.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 16}px '#{C_FONT_FAMILY}'"
-						@lastChild.image.context.textAlign = 'left'
-						@lastChild.image.context.fillStyle = '#FFFFFF'
-						@lastChild.image.context.fillText("Murdered by #{unit.killer}.",N_X_WND / 16 * 9,(N_Y_WND / 16 + 32) / 2)
+				@lastChild.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 16}px '#{C_FONT_FAMILY}'"
+				@lastChild.image.context.textAlign = 'left'
+				@lastChild.image.context.fillStyle = '#FFFFFF'
+				@lastChild.image.context.fillText("Murdered by #{unit.killer}.",N_X_WND / 16 * 9,(N_Y_WND / 16 + 32) / 2)
 	
-						@lastChild.x = 0
-						@lastChild.y = N_Y_WND / 16 * 9
-						@lastChild.opacity = 0
-						@lastChild.tl
-						.delay(w)
-						.moveTo(0,N_Y_WND / 16 * 8,N_1000MS).and().fadeIn(N_1000MS)
-						.moveTo(0,N_Y_WND / 16 * 4,N_4000MS)
-						.moveTo(0,N_Y_WND / 16 * 3,N_1000MS).and().fadeOut(N_1000MS)
-						.exec(->
-							@parentNode.deathtoll.push(@unit)
-							@parentNode.dead()
-							@parentNode.removeChild(@)
-						)
+				@lastChild.x = 0
+				@lastChild.y = N_Y_WND / 16 * 9
+				@lastChild.opacity = 0
+				@lastChild.tl
+				.delay(w)
+				.moveTo(0,N_Y_WND / 16 * 8,N_1000MS).and().fadeIn(N_1000MS)
+				.moveTo(0,N_Y_WND / 16 * 4,N_4000MS)
+				.moveTo(0,N_Y_WND / 16 * 3,N_1000MS).and().fadeOut(N_1000MS)
+				.exec(->
+					@parentNode.deathtoll.push(@unit)
+					@parentNode.dead()
+					@parentNode.removeChild(@)
+				)
 
 	game.prepare()
 	game.start()
