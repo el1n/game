@@ -344,9 +344,9 @@ defense1:
       crd: 10 8
   - spawninterval: F_UNIT_FACTION_BLACK 4 0 32
     event: |-
-      game.Main.System.wave++;
-      game.Main.System.lock();
-      (new game.Main.Label()).phase("Wave "+game.Main.System.wave+"/9","#FFFFFF",8);
+      main.System.wave++;
+      main.System.lock();
+      (new main.Label()).phase("Wave "+main.System.wave+"/9","#FFFFFF",8);
   - spawninterval: F_UNIT_FACTION_BLACK 4 0 32
     unit:
     - template: NULL

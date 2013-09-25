@@ -279,6 +279,26 @@ F_DEAL_B_WIL1					= 0x00000080
 				return(@w)
 	)
 
+	arm(enchant.Node,
+		xy:(x,y) ->
+			if x?
+				@x = x
+			if y?
+				@y = y
+	)
+
+	arm(enchant.Entity,
+		xywh:(x,y,w,h) ->
+			if x?
+				@x = x
+			if y?
+				@y = y
+			if w?
+				@width = w
+			if h?
+				@height = h
+	)
+
 	arm(enchant.Timeline,
 		exec:(func,args) ->
 			timeline = @
@@ -306,6 +326,17 @@ F_DEAL_B_WIL1					= 0x00000080
 		console.log("[?] Seed #{Math.w}")
 	else
 		Math.w = 1
+
+
+	Hash = class
+		keys:() ->
+			return(for k,v of @
+				k
+			)
+		values:() ->
+			return(for k,v of @
+				v
+			)
 
 	Flag = class
 		class:"Flag"
@@ -858,14 +889,17 @@ F_DEAL_B_WIL1					= 0x00000080
 				@_cache[sv] = f()
 			return(@_cache[sv])
 
-	@main = new class extends enchant.Scene
+	COLORREF = (b) ->
+		return("rgba(#{b >> 24 & 0xff},#{b >> 16 & 0xff},#{b >> 8 & 0xff},#{(b & 0xff) / 0xff})")
+
+	main = new class extends enchant.Scene
 		constructor:() ->
 			super()
-			@backgroundColor = '#666666';
+			@backgroundColor = COLORREF(0x666666ff)
 
 			@prepareSystem()
-			@prepareInput()
-			@prepareFieldContainer()
+			@addChild(@Input)
+			@addChild(@FieldContainer)
 			@prepareField()
 			@prepareZoneContainer()
 			@prepareHilightContainer()
@@ -1797,137 +1831,136 @@ F_DEAL_B_WIL1					= 0x00000080
 					else
 						console.log("fail target");
 			)
-		prepareInput:() ->
-			@addChild(@Input = new class extends enchant.Entity
-				constructor:() ->
-					super()
-					Action.apply(@)
+		Input:new class extends enchant.Entity
+			constructor:() ->
+				super()
+				Action.apply(@)
 
-					@x = 0
-					@y = 0
-					@width = game.width
-					@height = game.height
-				MOUSE_DOWN:(crd) ->
-					main.ZoneContainer.clear(F_ZONE_MARK_MASK)
-					main.StatusContainer.close()
-					if crd?
-						crd.cnv(F_VEC_SETAS_GRID_GRID)
-						console.log("? #{crd.c2a()}")
-				MOUSE_DRAG:(crd) ->
-					crd.b.on(F_VEC_SETAS_INPUT,F_VEC_MASK)
-					crd.dif().neg()
-					main.FieldContainer.scroll(crd)
-				MOUSE_DCLICK:(crd) ->
-					main.DialogContainer.create(7,[
-						{
-							text:"Phase End"
-							icon:"resources/icon/overhead.png"
-							exec:() ->
-								for unit in main.UnitContainer.childNodes when unit.b.is(main.System.phase)
-									unit.b.on(F_UNIT_STATE_END)
-								main.System.role()
-								#main.System.phaseend()
-						}
-						{
-							text:"Cancel"
-							icon:"resources/icon/cycle_1.png"
-						}
-						{
-							text:"Config"
-							icon:"resources/icon/cog.png"
-						}
-						{
-							text:"Mask Switch"
-							icon:"resources/icon/pointing.png"
-							exec:() ->
-								if main.MaskContainer.Mask.CTL_STATE == 1
-									main.MaskContainer.Mask.open()
-								else if main.MaskContainer.Mask.CTL_STATE == 4
-									main.MaskContainer.Mask.close()
-						}
-						{
-							text:"Defeat"
-							icon:"resources/icon/pirate-grave_1.png"
-							exec:() ->
-								main.System.gameover()
-						}
-						{
-							text:"AI Suspend"
-							icon:"resources/icon/hazard-sign.png"
-							exec:() ->
-								main.System.lock()
-						}
-						{
-							text:"AI Resume"
-							icon:"resources/icon/sands-of-time.png"
-							exec:() ->
-								main.System.unlock()
-						}
-					]).open()
-			)
-		prepareFieldContainer:() ->
-			@addChild(@FieldContainer = new class extends enchant.Group
-				constructor:() ->
-					super()
-				scroll:(crd,b) ->
-					crd.min(new Coordinates(N_X_MIN_SCR,N_Y_MIN_SCR))
-					crd.max(new Coordinates(N_X_MAX_SCR,N_Y_MAX_SCR))
-					crd.setas(@,NULL,b)
-				look:(crd) ->
-					crd = crd.clone()
-					crd.b.on(F_VEC_SETAS_DISPLAY_GRID,F_VEC_MASK)
-					@scroll(crd,N_333MS)
-				scan:(b) ->
-					if !@fd? || !b
-						@fd =
-							b:new Object()
-							c:new Object()
-							z:new Object()
+				@xywh(0,0,game.width,game.height)
+			MOUSE_DOWN:(crd) ->
+				main.ZoneContainer.clear(F_ZONE_MARK_MASK)
+				main.StatusContainer.close()
+				if crd?
+					crd.cnv(F_VEC_SETAS_GRID_GRID)
+					console.log("? #{crd.c2a()}")
+					console.log(main.Field.width)
+					console.log(main.Field.height)
+			MOUSE_DRAG:(crd) ->
+				crd.b.on(F_VEC_SETAS_INPUT,F_VEC_MASK)
+				crd.dif().neg()
+				main.FieldContainer.scroll(crd)
+			MOUSE_DCLICK:(crd) ->
+				main.DialogContainer.create(7,[
+					{
+						text:"Phase End"
+						icon:"resources/icon/overhead.png"
+						exec:() ->
+							for unit in main.UnitContainer.childNodes when unit.b.is(main.System.phase)
+								unit.b.on(F_UNIT_STATE_END)
+							main.System.role()
+							#main.System.phaseend()
+					}
+					{
+						text:"Cancel"
+						icon:"resources/icon/cycle_1.png"
+					}
+					{
+						text:"Config"
+						icon:"resources/icon/cog.png"
+					}
+					{
+						text:"Mask Switch"
+						icon:"resources/icon/pointing.png"
+						exec:() ->
+							if main.MaskContainer.Mask.CTL_STATE == 1
+								main.MaskContainer.Mask.open()
+							else if main.MaskContainer.Mask.CTL_STATE == 4
+								main.MaskContainer.Mask.close()
+					}
+					{
+						text:"Defeat"
+						icon:"resources/icon/pirate-grave_1.png"
+						exec:() ->
+							main.System.gameover()
+					}
+					{
+						text:"AI Suspend"
+						icon:"resources/icon/hazard-sign.png"
+						exec:() ->
+							main.System.lock()
+					}
+					{
+						text:"AI Resume"
+						icon:"resources/icon/sands-of-time.png"
+						exec:() ->
+							main.System.unlock()
+					}
+				]).open()
+		FieldContainer:new class extends enchant.Group
+			constructor:() ->
+				super()
+			scroll:(crd,b) ->
+				crd.min(new Coordinates(N_X_MIN_SCR,N_Y_MIN_SCR))
+				crd.max(new Coordinates(N_X_MAX_SCR,N_Y_MAX_SCR))
+				crd.setas(@,NULL,b)
+			look:(crd) ->
+				crd = crd.clone()
+				crd.b.on(F_VEC_SETAS_DISPLAY_GRID,F_VEC_MASK)
+				@scroll(crd,N_333MS)
+			scan:(b) ->
+				if !@fd? || !b
+					@fd =
+						b:new Object()
+						c:new Object()
+						z:new Object()
 
-						for e in main.ZoneContainer.childNodes
-							if e.CTL_STATE & 6
-								@fd.b[e.crd.c2a()] ?= new Flag()
-								@fd.b[e.crd.c2a()].on(e.crd.b)
-								@fd.z[e.crd.c2a()] ?= new Array()
-								@fd.z[e.crd.c2a()].push(e)
-						for e in main.UnitContainer.childNodes
-							#if e.CTL_STATE & 6
-							if e.crd2?
-								@fd.b[e.crd2.c2a()] ?= new Flag()
-								@fd.b[e.crd2.c2a()].on(e.b)
-								@fd.c[e.crd2.c2a()] = e
-							else
-								@fd.b[e.crd.c2a()] ?= new Flag()
-								@fd.b[e.crd.c2a()].on(e.b)
-								@fd.c[e.crd.c2a()] = e
+					for e in main.ZoneContainer.childNodes
+						if e.CTL_STATE & 6
+							@fd.b[e.crd.c2a()] ?= new Flag()
+							@fd.b[e.crd.c2a()].on(e.crd.b)
+							@fd.z[e.crd.c2a()] ?= new Array()
+							@fd.z[e.crd.c2a()].push(e)
+					for e in main.UnitContainer.childNodes
+						#if e.CTL_STATE & 6
+						if e.crd2?
+							@fd.b[e.crd2.c2a()] ?= new Flag()
+							@fd.b[e.crd2.c2a()].on(e.b)
+							@fd.c[e.crd2.c2a()] = e
+						else
+							@fd.b[e.crd.c2a()] ?= new Flag()
+							@fd.b[e.crd.c2a()].on(e.b)
+							@fd.c[e.crd.c2a()] = e
 
-				getb:(crd) ->
-					@scan(1)
+			getb:(crd) ->
+				@scan(1)
 
-					@fd.b[crd.c2a()] ?= new Flag()
-					return(@fd.b[crd.c2a()])
-				getc:(crd) ->
-					@scan(1)
+				@fd.b[crd.c2a()] ?= new Flag()
+				return(@fd.b[crd.c2a()])
+			getc:(crd) ->
+				@scan(1)
 
-					return(@fd.c[crd.c2a()])
-				getz:(crd) ->
-					@scan(1)
+				return(@fd.c[crd.c2a()])
+			getz:(crd) ->
+				@scan(1)
 
-					@fd.z[crd.c2a()] ?= new Array()
-					return(@fd.z[crd.c2a()])
-				clearfd:() ->
-					@scan()
-			)
+				@fd.z[crd.c2a()] ?= new Array()
+				return(@fd.z[crd.c2a()])
+			clearfd:() ->
+				@scan()
 		prepareField:() ->
 			@FieldContainer.addChild(@Field = new class extends enchant.Map
 				constructor:() ->
 					super(N_X_GRID,N_Y_GRID)
 					@touchEnabled = 0
-					@image = game.assets['resources/field.gif']
 
 					@loadData(for x in [0..N_X_FIELD - 1]
 						for y in [0..N_Y_FIELD - 1]
 							0
+					)
+
+					@addEventListener(enchant.Event.ENTER,(a) ->
+						console.log(game.assets['resources/field.gif'])
+						@image = game.assets['resources/field.gif']
 					)
 			)
 		prepareZoneContainer:() ->
@@ -4021,7 +4054,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					#		process[crd.c2a()].y = crd.y * N_Y_GRID + crd.x * 16
 					#		process[crd.c2a()].color = '#FFFFFF'
 					#	process[crd.c2a()].text += '[' + i + ']'
-					if !crd.lim(new Coordinates(0,0),new game.Coordinates(N_X_FIELD - 1,N_Y_FIELD - 1)).same(NULL,1)
+					if !crd.lim(new Coordinates(0,0),new Coordinates(N_X_FIELD - 1,N_Y_FIELD - 1)).same(NULL,1)
 						continue
 					if r[crd.c2a()]? && r[crd.c2a()].n <= n
 						continue
@@ -4108,7 +4141,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					#		process[crd.c2a()].y = crd.y * N_Y_GRID + crd.x * 16
 					#		process[crd.c2a()].color = '#FFFFFF'
 					#	process[crd.c2a()].text += '[' + i + ']'
-					if !crd.lim(new Coordinates(0,0),new game.Coordinates(N_X_FIELD - 1,N_Y_FIELD - 1)).same(NULL,1)
+					if !crd.lim(new Coordinates(0,0),new Coordinates(N_X_FIELD - 1,N_Y_FIELD - 1)).same(NULL,1)
 						continue
 					if r[crd.c2a()]? && r[crd.c2a()].n <= n
 						continue
@@ -4637,7 +4670,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					@parentNode.removeChild(@)
 				)
 
-	@gameover = new class extends enchant.Scene
+	gameover = new class extends enchant.Scene
 		constructor:() ->
 			super()
 			@backgroundColor = '#000000';
