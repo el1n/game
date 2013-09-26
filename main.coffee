@@ -586,14 +586,14 @@ F_DEAL_B_WIL1					= 0x00000080
 				when F_VEC_SET_DISPLAY
 					x = @x[i]
 					y = @y[i]
-					console.log("F_VEC_SET_DISPLAY")
+					console.log("cnv F_VEC_SET_DISPLAY")
 				when F_VEC_SET_GRID
 					x = @x[i] * N_X_GRID
 					y = @y[i] * N_Y_GRID
 				when F_VEC_SET_INPUT
 					x = @x[i]
 					y = @y[i]
-					console.log("F_VEC_SET_INPUT")
+					console.log("cnv F_VEC_SET_INPUT")
 				when F_VEC_BANK
 					x = @x[i]
 					y = @y[i]
