@@ -62,8 +62,7 @@ F_ACTION_TCLICK					= 0x01000010
 F_ACTION_DRAG					= 0x01000020
 F_ACTION_DROP					= 0x01000040
 F_ACTION_HOLD					= 0x01000080
-F_ACTION_HOLD_DRAG				= 0x01000100
-F_ACTION_MASK					= 0x01FFFFFF
+F_ACTION_MASK					= 0x010000FF
 F_VEC_SET_FIELD					= 0x02000001
 F_VEC_SET_DISPLAY				= 0x02000002
 F_VEC_SET_GRID					= 0x02000004
@@ -287,6 +286,113 @@ F_DEAL_B_WIL1					= 0x00000080
 				@y = y
 	)
 
+	enchant.Entity = class extends enchant.Entity
+		constructor:() ->
+			super()
+
+			b = new Flag()
+			if @MOUSE_DOWN?
+				b.on(F_ACTION_DOWN)
+			if @MOUSE_UP?
+				b.on(F_ACTION_UP)
+			if @MOUSE_CLICK?
+				b.on(F_ACTION_CLICK)
+			if @MOUSE_DCLICK?
+				b.on(F_ACTION_DCLICK)
+			if @MOUSE_TCLICK?
+				b.on(F_ACTION_TCLICK)
+			if @MOUSE_DRAG?
+				b.on(F_ACTION_DRAG)
+			if @MOUSE_DROP?
+				b.on(F_ACTION_DROP)
+			if @MOUSE_HOLD?
+				b.on(F_ACTION_HOLD)
+			if @MOUSE_HOLD_DRAG?
+				b.on(F_ACTION_HOLD_DRAG)
+			if @MOUSE_HOLD_DROP?
+				b.on(F_ACTION_HOLD_DROP)
+
+			elapse = 0
+			crd = new Coordinates(0,0,F_ACTION_UP)
+			i = 0
+
+			if b.is(F_ACTION_MASK)
+				@addEventListener(enchant.Event.TOUCH_START,(a) ->
+					crd.set(a)
+					crd.set(a,2)
+
+					if @age - elapse > N_200MS
+						i = 0
+						crd.b.off(F_ACTION_MASK)
+					elapse = @age
+
+					console.log("? MOUSE_DOWN")
+					crd.b.on(F_ACTION_DOWN)
+					@MOUSE_DOWN?(crd.clone())
+				)
+			if b.is(F_ACTION_MASK)
+				@addEventListener(enchant.Event.TOUCH_MOVE,(a) ->
+					crd.set(a)
+
+					if crd.b.is(F_ACTION_DRAG) || crd.distance(NULL,2) > 3
+						console.log("? MOUSE_DRAG")
+						crd.b.on(F_ACTION_DRAG)
+						@MOUSE_DRAG?(crd.clone())
+
+						if crd.b.is(F_ACTION_HOLD)
+							console.log("? MOUSE_HOLD_DRAG")
+							@MOUSE_HOLD_DRAG?(crd.clone())
+				)
+			if b.is(F_ACTION_MASK)
+				@addEventListener(enchant.Event.TOUCH_END,(a) ->
+					crd.set(a)
+
+					console.log("? MOUSE_UP")
+					crd.b.on(F_ACTION_UP)
+					crd.b.off(F_ACTION_DOWN)
+					@MOUSE_UP?(crd.clone())
+
+					if @age - elapse < N_200MS && !crd.b.is(F_ACTION_HOLD|F_ACTION_DRAG)
+						++i
+
+						console.log("? MOUSE_CLICK")
+						crd.b.on(F_ACTION_CLICK)
+						@MOUSE_CLICK?(crd.clone())
+
+						if i % 2 == 0
+							console.log("? MOUSE_DCLICK")
+							crd.b.on(F_ACTION_DCLICK)
+							@MOUSE_DCLICK?(crd.clone())
+						if i % 3 == 0
+							console.log("? MOUSE_TCLICK")
+							crd.b.on(F_ACTION_TCLICK)
+							@MOUSE_TCLICK?(crd.clone())
+					else if crd.b.is(F_ACTION_DRAG)
+						console.log("? MOUSE_DROP")
+						crd.b.on(F_ACTION_DROP)
+						@MOUSE_DROP?(crd.clone())
+
+						if crd.b.is(F_ACTION_HOLD)
+							console.log("? MOUSE_HOLD_DROP")
+							@MOUSE_HOLD_DROP?(crd.clone())
+
+						i = 0
+						crd.b.off(F_ACTION_MASK)
+					else
+						i = 0
+						crd.b.off(F_ACTION_MASK)
+				)
+			if b.is(F_ACTION_MASK)
+				@addEventListener(enchant.Event.ENTER_FRAME,(a) ->
+					if @age - elapse > N_500MS && crd.b.is(F_ACTION_DOWN,F_ACTION_DOWN|F_ACTION_HOLD|F_ACTION_DRAG)
+						console.log("? MOUSE_HOLD")
+						crd.b.on(F_ACTION_HOLD)
+						@MOUSE_HOLD?(crd.clone())
+				)
+
+			if !b.is(F_ACTION_MASK)
+				@touchEnabled = 0
+
 	arm(enchant.Entity,
 		xywh:(x,y,w,h) ->
 			if x?
@@ -372,12 +478,14 @@ F_DEAL_B_WIL1					= 0x00000080
 					b &= mask
 				@mask(mask & F_FLAG_BANK | (~mask & F_FLAG_FLAG))
 				@value[@bank(b)] |= b & F_FLAG_FLAG
+			return(@)
 		off:(b = 0,mask = 0xFFFFFFFF) ->
 			if 0
 				NOP
 			else
 				#@mask(mask & F_FLAG_BANK | ~(mask & F_FLAG_FLAG))
 				@value[@bank(b)] &= ~b & F_FLAG_FLAG
+			return(@)
 		mask:(mask = 0x00000000) ->
 			@value[@bank(mask)] &= mask & F_FLAG_FLAG
 		is:(b = 0,mask) ->
@@ -904,7 +1012,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					@prepareSystem()
 					@addChild(@Input)
 					@addChild(@FieldContainer)
-					@prepareField()
+					@FieldContainer.addChild(@Field)
 					@prepareZoneContainer()
 					@prepareHilightContainer()
 					@prepareUnitContainer()
@@ -1951,18 +2059,16 @@ F_DEAL_B_WIL1					= 0x00000080
 						return(@fd.z[crd.c2a()])
 					clearfd:() ->
 						@scan()
-				prepareField:() ->
-					@FieldContainer.addChild(@Field = new class extends enchant.Map
-						constructor:() ->
-							super(N_X_GRID,N_Y_GRID)
-							@touchEnabled = 0
-							@image = game.assets['resources/field.gif']
+				Field:new class extends enchant.Map
+					constructor:() ->
+						super(N_X_GRID,N_Y_GRID)
+						@touchEnabled = 0
+						@image = game.assets['resources/field.gif']
 		
-							@loadData(for x in [0..N_X_FIELD - 1]
-								for y in [0..N_Y_FIELD - 1]
-									0
-							)
-					)
+						@loadData(for x in [0..N_X_FIELD - 1]
+							for y in [0..N_Y_FIELD - 1]
+								0
+						)
 				prepareZoneContainer:() ->
 					@FieldContainer.addChild(@ZoneContainer = new class extends enchant.Group
 						constructor:() ->
@@ -3220,7 +3326,8 @@ F_DEAL_B_WIL1					= 0x00000080
 									@image.context.strokeText("Input blocked",N_X_WND,N_Y_WND - 12)
 		
 								MOUSE_DCLICK:() ->
-									main.Input.MOUSE_DCLICK()
+									#main.Input.MOUSE_DCLICK()
+									1 + 1
 							)
 					)
 				UnitTemplate:{
