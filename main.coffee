@@ -2,7 +2,6 @@ NULL = null
 NOP = () ->
 
 C_TEST = 0
-C_GAMEMODE = "2"
 C_GAMEMODE = "MadokaKaname"
 C_GAMEMODE = "SayakaMiki"
 C_GAMEMODE = "MamiTomoe"
@@ -10,6 +9,7 @@ C_GAMEMODE = "HomuraAkemi"
 C_GAMEMODE = "KyoukoSakura"
 C_GAMEMODE = "MadokaMagika"
 C_GAMEMODE = "defense1"
+C_GAMEMODE = "2"
 #ir< C_GAMEMODE = "defense1"
 
 C_FONT_FAMILY = "Georgia"
@@ -290,26 +290,28 @@ F_DEAL_B_WIL1					= 0x00000080
 		constructor:() ->
 			super()
 
+			@mouse_bind()
+		mouse_bind:(bind = @) ->
 			b = new Flag()
-			if @MOUSE_DOWN?
+			if bind.MOUSE_DOWN?
 				b.on(F_ACTION_DOWN)
-			if @MOUSE_UP?
+			if bind.MOUSE_UP?
 				b.on(F_ACTION_UP)
-			if @MOUSE_CLICK?
+			if bind.MOUSE_CLICK?
 				b.on(F_ACTION_CLICK)
-			if @MOUSE_DCLICK?
+			if bind.MOUSE_DCLICK?
 				b.on(F_ACTION_DCLICK)
-			if @MOUSE_TCLICK?
+			if bind.MOUSE_TCLICK?
 				b.on(F_ACTION_TCLICK)
-			if @MOUSE_DRAG?
+			if bind.MOUSE_DRAG?
 				b.on(F_ACTION_DRAG)
-			if @MOUSE_DROP?
+			if bind.MOUSE_DROP?
 				b.on(F_ACTION_DROP)
-			if @MOUSE_HOLD?
+			if bind.MOUSE_HOLD?
 				b.on(F_ACTION_HOLD)
-			if @MOUSE_HOLD_DRAG?
+			if bind.MOUSE_HOLD_DRAG?
 				b.on(F_ACTION_HOLD_DRAG)
-			if @MOUSE_HOLD_DROP?
+			if bind.MOUSE_HOLD_DROP?
 				b.on(F_ACTION_HOLD_DROP)
 
 			elapse = 0
@@ -326,55 +328,55 @@ F_DEAL_B_WIL1					= 0x00000080
 						crd.b.off(F_ACTION_MASK)
 					elapse = @age
 
-					console.log("? MOUSE_DOWN")
+					#console.log("? MOUSE_DOWN")
 					crd.b.on(F_ACTION_DOWN)
-					@MOUSE_DOWN?(crd.clone())
+					bind.MOUSE_DOWN?(crd.clone())
 				)
-			if b.is(F_ACTION_MASK)
+			if b.is(F_ACTION_DRAG)
 				@addEventListener(enchant.Event.TOUCH_MOVE,(a) ->
 					crd.set(a)
 
 					if crd.b.is(F_ACTION_DRAG) || crd.distance(NULL,2) > 3
-						console.log("? MOUSE_DRAG")
+						#console.log("? MOUSE_DRAG")
 						crd.b.on(F_ACTION_DRAG)
-						@MOUSE_DRAG?(crd.clone())
+						bind.MOUSE_DRAG?(crd.clone())
 
 						if crd.b.is(F_ACTION_HOLD)
-							console.log("? MOUSE_HOLD_DRAG")
-							@MOUSE_HOLD_DRAG?(crd.clone())
+							#console.log("? MOUSE_HOLD_DRAG")
+							bind.MOUSE_HOLD_DRAG?(crd.clone())
 				)
 			if b.is(F_ACTION_MASK)
 				@addEventListener(enchant.Event.TOUCH_END,(a) ->
 					crd.set(a)
 
-					console.log("? MOUSE_UP")
+					#console.log("? MOUSE_UP")
 					crd.b.on(F_ACTION_UP)
 					crd.b.off(F_ACTION_DOWN)
-					@MOUSE_UP?(crd.clone())
+					bind.MOUSE_UP?(crd.clone())
 
 					if @age - elapse < N_200MS && !crd.b.is(F_ACTION_HOLD|F_ACTION_DRAG)
 						++i
 
-						console.log("? MOUSE_CLICK")
+						#console.log("? MOUSE_CLICK")
 						crd.b.on(F_ACTION_CLICK)
-						@MOUSE_CLICK?(crd.clone())
+						bind.MOUSE_CLICK?(crd.clone())
 
 						if i % 2 == 0
-							console.log("? MOUSE_DCLICK")
+							#console.log("? MOUSE_DCLICK")
 							crd.b.on(F_ACTION_DCLICK)
-							@MOUSE_DCLICK?(crd.clone())
+							bind.MOUSE_DCLICK?(crd.clone())
 						if i % 3 == 0
-							console.log("? MOUSE_TCLICK")
+							#console.log("? MOUSE_TCLICK")
 							crd.b.on(F_ACTION_TCLICK)
-							@MOUSE_TCLICK?(crd.clone())
+							bind.MOUSE_TCLICK?(crd.clone())
 					else if crd.b.is(F_ACTION_DRAG)
-						console.log("? MOUSE_DROP")
+						#console.log("? MOUSE_DROP")
 						crd.b.on(F_ACTION_DROP)
-						@MOUSE_DROP?(crd.clone())
+						bind.MOUSE_DROP?(crd.clone())
 
 						if crd.b.is(F_ACTION_HOLD)
-							console.log("? MOUSE_HOLD_DROP")
-							@MOUSE_HOLD_DROP?(crd.clone())
+							#console.log("? MOUSE_HOLD_DROP")
+							bind.MOUSE_HOLD_DROP?(crd.clone())
 
 						i = 0
 						crd.b.off(F_ACTION_MASK)
@@ -382,12 +384,12 @@ F_DEAL_B_WIL1					= 0x00000080
 						i = 0
 						crd.b.off(F_ACTION_MASK)
 				)
-			if b.is(F_ACTION_MASK)
+			if b.is(F_ACTION_HOLD)
 				@addEventListener(enchant.Event.ENTER_FRAME,(a) ->
 					if @age - elapse > N_500MS && crd.b.is(F_ACTION_DOWN,F_ACTION_DOWN|F_ACTION_HOLD|F_ACTION_DRAG)
-						console.log("? MOUSE_HOLD")
+						#console.log("? MOUSE_HOLD")
 						crd.b.on(F_ACTION_HOLD)
-						@MOUSE_HOLD?(crd.clone())
+						bind.MOUSE_HOLD?(crd.clone())
 				)
 
 			if !b.is(F_ACTION_MASK)
@@ -737,71 +739,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				@y[i] = RegExp.$2
 		print:(i = 0) ->
 			console.log("[#{i}] #{@x[i]}.#{@y[i]} (0x#{@b.hex()})")
-
-	Action = class
-		constructor:() ->
-			@ACTION = 
-				crd:new Coordinates(0,0,F_VEC_SET_INPUT)
-				b:new Flag(0)
-				elapse:0
-
-			@addEventListener(enchant.Event.TOUCH_START,(a) ->
-				@ACTION.crd.set(a)
-				@ACTION.crd.set(a,2)
-
-				if !@ACTION.b.is(F_ACTION_CLICK|F_ACTION_DCLICK|F_ACTION_TCLICK) || @age - @ACTION.elapse > N_200MS
-					@ACTION.b.off(F_ACTION_MASK)
-
-				@ACTION.b.on(F_ACTION_DOWN)
-				@MOUSE_DOWN?(@ACTION.crd.clone())
-
-				@ACTION.elapse = @age
-			)
-
-			@addEventListener(enchant.Event.TOUCH_MOVE,(e) ->
-				@ACTION.crd.set(e)
-
-				if @ACTION.b.is(F_ACTION_DOWN) && @age - @ACTION.elapse > N_1000MS
-					@ACTION.b.on(F_ACTION_HOLD,F_ACTION_MASK)
-					@MOUSE_HOLD?(@ACTION.crd.clone())
-				else if !@ACTION.b.is(F_ACTION_HOLD) && @ACTION.crd.distance(NULL,2)
-					@ACTION.b.on(F_ACTION_DRAG,F_ACTION_MASK)
-					@MOUSE_DRAG?(@ACTION.crd.clone())
-				else if @ACTION.b.is(F_ACTION_HOLD) && @ACTION.crd.distance(NULL,2)
-					@ACTION.b.on(F_ACTION_HOLD_DRAG)
-					@MOUSE_HOLD_DRAG?(@ACTION.crd.clone())
-			)
-
-			@addEventListener(enchant.Event.TOUCH_END,(e) ->
-				@ACTION.crd.set(e)
-
-				if @ACTION.b.is(F_ACTION_DOWN) && @age - @ACTION.elapse < N_200MS
-					if @ACTION.b.is(F_ACTION_CLICK) && @MOUSE_DCLICK?
-						@ACTION.b.on(F_ACTION_DCLICK,F_ACTION_MASK)
-						@MOUSE_DCLICK?(@ACTION.crd.clone())
-					else if @ACTION.b.is(F_ACTION_DCLICK) && @MOUSE_TCLICK?
-						@ACTION.b.on(F_ACTION_TCLICK,F_ACTION_MASK)
-						@MOUSE_TCLICK?(@ACTION.crd.clone())
-					else
-						@ACTION.b.on(F_ACTION_CLICK,F_ACTION_MASK)
-						@MOUSE_CLICK?(@ACTION.crd.clone())
-				else if @ACTION.b.is(F_ACTION_DRAG) || @ACTION.b.is(F_ACTION_HOLD_DRAG)
-					@ACTION.b.on(F_ACTION_DROP,F_ACTION_MASK)
-					@MOUSE_DROP?(@ACTION.crd.clone())
-
-				@MOUSE_UP?(@ACTION.crd.clone())
-
-				@ACTION.b.off(F_ACTION_DOWN)
-				@ACTION.elapse = @age
-			)
-
-			if @MOUSE_HOLD?
-				@addEventListener(enchant.Event.ENTER_FRAME,(e) ->
-					#if @ACTION.b.is(F_ACTION_DOWN) && @age - @ACTION.elapse > N_1000MS
-					if @ACTION.b.is(F_ACTION_DOWN) && @age - @ACTION.elapse > N_500MS
-						@ACTION.b.on(F_ACTION_HOLD,F_ACTION_MASK)
-						@MOUSE_HOLD?(@ACTION.crd.clone())
-				)
 
 	Control = class
 		constructor:(a) ->
@@ -1946,7 +1883,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				Input:new class extends enchant.Entity
 					constructor:() ->
 						super()
-						Action.apply(@)
 		
 						@xywh(0,0,game.width,game.height)
 					MOUSE_DOWN:(crd) ->
@@ -2582,7 +2518,6 @@ F_DEAL_B_WIL1					= 0x00000080
 						N_MARGIN = 20
 						constructor:() ->
 							super()
-							Action.apply(@)
 							#Control.apply(@)
 							#@CTL_OPEN_ST.b = 0
 							#@CTL_CLOSE_ST.b = 0
@@ -3225,7 +3160,6 @@ F_DEAL_B_WIL1					= 0x00000080
 								@addChild(@Input = new class extends enchant.Entity
 									constructor:() ->
 										super()
-										Action.apply(@)
 				
 										@x = 0
 										@y = 0
@@ -3293,7 +3227,6 @@ F_DEAL_B_WIL1					= 0x00000080
 							@addChild(@Mask = new class extends enchant.Entity
 								constructor:() ->
 									super()
-									Action.apply(@)
 									Control.apply(@)
 									@CTL_OPEN_ST.b = 0
 									@CTL_CLOSE_ST.b = 0
@@ -3310,7 +3243,6 @@ F_DEAL_B_WIL1					= 0x00000080
 							@addChild(@Mask = new class extends enchant.Sprite
 								constructor:() ->
 									super(N_X_WND,N_Y_WND)
-									Action.apply(@)
 									Control.apply(@)
 									@CTL_OPEN_ST.b = 0
 									@CTL_CLOSE_ST.b = 0
@@ -3752,7 +3684,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				Unit:class extends enchant.Group
 					constructor:(@id) ->
 						super(N_X_UNIT,N_Y_UNIT)
-						Action.apply(@)
 						Control.apply(@,[3,N_333MS])
 						@CTL_CLOSE_ST.b = 1
 						@CTL_OPEN_ST.b = 1
@@ -3774,6 +3705,8 @@ F_DEAL_B_WIL1					= 0x00000080
 							console.log("unit id error")
 		
 						@addChild(@spr = new enchant.Sprite(N_X_UNIT,N_Y_UNIT))
+						console.log(@spr)
+						@spr.MOUSE_BIND(@)
 					MOUSE_DOWN:(crd) ->
 						main.FieldContainer.clearfd()
 						crd.cnv(F_VEC_SETAS_GRID_GRID)
@@ -4384,7 +4317,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				Zone:class extends enchant.Sprite
 					constructor:() ->
 						super(N_X_CELL,N_Y_CELL)
-						Action.apply(@)
 						Control.apply(@)
 						#@CTL.open.alpha = 0.500
 						@CTL_OPEN_ST.alpha = 0.500
