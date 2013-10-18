@@ -8,8 +8,7 @@ C_GAMEMODE = "MamiTomoe"
 C_GAMEMODE = "HomuraAkemi"
 C_GAMEMODE = "KyoukoSakura"
 C_GAMEMODE = "MadokaMagika"
-C_GAMEMODE = "defense1"
-C_GAMEMODE = "2"
+#C_GAMEMODE = "defense1"
 #ir< C_GAMEMODE = "defense1"
 
 C_FONT_FAMILY = "Georgia"
@@ -63,6 +62,18 @@ F_ACTION_DRAG					= 0x01000020
 F_ACTION_DROP					= 0x01000040
 F_ACTION_HOLD					= 0x01000080
 F_ACTION_MASK					= 0x010000FF
+F_MOTION_OPEN_CLEAR_TL			= 0x01000100
+F_MOTION_OPEN_SET_TL			= 0x01000200
+F_MOTION_OPEN_PRE_ENABLE_INPUT	= 0x01000400
+F_MOTION_CLOSE_CLEAR_TL			= 0x01001000
+F_MOTION_CLOSE_SET_TL			= 0x01002000
+F_MOTION_CLOSE_PRE_DISABLE_INPUT= 0x01004000
+F_MOTION_CLOSE_AND_BANISH		= 0x01010000
+F_MOTION_OPEN_ANIMATION			= 0x01000300
+F_MOTION_CLOSE_ANIMATION		= 0x01003000
+F_MOTION_ANIMATION				= 0x01007300
+F_MOTION_IMMEDIATELY			= 0x01005500
+F_MOTION_MASK					= 0x0101FF00
 F_VEC_SET_FIELD					= 0x02000001
 F_VEC_SET_DISPLAY				= 0x02000002
 F_VEC_SET_GRID					= 0x02000004
@@ -286,39 +297,39 @@ F_DEAL_B_WIL1					= 0x00000080
 				@y = y
 	)
 
-	enchant.Entity = class extends enchant.Entity
-		constructor:() ->
-			super()
+	#enchant.Entity = class extends enchant.Entity
+	#arm(enchant.Entity,
+	arm(enchant.Node,
+		initialize:() ->
+			@$initialize()
 
-			@mouse_bind()
-		mouse_bind:(bind = @) ->
-			b = new Flag()
-			if bind.MOUSE_DOWN?
-				b.on(F_ACTION_DOWN)
-			if bind.MOUSE_UP?
-				b.on(F_ACTION_UP)
-			if bind.MOUSE_CLICK?
-				b.on(F_ACTION_CLICK)
-			if bind.MOUSE_DCLICK?
-				b.on(F_ACTION_DCLICK)
-			if bind.MOUSE_TCLICK?
-				b.on(F_ACTION_TCLICK)
-			if bind.MOUSE_DRAG?
-				b.on(F_ACTION_DRAG)
-			if bind.MOUSE_DROP?
-				b.on(F_ACTION_DROP)
-			if bind.MOUSE_HOLD?
-				b.on(F_ACTION_HOLD)
-			if bind.MOUSE_HOLD_DRAG?
-				b.on(F_ACTION_HOLD_DRAG)
-			if bind.MOUSE_HOLD_DROP?
-				b.on(F_ACTION_HOLD_DROP)
+			@b = new Flag(F_MOTION_ANIMATION)
+			if @MOUSE_DOWN?
+				@b.on(F_ACTION_DOWN)
+			if @MOUSE_UP?
+				@b.on(F_ACTION_UP)
+			if @MOUSE_CLICK?
+				@b.on(F_ACTION_CLICK)
+			if @MOUSE_DCLICK?
+				@b.on(F_ACTION_DCLICK)
+			if @MOUSE_TCLICK?
+				@b.on(F_ACTION_TCLICK)
+			if @MOUSE_DRAG?
+				@b.on(F_ACTION_DRAG)
+			if @MOUSE_DROP?
+				@b.on(F_ACTION_DROP)
+			if @MOUSE_HOLD?
+				@b.on(F_ACTION_HOLD)
+			if @MOUSE_HOLD_DRAG?
+				@b.on(F_ACTION_HOLD_DRAG)
+			if @MOUSE_HOLD_DROP?
+				@b.on(F_ACTION_HOLD_DROP)
 
 			elapse = 0
 			crd = new Coordinates(0,0,F_ACTION_UP)
 			i = 0
 
-			if b.is(F_ACTION_MASK)
+			if @b.is(F_ACTION_MASK)
 				@addEventListener(enchant.Event.TOUCH_START,(a) ->
 					crd.set(a)
 					crd.set(a,2)
@@ -328,55 +339,55 @@ F_DEAL_B_WIL1					= 0x00000080
 						crd.b.off(F_ACTION_MASK)
 					elapse = @age
 
-					#console.log("? MOUSE_DOWN")
+					console.log("? MOUSE_DOWN")
 					crd.b.on(F_ACTION_DOWN)
-					bind.MOUSE_DOWN?(crd.clone())
+					@MOUSE_DOWN?(crd.clone())
 				)
-			if b.is(F_ACTION_DRAG)
+			if @b.is(F_ACTION_DRAG)
 				@addEventListener(enchant.Event.TOUCH_MOVE,(a) ->
 					crd.set(a)
 
 					if crd.b.is(F_ACTION_DRAG) || crd.distance(NULL,2) > 3
 						#console.log("? MOUSE_DRAG")
 						crd.b.on(F_ACTION_DRAG)
-						bind.MOUSE_DRAG?(crd.clone())
+						@MOUSE_DRAG?(crd.clone())
 
 						if crd.b.is(F_ACTION_HOLD)
 							#console.log("? MOUSE_HOLD_DRAG")
-							bind.MOUSE_HOLD_DRAG?(crd.clone())
+							@MOUSE_HOLD_DRAG?(crd.clone())
 				)
-			if b.is(F_ACTION_MASK)
+			if @b.is(F_ACTION_MASK)
 				@addEventListener(enchant.Event.TOUCH_END,(a) ->
 					crd.set(a)
 
 					#console.log("? MOUSE_UP")
 					crd.b.on(F_ACTION_UP)
 					crd.b.off(F_ACTION_DOWN)
-					bind.MOUSE_UP?(crd.clone())
+					@MOUSE_UP?(crd.clone())
 
 					if @age - elapse < N_200MS && !crd.b.is(F_ACTION_HOLD|F_ACTION_DRAG)
 						++i
 
 						#console.log("? MOUSE_CLICK")
 						crd.b.on(F_ACTION_CLICK)
-						bind.MOUSE_CLICK?(crd.clone())
+						@MOUSE_CLICK?(crd.clone())
 
 						if i % 2 == 0
 							#console.log("? MOUSE_DCLICK")
 							crd.b.on(F_ACTION_DCLICK)
-							bind.MOUSE_DCLICK?(crd.clone())
+							@MOUSE_DCLICK?(crd.clone())
 						if i % 3 == 0
 							#console.log("? MOUSE_TCLICK")
 							crd.b.on(F_ACTION_TCLICK)
-							bind.MOUSE_TCLICK?(crd.clone())
+							@MOUSE_TCLICK?(crd.clone())
 					else if crd.b.is(F_ACTION_DRAG)
 						#console.log("? MOUSE_DROP")
 						crd.b.on(F_ACTION_DROP)
-						bind.MOUSE_DROP?(crd.clone())
+						@MOUSE_DROP?(crd.clone())
 
 						if crd.b.is(F_ACTION_HOLD)
 							#console.log("? MOUSE_HOLD_DROP")
-							bind.MOUSE_HOLD_DROP?(crd.clone())
+							@MOUSE_HOLD_DROP?(crd.clone())
 
 						i = 0
 						crd.b.off(F_ACTION_MASK)
@@ -384,16 +395,54 @@ F_DEAL_B_WIL1					= 0x00000080
 						i = 0
 						crd.b.off(F_ACTION_MASK)
 				)
-			if b.is(F_ACTION_HOLD)
+			if @b.is(F_ACTION_HOLD)
 				@addEventListener(enchant.Event.ENTER_FRAME,(a) ->
 					if @age - elapse > N_500MS && crd.b.is(F_ACTION_DOWN,F_ACTION_DOWN|F_ACTION_HOLD|F_ACTION_DRAG)
 						#console.log("? MOUSE_HOLD")
 						crd.b.on(F_ACTION_HOLD)
-						bind.MOUSE_HOLD?(crd.clone())
+						@MOUSE_HOLD?(crd.clone())
 				)
 
-			if !b.is(F_ACTION_MASK)
-				@touchEnabled = 0
+			if @touchEnabled
+				if @b.is(F_ACTION_MASK)
+					@touchEnabled = 1
+				else
+					@touchEnabled = 0
+		open:(opacity = 1.000,time = N_333MS) ->
+			if !@visible
+				for o in [@].concat(@childNodes) when o?
+					if @b.is(F_MOTION_OPEN_CLEAR_TL)
+						o.tl.clear()
+					if @b.is(F_MOTION_OPEN_SET_TL)
+						o.opacity = 0.000
+						o.tl.fadeTo(opacity,time,enchant.Easing.QUINT_EASEOUT).exec(->
+							if @b.is(F_ACTION_MASK) && !@b.is(F_MOTION_OPEN_PRE_ENABLE_INPUT)
+								@touchEnabled = 1
+						)
+					else
+						if @b.is(F_ACTION_MASK) && @b.is(F_MOTION_OPEN_PRE_ENABLE_INPUT)
+							o.touchEnabled = 1
+					o.visible = 1
+			return(@)
+		close:(time = N_333MS) ->
+			if @visible
+				for o in [@].concat(@childNodes) when o?
+					if @b.is(F_MOTION_CLOSE_CLEAR_TL)
+						o.tl.clear()
+					if @b.is(F_MOTION_CLOSE_SET_TL)
+						o.tl.fadeTo(0,time,enchant.Easing.QUINT_EASEOUT).exec(->
+							if @b.is(F_ACTION_MASK) && !@b.is(F_MOTION_CLOSE_PRE_DISABLE_INPUT)
+								@touchEnabled = 0
+							@visible = 0
+						)
+					else
+							o.visible = 0
+							if @b.is(F_ACTION_MASK) && @b.is(F_MOTION_CLOSE_PRE_DISABLE_INPUT)
+								o.touchEnabled = 0
+					if @b.is(F_MOTION_CLOSE_AND_BANISH)
+						@tl.banish()
+			return(@)
+	)
 
 	arm(enchant.Entity,
 		xywh:(x,y,w,h) ->
@@ -409,10 +458,9 @@ F_DEAL_B_WIL1					= 0x00000080
 
 	arm(enchant.Timeline,
 		exec:(func,args) ->
-			timeline = @
 			@add(new enchant.Action(
-				onactiontick:(e) ->
-					func.apply(timeline.node,args)
+				onactiontick:(e) =>
+					func.apply(@node,args)
 				time:0
 			))
 			return(@)
@@ -422,7 +470,7 @@ F_DEAL_B_WIL1					= 0x00000080
 				return(@)
 			)
 			return(@)
-		destroy:() ->
+		banish:() ->
 			@exec(->
 				@parentNode.removeChild(@)
 			)
@@ -757,25 +805,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				@CTL_CLOSE = @close
 
 			@open = () ->
-				if !@visible
-					@CTL_STATE = 2
-					for elem in [@].concat(@childNodes)
-						if !elem?
-							continue
-						if @CTL_OPEN_ST.b & 2
-							elem.tl.clear()
-						if @CTL_OPEN_ST.b & 1
-							elem.opacity = 0
-							elem.tl.fadeTo(@CTL_OPEN_ST.alpha,@CTL_OPEN_ST.time,enchant.Easing.QUINT_EASEOUT).exec(->
-								@CTL_STATE = 4
-							)
-						else
-							@CTL_STATE = 4
-						elem.touchEnabled = !!elem.ACTION?
-						elem.visible = 1
-
-					@CTL_OPEN?.apply(@,arguments)
-				return(@)
 
 			@close = () ->
 				if 1
@@ -3097,7 +3126,6 @@ F_DEAL_B_WIL1					= 0x00000080
 						Circle:class extends enchant.Group
 							constructor:(n = 3,@button) ->
 								super()
-								Control.apply(@)
 								@CTL_OPEN_ST.alpha = 0.750
 								@CTL_CLOSE_ST.b = 1
 								@n = n
@@ -3210,7 +3238,6 @@ F_DEAL_B_WIL1					= 0x00000080
 								@addChild(new class extends enchant.Sprite
 									constructor:() ->
 										super(N_X_WND,N_Y_WND)
-										Control.apply(@)
 										@CTL_OPEN_ST.b = 1
 										@CTL_OPEN_ST.time = N_1000MS
 										@CTL_CLOSE_ST.b = 1
@@ -3227,25 +3254,17 @@ F_DEAL_B_WIL1					= 0x00000080
 							@addChild(@Mask = new class extends enchant.Entity
 								constructor:() ->
 									super()
-									Control.apply(@)
-									@CTL_OPEN_ST.b = 0
-									@CTL_CLOSE_ST.b = 0
 		
 									@x = 0
 									@y = 0
 									@width = N_X_WND
 									@height = N_Y_WND
-									@opacity = 0.000
-								MOUSE_DCLICK:() ->
-									main.Input.MOUSE_DCLICK()
 							)
 							###
 							@addChild(@Mask = new class extends enchant.Sprite
 								constructor:() ->
 									super(N_X_WND,N_Y_WND)
-									Control.apply(@)
-									@CTL_OPEN_ST.b = 0
-									@CTL_CLOSE_ST.b = 0
+									@b.on(F_MOTION_IMMEDIATELY,F_MOTION_MASK)
 		
 									@image = new enchant.Surface(N_X_WND,N_Y_WND)
 									@image.context.font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
@@ -3256,10 +3275,13 @@ F_DEAL_B_WIL1					= 0x00000080
 									@image.context.globalAlpha = 0.750
 									@image.context.fillText("Input blocked",N_X_WND,N_Y_WND - 12)
 									@image.context.strokeText("Input blocked",N_X_WND,N_Y_WND - 12)
-		
 								MOUSE_DCLICK:() ->
 									#main.Input.MOUSE_DCLICK()
 									1 + 1
+								close:() ->
+									console.log(@)
+									super()
+									console.log(@)
 							)
 					)
 				UnitTemplate:{
@@ -3684,9 +3706,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				Unit:class extends enchant.Group
 					constructor:(@id) ->
 						super(N_X_UNIT,N_Y_UNIT)
-						Control.apply(@,[3,N_333MS])
-						@CTL_CLOSE_ST.b = 1
-						@CTL_OPEN_ST.b = 1
 		
 						@crd = new Coordinates(0,0,F_VEC_SETAS_GRID_GRID)
 						@speed = 1
@@ -3697,7 +3716,7 @@ F_DEAL_B_WIL1					= 0x00000080
 						@mgk = 1
 						@mg2 = 0
 						@wil = 1
-						@b = new Flag()
+						#@b = new Flag()
 						@queue = new Array()
 						@icon = new Object()
 		
@@ -3705,8 +3724,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							console.log("unit id error")
 		
 						@addChild(@spr = new enchant.Sprite(N_X_UNIT,N_Y_UNIT))
-						console.log(@spr)
-						@spr.MOUSE_BIND(@)
+						@spr.touchEnabled = 1
 					MOUSE_DOWN:(crd) ->
 						main.FieldContainer.clearfd()
 						crd.cnv(F_VEC_SETAS_GRID_GRID)
@@ -4262,10 +4280,6 @@ F_DEAL_B_WIL1					= 0x00000080
 							@kao = game.assets['resources/' + @name.replace(/\ /g,'_') + '.png']
 						else
 							@kao = game.assets['resources/default.png']
-					open:() ->
-						@tl.exec(->
-							@childNodes[0].touchEnabled = 1
-						)
 					close:() ->
 						console.log("close")
 						@tl.delay(N_1000MS).exec(->
@@ -4317,11 +4331,8 @@ F_DEAL_B_WIL1					= 0x00000080
 				Zone:class extends enchant.Sprite
 					constructor:() ->
 						super(N_X_CELL,N_Y_CELL)
-						Control.apply(@)
-						#@CTL.open.alpha = 0.500
-						@CTL_OPEN_ST.alpha = 0.500
-						@CTL_OPEN_ST.time = N_200MS
-						@CTL_CLOSE_ST.time = N_200MS
+						@b.on(F_MOTION_CLOSE_AND_BANISH)
+						@visible = 0
 		
 						if 1
 							@cvsRender = (cvs) ->
@@ -4373,6 +4384,8 @@ F_DEAL_B_WIL1					= 0x00000080
 						else
 							main.Input.MOUSE_DOWN(crd)
 					open:(crd,@bind) ->
+						super(0.500)
+
 						if crd.b.is(F_ZONE_MARK_MOVE) && @bind.b.is(main.System.phase,F_UNIT_FACTION_MASK) && crd.same(@bind.crd)
 							@backgroundColor = '#007FFF'
 							@tl.loop2().fadeTo(0.333,N_1000MS).fadeTo(0.500,N_1000MS)
@@ -4384,6 +4397,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@tl.loop2().fadeTo(0.333,N_1000MS).fadeTo(0.500,N_1000MS)
 						else if crd.b.is(F_ZONE_MARK_ATTACK) && @bind.b.is(main.System.phase,F_UNIT_FACTION_MASK)
 							@backgroundColor = '#FF7F00'
+							@tl.loop2().fadeTo(0.333,N_1000MS).fadeTo(0.500,N_1000MS)
 						else if crd.b.is(F_ZONE_MARK_CONTRACT) && @bind.b.is(main.System.phase,F_UNIT_FACTION_MASK)
 							@backgroundColor = '#FFBF00'
 							@tl.loop2().fadeTo(0.333,N_1000MS).fadeTo(0.500,N_1000MS)
@@ -4412,11 +4426,6 @@ F_DEAL_B_WIL1					= 0x00000080
 							console.log(crd.b)
 							@close()
 						(@crd = crd.clone()).setas(@)
-					close:() ->
-						@tl.exec(->
-							@bind = NULL
-							@parentNode.removeChild(@)
-						)
 				Label:class extends enchant.Sprite
 					constructor:() ->
 						#Control.apply(@)
@@ -4604,7 +4613,6 @@ F_DEAL_B_WIL1					= 0x00000080
 				Bar:class extends enchant.Group
 					constructor:(@bind) ->
 						super()
-						Control.apply(@)
 						@CTL_CLOSE_ST.b = 1
 		
 						@_width = N_X_GRID - 4
