@@ -216,6 +216,7 @@ F_DEAL_B_WIL1					= 0x00000080
 			if o::?
 				if o::[p]?
 					o::["$#{p}"] = o::[p]
+					f.super = o::[p]
 				o::[p] = f
 			else
 				o[p] = f
@@ -301,7 +302,7 @@ F_DEAL_B_WIL1					= 0x00000080
 	#arm(enchant.Entity,
 	arm(enchant.Node,
 		initialize:() ->
-			@$initialize()
+			arguments.callee.super.call(@,arguments)
 
 			@b = new Flag(F_MOTION_ANIMATION)
 			if @MOUSE_DOWN?
@@ -403,48 +404,56 @@ F_DEAL_B_WIL1					= 0x00000080
 						@MOUSE_HOLD?(crd.clone())
 				)
 
-			if @touchEnabled
-				if @b.is(F_ACTION_MASK)
-					@touchEnabled = 1
+			@addEventListener(enchant.Event.ADDED,(a) ->
+				if @parentNode.age > 0
+					@visible = !!0
+					@touchEnabled = !!0
 				else
-					@touchEnabled = 0
-		open:(opacity = 1.000,time = N_333MS) ->
+					@visible = !!1
+					@touchEnabled = !!@b.is(F_ACTION_MASK)
+			)
+		open:(opacity = 1.000,time = N_333MS,b = @b) ->
 			if !@visible
-				for o in [@].concat(@childNodes) when o?
-					if @b.is(F_MOTION_OPEN_CLEAR_TL)
-						o.tl.clear()
-					if @b.is(F_MOTION_OPEN_SET_TL)
-						o.opacity = 0.000
-						o.tl.fadeTo(opacity,time,enchant.Easing.QUINT_EASEOUT).exec(->
-							if @b.is(F_ACTION_MASK) && !@b.is(F_MOTION_OPEN_PRE_ENABLE_INPUT)
-								@touchEnabled = 1
-						)
-					else
-						if @b.is(F_ACTION_MASK) && @b.is(F_MOTION_OPEN_PRE_ENABLE_INPUT)
-							o.touchEnabled = 1
-					o.visible = 1
+				if @childNodes?
+					for _ in @childNodes
+						_.open(opacity,time,b)
+
+				if b.is(F_MOTION_OPEN_CLEAR_TL)
+					@tl.clear()
+				if b.is(F_MOTION_OPEN_SET_TL)
+					@opacity = 0.000
+					@tl.fadeTo(opacity,time,enchant.Easing.QUINT_EASEOUT).exec(->
+						if b.is(F_ACTION_MASK) && !b.is(F_MOTION_OPEN_PRE_ENABLE_INPUT)
+							@touchEnabled = 1
+					)
+				@visible = 1
 			return(@)
-		close:(time = N_333MS) ->
+		close:(time = N_333MS,b = @b) ->
 			if @visible
-				for o in [@].concat(@childNodes) when o?
-					if @b.is(F_MOTION_CLOSE_CLEAR_TL)
-						o.tl.clear()
-					if @b.is(F_MOTION_CLOSE_SET_TL)
-						o.tl.fadeTo(0,time,enchant.Easing.QUINT_EASEOUT).exec(->
-							if @b.is(F_ACTION_MASK) && !@b.is(F_MOTION_CLOSE_PRE_DISABLE_INPUT)
-								@touchEnabled = 0
-							@visible = 0
-						)
-					else
-							o.visible = 0
-							if @b.is(F_ACTION_MASK) && @b.is(F_MOTION_CLOSE_PRE_DISABLE_INPUT)
-								o.touchEnabled = 0
-					if @b.is(F_MOTION_CLOSE_AND_BANISH)
-						@tl.banish()
+				if @childNodes?
+					for _ in @childNodes
+						_.close(time,b)
+
+				if b.is(F_MOTION_CLOSE_CLEAR_TL)
+					@tl.clear()
+				if b.is(F_MOTION_CLOSE_SET_TL)
+					@tl.fadeTo(0,time,enchant.Easing.QUINT_EASEOUT).exec(->
+						if b.is(F_ACTION_MASK) && !b.is(F_MOTION_CLOSE_PRE_DISABLE_INPUT)
+							@touchEnabled = 0
+						@visible = 0
+					)
+				else
+					@visible = 0
+				if @b.is(F_ACTION_MASK) && @b.is(F_MOTION_CLOSE_PRE_DISABLE_INPUT)
+					@touchEnabled = 0
+				if b.is(F_MOTION_CLOSE_AND_BANISH)
+					@tl.banish()
 			return(@)
 	)
 
 	arm(enchant.Entity,
+		initialize:() ->
+			arguments.callee.super.call(@,arguments)
 		xywh:(x,y,w,h) ->
 			if x?
 				@x = x
@@ -968,6 +977,7 @@ F_DEAL_B_WIL1					= 0x00000080
 			return(@_cache[sv])
 
 		onload:() ->
+			console.log("onload start")
 			game = @
 
 			main = new class extends enchant.Scene
@@ -4332,7 +4342,6 @@ F_DEAL_B_WIL1					= 0x00000080
 					constructor:() ->
 						super(N_X_CELL,N_Y_CELL)
 						@b.on(F_MOTION_CLOSE_AND_BANISH)
-						@visible = 0
 		
 						if 1
 							@cvsRender = (cvs) ->
@@ -4847,6 +4856,8 @@ F_DEAL_B_WIL1					= 0x00000080
 							@parentNode.removeChild(@)
 						)
 
+			console.log("onload end")
+			console.log(game.age)
 			@replaceScene(main)
 			#@replaceScene(gameover)
 	).start()

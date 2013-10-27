@@ -4,6 +4,7 @@ build/*.js
 build/*.json
 enchant.js
 enchant.js-builds-0.7.0/
+enchant.js-builds-0.8.0/
 main.py
 name.pl
 resources/
