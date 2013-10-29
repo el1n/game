@@ -27,7 +27,7 @@ C_FONT_STYLE = "italic"
 #C_FONT_STYLE = "bold"
 C_FONT_SIZE = 0
 
-N_GAME_SPEED = 30
+N_GAME_SPEED = 60
 N_X_WND = 720 #ir$
 N_Y_WND = N_X_WND / 9 * 16 #ir$
 N_M_BTN_MAIN = N_X_WND / 20
@@ -68,6 +68,7 @@ F_MOTION_OPEN_PRE_ENABLE_INPUT	= 0x01000400
 F_MOTION_CLOSE_CLEAR_TL			= 0x01001000
 F_MOTION_CLOSE_SET_TL			= 0x01002000
 F_MOTION_CLOSE_PRE_DISABLE_INPUT= 0x01004000
+F_MOTION_FORCE					= 0x01008000
 F_MOTION_CLOSE_AND_BANISH		= 0x01010000
 F_MOTION_OPEN_ANIMATION			= 0x01000300
 F_MOTION_CLOSE_ANIMATION		= 0x01003000
@@ -304,7 +305,7 @@ F_DEAL_B_WIL1					= 0x00000080
 		initialize:() ->
 			arguments.callee.super.call(@,arguments)
 
-			@b = new Flag(F_MOTION_ANIMATION)
+			@b = new Flag()
 			if @MOUSE_DOWN?
 				@b.on(F_ACTION_DOWN)
 			if @MOUSE_UP?
@@ -407,13 +408,15 @@ F_DEAL_B_WIL1					= 0x00000080
 			@addEventListener(enchant.Event.ADDED,(a) ->
 				if @parentNode.age > 0
 					@visible = !!0
-					@touchEnabled = !!0
+					@touchEnabled = !!0 || !!@parentNode.b.is(F_ACTION_MASK)
+					@b.on(F_MOTION_ANIMATION)
 				else
+					#enchant.Node.open.call(@,null,new Flag(F_MOTION_IMMEDIATELY))
 					@visible = !!1
-					@touchEnabled = !!@b.is(F_ACTION_MASK)
+					@touchEnabled = !!@b.is(F_ACTION_MASK) || !!@parentNode.b.is(F_ACTION_MASK)
 			)
 		open:(opacity = 1.000,time = N_333MS,b = @b) ->
-			if !@visible
+			if !@visible || b.is(F_MOTION_FORCE)
 				if @childNodes?
 					for _ in @childNodes
 						_.open(opacity,time,b)
@@ -427,9 +430,11 @@ F_DEAL_B_WIL1					= 0x00000080
 							@touchEnabled = 1
 					)
 				@visible = 1
+				if b.is(F_ACTION_MASK) && !b.is(F_MOTION_OPEN_PRE_ENABLE_INPUT)
+					@touchEnabled = 1
 			return(@)
 		close:(time = N_333MS,b = @b) ->
-			if @visible
+			if @visible || b.is(F_MOTION_FORCE)
 				if @childNodes?
 					for _ in @childNodes
 						_.close(time,b)
@@ -3001,6 +3006,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@childNodes[1].image.context.strokeStyle = "#cccccc"
 							#@childNodes[1].image.context.stroke()
 						open:(elem) ->
+
 							@childNodes[3].width2 = elem.exp
 							@childNodes[4].width2 = elem.wil
 							@childNodes[5].width2 = elem.mgk
@@ -3115,6 +3121,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@draw("Serial",0,"left",@window[1],0,5)
 							@draw(elem.serial,0,"left",@window[1],1,5,3)
 		
+							super(NULL,NULL,new Flag(F_MOTION_IMMEDIATELY|F_MOTION_FORCE))
 							@move(1)
 						close:() ->
 							@childNodes[1].image.clear()
