@@ -1,5 +1,5 @@
 *** enchant.js-builds-0.7.0/build/enchant.js	2013-06-07 19:46:24.000000000 +0900
---- enchant.js	2013-09-20 13:04:36.196782869 +0900
+--- enchant.js	2014-02-06 09:58:21.426802771 +0900
 ***************
 *** 7,12 ****
 --- 7,17 ----
@@ -48,22 +48,30 @@
           } else {
               this._listeners = {};
 ***************
-*** 914,920 ****
+*** 914,924 ****
                   while (stage.firstChild) {
                       stage.removeChild(stage.firstChild);
                   }
 !                 stage.style.position = 'relative';
   
                   var bounding = stage.getBoundingClientRect();
-                  this._pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
---- 923,929 ----
+!                 this._pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
+!                 this._pageY = Math.round(window.scrollY || window.pageYOffset + bounding.top);
+              }
+              stage.style.fontSize = '12px';
+              stage.style.webkitTextSizeAdjust = 'none';
+--- 923,933 ----
                   while (stage.firstChild) {
                       stage.removeChild(stage.firstChild);
                   }
 !                 //stage.style.position = 'relative';
   
                   var bounding = stage.getBoundingClientRect();
-                  this._pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
+!                 this._pageX = Math.round((window.scrollX || window.pageXOffset) + bounding.left);
+!                 this._pageY = Math.round((window.scrollY || window.pageYOffset) + bounding.top);
+              }
+              stage.style.fontSize = '12px';
+              stage.style.webkitTextSizeAdjust = 'none';
 ***************
 *** 1493,1498 ****
 --- 1502,1510 ----
@@ -142,28 +150,17 @@
               this._css = '-webkit-canvas(' + id + ')';
 ***************
 *** 5806,5816 ****
-              e.timeline = this;
-              action.dispatchEvent(e);
-          }
-!         if (remainingTime > 0 || (this.queue[0] && this.queue[0].time === 0)) {
-              var event = new enchant.Event("enterframe");
-              event.elapsed = remainingTime;
-              this.dispatchEvent(event);
-          }
-      },
-      /**
-       */
 --- 5829,5849 ----
               e.timeline = this;
               action.dispatchEvent(e);
           }
-! 		//++CALLSTACK;
-!         //if (remainingTime > 0 || (this.queue[0] && this.queue[0].time === 0)) {
-!         if (++CALLSTACK < 2048 && (remainingTime > 0 || (this.queue[0] && this.queue[0].time === 0))) {
-! 			CALLSTACK_PEAK = CALLSTACK
-! 			//DEBUG("enchant.js/CALLSTACK: "+(CALLSTACK)+" [+]");
-! 			//if(CALLSTACK >= 256)
-! 			//	DEBUG("enchant.js/CALLSTACK: Peak "+(CALLSTACK));
++ 		//++CALLSTACK;
+          if (remainingTime > 0 || (this.queue[0] && this.queue[0].time === 0)) {
++         //if (++CALLSTACK < 2048 && (remainingTime > 0 || (this.queue[0] && this.queue[0].time === 0))) {
++ 			CALLSTACK_PEAK = CALLSTACK
++ 			//DEBUG("enchant.js/CALLSTACK: "+(CALLSTACK)+" [+]");
++ 			//if(CALLSTACK >= 256)
++ 			//	DEBUG("enchant.js/CALLSTACK: Peak "+(CALLSTACK));
               var event = new enchant.Event("enterframe");
               event.elapsed = remainingTime;
               this.dispatchEvent(event);

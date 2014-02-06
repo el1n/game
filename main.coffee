@@ -502,6 +502,12 @@ F_DEAL_B_WIL1					= 0x00000080
 				@width = w
 			if h?
 				@height = h
+		wh:(w,h) ->
+			if w?
+				@width = w
+			if h?
+				@height = h
+			return([@width,@height])
 	)
 
 	arm(enchant.Surface,
@@ -1016,8 +1022,8 @@ F_DEAL_B_WIL1					= 0x00000080
 
 			window.addEventListener("resize",=>
 				bounding = @_element.getBoundingClientRect()
-				@_pageX = Math.round(window.scrollX || window.pageXOffset + bounding.left);
-				@_pageY = Math.round(window.scrollY || window.pageYOffset + bounding.top);
+				@_pageX = Math.round((window.scrollX || window.pageXOffset) + bounding.left);
+				@_pageY = Math.round((window.scrollY || window.pageYOffset) + bounding.top);
 			)
 		cache:(sv,f) ->
 			@_cache ?= new Object()
@@ -1029,6 +1035,7 @@ F_DEAL_B_WIL1					= 0x00000080
 		onload:() ->
 			console.log("onload start")
 			game = @
+			window.game = @
 
 			main = new class extends enchant.Scene
 				constructor:() ->
@@ -1074,9 +1081,11 @@ F_DEAL_B_WIL1					= 0x00000080
 						hk:0
 		
 					@addEventListener(enchant.Event.ENTER,() ->
-						@ctrl = MODE[C_GAMEMODE].control
-						main.MaskContainer.Mask.open()
-						@System.init2()
+						if !@initcalled?
+							@ctrl = MODE[C_GAMEMODE].control
+							main.MaskContainer.Mask.open()
+							@System.init2()
+							@initcalled = 1
 					)
 		
 					if window.performance?.memory?
@@ -1098,6 +1107,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							@heap = new Object()
 							@phase = new Flag()
 						init2:() ->
+							console.log("call init2")
 							for i in [0..7]
 								@phase = new Flag(1 << 16 + i & F_UNIT_FACTION_MASK | F_UNIT_FACTION_BANK)
 								@phaseendrun()
@@ -1153,7 +1163,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								easing:enchant.Easing.QUINT_EASEOUT
 							).exec(->
 								@parentNode.removeChild(@)
-								game.replaceScene(game.Gameover)
+								game.replaceScene(gameover)
 							)
 							(new main.Label()).defeat("Player Phase",NULL,@i)
 						phaseend:() ->
@@ -2004,6 +2014,9 @@ F_DEAL_B_WIL1					= 0x00000080
 							{
 								text:"Config"
 								icon:"resources/icon/cog.png"
+								exec:() ->
+									game.pushScene(configure)
+									main.dispatchEvent(new enchant.Event('enter'));
 							}
 							{
 								text:"Mask Switch"
@@ -4539,6 +4552,7 @@ F_DEAL_B_WIL1					= 0x00000080
 						).exec(->
 							@parentNode.removeChild(@)
 						)
+						console.log(@)
 					defeat:(m) ->
 						@touchEnabled = 1
 						@geom(NULL,NULL,N_X_WND,N_Y_WND)
@@ -4888,163 +4902,461 @@ F_DEAL_B_WIL1					= 0x00000080
 							@parentNode.dead()
 							@parentNode.removeChild(@)
 						)
+
+
 			configure = new class extends enchant.Scene
 				constructor:() ->
 					super()
-					@backgroundColor = COLORREF(0x000000ff)
+					@backgroundColor = COLORREF(0x000000cf)
 
-					@item(0,@Separator,"Separator 1")
-					@item(0,@Label,"Label 1")
-					@item(0,@Label,"Label 2","discription")
-					@item(0,@Separator,"Separator 2")
-					@item(0,@Label,"Label 3")
-					@item(0,@Checkbox,"Checkbox Off").value = 0
-					@item(0,@Checkbox,"Checkbox On").value = 1
-					@item(0,@Label,"Label 4")
-					@item(0,@RadioButton,"RadioButton 1").value = 1
-					@item(0,@RadioButton,"RadioButton 2").value = 0
-					@item(0,@RadioButton,"RadioButton 3").value = 0
-				item:(lay,class1,args...) ->
-					while !@childNodes[lay]?
+					@value = new Object()
+
+					for a in Object.keys(Object.getPrototypeOf(@))
+						do (a) =>
+							if Object.getPrototypeOf(@)[a]?::class?
+								@[a] = (layer,args...) ->
+									@add(layer,Object.getPrototypeOf(@)[a],args)
+
+					@addEventListener(enchant.Event.ENTER_FRAME,() ->
+						console.log(1)
+						game.ready = false
+						game.currentScene = game._scenes[1]
+						game._callTick()
+						game.currentScene = game._scenes[2]
+						game.ready = true
+					)
+				add:(layer,class1,args) ->
+					while !@childNodes[layer]?
 						@addChild(new enchant.Group())
-						if lay != 0
-							@lastChild.x = N_X_WND
-					y = 0
-					if @childNodes[lay].lastChild?
-						y = @childNodes[lay].lastChild.y + @childNodes[lay].lastChild.height
-					@childNodes[lay].addChild(new class1(lay,args...))
-					@childNodes[lay].lastChild.y = y
-
-					return(@childNodes[lay].lastChild)
-				Label:class extends enchant.Group
-					constructor:(@layer,sv1,sv2) ->
+						if layer != 0
+							@lastChild.x = -N_X_WND
+					@childNodes[layer].addChild(new class1([0,0,N_X_WND,N_Y_WND * 0.100],args...))
+				Common:class extends enchant.Group
+					class:"Common"
+					constructor:(xywh,@key) ->
 						super()
+						[@x,@y,@width,@height] = xywh
 
-						if sv2?
-							@addChild(new enchant.Sprite(N_X_WND,N_Y_WND / 10))
-							@lastChild.image = new enchant.Surface(@lastChild.width,@lastChild.height)
-							@lastChild.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 60}px '#{C_FONT_FAMILY}'"
-							@lastChild.image.context.textAlign = 'left'
-							@lastChild.image.context.textBaseline = "alphabetic"
-							@lastChild.image.context.fillStyle = COLORREF(0xffffffff)
-							@lastChild.image.context.fillText(sv1,N_X_WND / 20,@lastChild.height / 2)
-							@lastChild.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
-							@lastChild.image.context.textAlign = 'left'
-							@lastChild.image.context.textBaseline = "middle"
-							@lastChild.image.context.fillStyle = COLORREF(0xffffffff)
-							@lastChild.image.context.fillText(sv2,N_X_WND / 20,@lastChild.height * 0.750)
-							@lastChild.image.context.strokeStyle = COLORREF(0xccccccff)
-							@lastChild.image.context.strokeLine(0,@lastChild.height,N_X_WND,@lastChild.height)
-						else
-							@addChild(new enchant.Sprite(N_X_WND,N_Y_WND / 10))
-							@lastChild.image = new enchant.Surface(@lastChild.width,@lastChild.height)
-							@lastChild.image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 60}px '#{C_FONT_FAMILY}'"
-							@lastChild.image.context.textAlign = 'left'
-							@lastChild.image.context.textBaseline = "middle"
-							@lastChild.image.context.fillStyle = COLORREF(0xffffffff)
-							@lastChild.image.context.fillText(sv1,N_X_WND / 20,@lastChild.height / 2)
-							@lastChild.image.context.strokeStyle = COLORREF(0xccccccff)
-							@lastChild.image.context.strokeLine(0,@lastChild.height,N_X_WND,@lastChild.height)
+						@addChild(new (class extends enchant.Entity
+							constructor:() ->
+								super()
 
-						@width = @lastChild.width
-						@height = @lastChild.height
-				Separator:class extends enchant.Sprite
-					constructor:(@layer,sv1) ->
-						super(N_X_WND,N_Y_WND / 30)
-						@backgroundColor = COLORREF(0x222222ff)
+								@xywh(arguments...)
+								@backgroundColor = COLORREF(0xccccccff)
+						)(0,0,@width,1))
 
-						@image = new enchant.Surface(@width,@height)
-						@image.context.font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
-						@image.context.textAlign = 'left'
-						@image.context.textBaseline = "middle"
-						@image.context.fillStyle = COLORREF(0xffffffff)
-						@image.context.fillText(sv1,N_X_WND / 30,@height / 2)
-						@image.context.strokeStyle = COLORREF(0xccccccff)
-						@image.context.strokeLine(0,@height,N_X_WND,@height)
-				Checkbox:class extends @::Label
-					constructor:() ->
+						@addEventListener(enchant.Event.ADDED,() ->
+							@y = Math.max(0,@parentNode.childNodes.slice(0,-1).map((_) -> _.y + _.firstChild.y)...) + 1
+						)
+						@addEventListener(enchant.Event.CHILD_ADDED,() ->
+							@firstChild.y = Math.max(@firstChild.y,@lastChild.y + @lastChild.height - 1)
+						)
+				Dummy:class extends @::Common
+					class:"Dummy"
+					constructor:(xywh,@key,color = 0x7f7f7fff) ->
+						super(arguments...)
+
+						@addChild(new (class extends enchant.Entity
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(xywh...)
+								@backgroundColor = COLORREF(color)
+						)(xywh))
+				Label:class extends @::Common
+					class:"Label"
+					constructor:(xywh,@key,args...) ->
 						super(arguments...)
 
 						@addChild(new (class extends enchant.Sprite
-							constructor:() ->
+							constructor:(x,y,w,h) ->
 								super()
-								@xywh(arguments...)
 
-								@image = new enchant.Surface(@width,@height,(node) ->
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 60}px '#{C_FONT_FAMILY}'"
+									@textAlign = "left"
+									@textBaseline = "middle"
 									@fillStyle = COLORREF(0xffffffff)
-									@fillRoundRect(0,0,node.width,node.height,node.width / 10)
+									@fillText(args[0],w * 0.050,h * 0.500)
 								)
-						#)(@height / 2,@height / 2))
-						)(@x + @width - @height * 0.750,@height * 0.250,@height / 2,@height / 2))
+						)(xywh...))
+
+						if args[1]?
+							@lastChild.y -= @lastChild.height * 0.166
+							@addChild(new (class extends enchant.Sprite
+								constructor:(x,y,w,h) ->
+									super()
+	
+									@xywh(arguments...)
+									@image = new enchant.Surface(w,h,() ->
+										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+										@textAlign = "left"
+										@textBaseline = "middle"
+										@fillStyle = COLORREF(0xffffffff)
+										@fillText(args[1],w * 0.050,h * 0.750)
+									)
+							)(xywh...))
+
+						if args[2]?
+							for _ in @childNodes[1..]
+								_.x = xywh[3] * 0.750 - xywh[2] * 0.050
+							@addChild(new (class extends enchant.Sprite
+								constructor:(x,y,w,h) ->
+									super()
+	
+									@xywh(arguments...)
+									@image = new enchant.Surface(w,h)
+									@image.draw(args[2],0,0,w,h)
+							)(xywh[3] * 0.125,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
+				Separator:class extends @::Dummy
+					class:"Separator"
+					constructor:(xywh,@key,args...) ->
+						xywh[3] *= 0.333
+						super(xywh,@key,0x222222ff)
+
+						if args[0]?
+							@addChild(new (class extends enchant.Sprite
+								constructor:(x,y,w,h) ->
+									super()
+	
+									@xywh(arguments...)
+									@image = new enchant.Surface(w,h,() ->
+										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+										@textAlign = "left"
+										@textBaseline = "middle"
+										@fillStyle = COLORREF(0xffffffff)
+										@fillText(args[0],w * 0.030,h * 0.500)
+									)
+							)(xywh...))
+
+						if args[1]?
+							@addChild(new (class extends enchant.Sprite
+								constructor:(x,y,w,h) ->
+									super()
+	
+									@xywh(arguments...)
+									@image = new enchant.Surface(w,h,() ->
+										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+										@textAlign = "right"
+										@textBaseline = "middle"
+										@fillStyle = COLORREF(0xffffffff)
+										@fillText(args[1],w - w * 0.030,h * 0.500)
+									)
+							)(xywh...))
+				Navigation:class extends @::Dummy
+					class:"Navigation"
+					constructor:(xywh,@key,args...) ->
+						xywh[3] *= 0.500
+						super(xywh,@key,0x444444ff)
 
 						@addChild(new (class extends enchant.Sprite
-							constructor:() ->
+							constructor:(x,y,w,h) ->
 								super()
-								@xywh(arguments...)
 
-								@image = new enchant.Surface(@width,@height,(node) ->
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+									@textAlign = "center"
+									@textBaseline = "middle"
+									@fillStyle = COLORREF(0xffffffff)
+									@fillText(args[0],w * 0.500,h * 0.500)
+								)
+						)(xywh...))
+
+						if args[1]?
+							@addChild(new (class extends enchant.Sprite
+								constructor:(x,y,w,h) ->
+									super()
+		
+									@xywh(arguments...)
+									@image = new enchant.Surface(w,h,() ->
+										@lineWidth = 4
+										@strokeStyle = COLORREF(0xddddddff)
+										@beginPath()
+										@moveTo(w * 0.050,h * 0.250)
+										@lineTo(w * 0.020,h * 0.500)
+										@lineTo(w * 0.050,h * 0.750)
+										@stroke()
+		
+										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+										@textAlign = "left"
+										@textBaseline = "middle"
+										@fillStyle = COLORREF(0xffffffff)
+										@fillText(args[1],w * 0.070,h * 0.500)
+									)
+								MOUSE_CLICK:() ->
+									if @scene.x + @parentNode.width > 0
+										game.popScene(@scene)
+									else
+										@scene.tl.clear().moveTo(@scene.x + @parentNode.width,0,N_500MS,enchant.Easing.QUINT_EASEOUT)
+							)(xywh...))
+				Checkbox:class extends @::Label
+					class:"Checkbox"
+					constructor:(xywh,@key,args...) ->
+						super(arguments...)
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@fillStyle = COLORREF(0xffffffff)
+									@fillRoundRect(0,0,w,h,w / 10)
+								)
+						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
 									@strokeStyle = COLORREF(0x666666ff)
 									@lineWidth = 16
 									@lineCap = "round"
 									@beginPath()
-									@moveTo(node.width * 0.200,node.height * 0.500)
-									@lineTo(node.width * 0.400,node.height * 0.750)
-									@lineTo(node.width * 0.800,node.height * 0.200)
+									@moveTo(w * 0.200,h * 0.500)
+									@lineTo(w * 0.400,h * 0.750)
+									@lineTo(w * 0.800,h * 0.200)
 									@stroke()
 								)
-						)(@x + @width - @height * 0.750,@height * 0.250,@height / 2,@height / 2))
+						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
 
-						@__defineGetter__("value",() -> @lastChild.visible)
-						@__defineSetter__("value",(value) -> @lastChild.visible = !!value)
+						@addEventListener(enchant.Event.ADDED_TO_SCENE,() ->
+							if @key?
+								[_,key,value] = @key.match(/^([^\.]+?)(?:\.(.+?))?$/)
+								if !@scene.value.__lookupGetter__(key)? && !@scene.value.__lookupSetter__(key)?
+									@scene.value.__defineGetter__(key,() =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												if _.lastChild.visible
+													return(value || _.lastChild.visible)
+									)
+									@scene.value.__defineSetter__(key,(value) =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												_.lastChild.visible = _.key == "#{key}.#{value}" && !!value
+									)
+						)
+						#@key = "#{@key.match(/^([^\.]+?)(?:\.(.+?))?$/)[1]}.0"
 					MOUSE_CLICK:() ->
-						@value ^= 1
+						if @key? && @key.search(/^([^\.]+?)(?:\.(.+?))?$/) != -1
+							@scene.value[RegExp.$1] ^= 1
+						console.log(game)
 				RadioButton:class extends @::Label
-					constructor:() ->
+					class:"RadioButton"
+					constructor:(xywh,@key,args...) ->
 						super(arguments...)
 
 						@addChild(new (class extends enchant.Sprite
-							constructor:() ->
+							constructor:(x,y,w,h) ->
 								super()
-								@xywh(arguments...)
 
-								@image = new enchant.Surface(@width,@height,(node) ->
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
 									@beginPath()
-									@arc(node.width / 2,node.height / 2,node.width / 2,0,Math.PI * 2,0)
+									@arc(w / 2,h / 2,w / 2,0,Math.PI * 2,0)
 									@fillStyle = COLORREF(0xffffffff)
 									@fill()
 
 									@beginPath()
-									@arc(node.width / 2,node.height / 2,node.width / 4,0,Math.PI * 2,0)
+									@arc(w / 2,h / 2,w / 3,0,Math.PI * 2,0)
 									@fillStyle = COLORREF(0xddddddff)
 									@fill()
 								)
-						#)(@height / 2,@height / 2))
-						)(@x + @width - @height * 0.750,@height * 0.250,@height / 2,@height / 2))
+						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
 
 						@addChild(new (class extends enchant.Sprite
-							constructor:() ->
+							constructor:(x,y,w,h) ->
 								super()
-								@xywh(arguments...)
 
-								@image = new enchant.Surface(@width,@height,(node) ->
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
 									@beginPath()
-									@arc(node.width / 2,node.height / 2,node.width / 4,0,Math.PI * 2,0)
+									@arc(w / 2,h / 2,w / 3,0,Math.PI * 2,0)
 									@fillStyle = COLORREF(0x666666ff)
 									@fill()
 								)
-						)(@x + @width - @height * 0.750,@height * 0.250,@height / 2,@height / 2))
+						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
 
-						@__defineGetter__("value",() -> @lastChild.visible)
-						@__defineSetter__("value",(value) -> @lastChild.visible = !!value)
+						@addEventListener(enchant.Event.ADDED_TO_SCENE,() ->
+							if @key?
+								[_,key,value] = @key.match(/^([^\.]+?)(?:\.(.+?))?$/)
+								if !@scene.value.__lookupGetter__(key)? && !@scene.value.__lookupSetter__(key)?
+									@scene.value.__defineGetter__(key,() =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												if _.lastChild.visible
+													return(value || _.lastChild.visible)
+									)
+									@scene.value.__defineSetter__(key,(value) =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												_.lastChild.visible = _.key == "#{key}.#{value}" && !!value
+									)
+						)
 					MOUSE_CLICK:() ->
-						@value ^= 1
-	
+						if @key? && @key.search(/^([^\.]+?)(?:\.(.+?))?$/) != -1
+							@scene.value[RegExp.$1] = RegExp.$2
 				Slider:class extends @::Label
-					constructor:() ->
+					class:"Slider"
+					constructor:(xywh,@key,args...) ->
 						super(arguments...)
 
-			#@replaceScene(main)
-			@replaceScene(configure)
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@fillStyle = COLORREF(0x666666ff)
+									@fillRoundRect(0,0,w,h,h * 0.200)
+								)
+						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.100,xywh[2] * 0.700,xywh[3] * 0.100))
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@fillStyle = COLORREF(0xccccccff)
+									@fillRoundRect(0,0,w,h,h * 0.200)
+								)
+						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.100,xywh[2] * 0.700,xywh[3] * 0.100))
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@fillStyle = COLORREF(0xffffffff)
+									@fillRoundRect(0,0,w,h,h * 0.200)
+								)
+						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.000,xywh[2] * 0.033,xywh[3] * 0.300))
+
+						@addChild(new (class extends enchant.Label
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+								@text = "1.000"
+								@textAlign = "center"
+								@textBaseline = "middle"
+								@color = COLORREF(0xffffffff)
+						)(xywh[0] + xywh[2] * 0.750,xywh[3] * 1.000,xywh[2] * 0.250,xywh[3] * 0.500))
+
+						###
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@beginPath()
+									@arc(w / 2,h / 2,w / 3,0,Math.PI * 2,0)
+									@fillStyle = COLORREF(0x666666ff)
+									@fill()
+								)
+						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.100,xywh[2] * 0.900,xywh[3] * 0.500))
+						###
+
+						@addEventListener(enchant.Event.ADDED_TO_SCENE,() ->
+							if @key?
+								[_,key,value] = @key.match(/^([^\.]+?)(?:\.(.+?))?$/)
+								if !@scene.value.__lookupGetter__(key)? && !@scene.value.__lookupSetter__(key)?
+									@scene.value.__defineGetter__(key,() =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												return(value)
+									)
+									@scene.value.__defineSetter__(key,(value) =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												@childNodes[5].text = args[3]?(value) || value
+									)
+						)
+					MOUSE_DRAG:(crd) ->
+						console.log(@childNodes[3].x)
+						crd.dif().neg().add(new Coordinates(@childNodes[5].x,@childNodes[5].y))
+						crd.min(new Coordinates(@childNodes[3].x,@lastChild.y))
+						crd.max(new Coordinates(@childNodes[3].x + @childNodes[3].width - @childNodes[5].width,@childNodes[5].y))
+						crd.setas(@childNodes[5])
+
+						@childNodes[4].width = @childNodes[5].x - @childNodes[3].x
+
+						#@childNodes[5].text = (@childNodes[5].x - @childNodes[3].x) / (@childNodes[3].width - @childNodes[5].width)
+
+						if @key? && @key.search(/^([^\.]+?)(?:\.(.+?))?$/) != -1
+							@scene.value[RegExp.$1] = RegExp.$2 * (@childNodes[4].x - @childNodes[3].x) / (@childNodes[3].width - @childNodes[4].width) 
+				Next:class extends @::Label
+					class:"Next"
+					constructor:(xywh,@key,args...) ->
+						super(arguments...)
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@beginPath()
+									@arc(w / 2,h / 2,w / 2,0,Math.PI * 2,0)
+									@fillStyle = COLORREF(0xffffffff)
+									@fill()
+
+									@strokeStyle = COLORREF(0x666666ff)
+									@lineWidth = 8
+									@lineCap = "round"
+									@lineJoin = "round"
+									@beginPath()
+									@moveTo(w * 0.375,h * 0.250)
+									@lineTo(w * 0.625,h * 0.500)
+									@lineTo(w * 0.375,h * 0.750)
+									@stroke()
+								)
+						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
+
+						if args[3]?
+							@layer = args[3]
+						else if @key?
+							@layer = @key
+					MOUSE_CLICK:() ->
+						if @layer?
+							@scene.childNodes[@layer].x = @x + @width
+							@scene.tl.clear().moveTo(-@scene.childNodes[@layer].x,0,N_500MS,enchant.Easing.QUINT_EASEOUT)
+#			configure.Dummy(0,NULL)
+#			configure.Dummy(0,NULL,0x7f0000ff)
+#			configure.Dummy(0,NULL,0x007f00ff)
+#			configure.Dummy(0,NULL,0x00007fff)
+
+#			configure.Dummy(0,NULL)
+#			configure.Dummy(0,NULL,0x7f0000ff)
+#			configure.Dummy(0,NULL,0x007f00ff)
+#			configure.Dummy(0,NULL,0x00007fff)
+#			configure.Label(0,NULL,"Label")
+#			configure.Label(0,NULL,"Label","Discription")
+			configure.Navigation(0,NULL,"Configure","Apply")
+
+			configure.Label(0,NULL,"Label","Discription",game.assets["resources/icon/sunrise.png"])
+			configure.Separator(0,NULL,"Separator")
+			#configure.Separator(0,NULL,NULL,"Separator")
+			configure.Checkbox(0,"cb1.1","Checkbox")
+			configure.RadioButton(0,"rb.1","RadioButton 1")
+			configure.RadioButton(0,"rb.2","RadioButton 2")
+			configure.RadioButton(0,"rb.3","RadioButton 3")
+			configure.Slider(0,"sl.100","Slider","Discription",NULL,(a) -> parseInt(a))
+			configure.Next(0,NULL,"Next",NULL,NULL,1)
+
+			configure.Navigation(1,NULL,"Sub Menu","Main Menu")
+			configure.Label(1,NULL,"Label","Discription")
+
+			@replaceScene(main)
+			#@replaceScene(configure)
 			#@replaceScene(gameover)
 	).start()
 	#).debug()
