@@ -222,6 +222,11 @@ F_DEAL_B_WIL1					= 0x00000080
 			else
 				o[p] = f
 
+	hook = (o,fn) ->
+		fn?.call(o)
+
+		return(o)
+
 	arm(Array,
 		clone:() ->
 			return(@slice())
@@ -458,14 +463,18 @@ F_DEAL_B_WIL1					= 0x00000080
 					@tl.clear()
 				if b.is(F_MOTION_OPEN_SET_TL)
 					@opacity = 0.000
-					@tl.fadeTo(opacity,time,enchant.Easing.QUINT_EASEOUT).exec(->
-						console.log(opacity)
+					@tl.exec(->
+						@visible = !!1
+					).fadeTo(opacity,time,enchant.Easing.QUINT_EASEOUT).exec(->
 						if b.is(F_ACTION_MASK) && !b.is(F_MOTION_OPEN_PRE_ENABLE_INPUT)
 							@touchEnabled = 1
 					)
-				@visible = 1
+				else
+					@visible = 1
 				if b.is(F_ACTION_MASK) && b.is(F_MOTION_OPEN_PRE_ENABLE_INPUT)
 					@touchEnabled = 1
+			else
+				console.log("open block visible == 1")
 			return(@)
 		close:(time = N_333MS,b = @b) ->
 			if @visible || b.is(F_MOTION_FORCE)
@@ -487,6 +496,8 @@ F_DEAL_B_WIL1					= 0x00000080
 					@touchEnabled = 0
 				if b.is(F_MOTION_CLOSE_AND_BANISH)
 					@tl.banish()
+			else
+				console.log("close block visible == 1")
 			return(@)
 	)
 
@@ -513,7 +524,7 @@ F_DEAL_B_WIL1					= 0x00000080
 	arm(enchant.Surface,
 		initialize:(x,y,fn) ->
 			arguments.callee.super.call(@,parseInt(x),parseInt(y))
-			fn?.call(@context,@)
+			fn?.call(@context,@,x,y)
 	)
 
 	arm(enchant.Sprite,
@@ -540,7 +551,30 @@ F_DEAL_B_WIL1					= 0x00000080
 				@parentNode.removeChild(@)
 			)
 			return(@)
+		open:(opacity,time,b = @node.b) ->
+			@node.open(opacity,time,b.clone().off(F_MOTION_OPEN_CLEAR_TL).on(F_MOTION_OPEN_SET_TL).on(F_MOTION_FORCE))
+			return(@)
+		close:(time,b = @node.b) ->
+			@node.close(time,b.clone().off(F_MOTION_CLOSE_CLEAR_TL).on(F_MOTION_CLOSE_SET_TL).on(F_MOTION_FORCE))
+			return(@)
 	)
+
+#	arm(enchant.Group,
+#		width:() ->
+#			min = Math.min(@childNodes.map((_) -> _.x)...)
+#			max = Math.max(@childNodes.map((_) -> _.x + _.width)...)
+#			return(max - min)
+#		height:() ->
+#			min = Math.min(@childNodes.map((_) -> _.y)...)
+#			max = Math.max(@childNodes.map((_) -> _.y + _.height)...)
+#			return(max - min)
+#	)
+
+	enchant.Canvas = class extends enchant.Sprite
+		constructor:(x,y,fn) ->
+			super(x,y)
+
+			@image = new enchant.Surface(x,y,fn)
 
 	if window.location.toString().match(/#(\d+)$/)
 		Math.w = parseInt(RegExp.$1)
@@ -1228,7 +1262,8 @@ F_DEAL_B_WIL1					= 0x00000080
 			
 									if b.is(@phase,F_UNIT_FACTION_MASK)
 										@lock()
-										(new main.Label()).phase(NULL,NULL,@i)
+										@scene.Render.Phase(@i)
+										#(new main.Label()).phase(NULL,NULL,@i)
 										@tl.exec(-> @role())
 									else
 										@phaseend()
@@ -4481,10 +4516,191 @@ F_DEAL_B_WIL1					= 0x00000080
 							console.log(crd.b)
 							@close()
 						(@crd = crd.clone()).setas(@)
+				Render:
+					Phase:(i = 0) ->
+						@Phase2(arguments...)
+					Phase2:(i = 0,m) ->
+						m ?= [
+							'Blue Phase'
+							'Allies Phase'
+							'Red Phase'
+							'Orange Phase'
+							'Yellow Phase'
+							'Green Phase'
+							'Witch Phase'
+						][i]
+
+						canvas = (new enchant.Surface(0,0)).context
+						canvas.font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 80}px '#{C_FONT_FAMILY}'"
+						canvas.textAlign = "center"
+						canvas.textBaseline = "middle"
+
+						color = COLORREF(0x0000ffff)
+
+
+						main.addChild(hook new enchant.Group(),->
+#							prew = 0
+#							ww = 0
+#							for i in m.split("")
+#								w = canvas.measureText(i).width * 1
+#								console.log("#{i} == #{w}")
+#								@addChild(hook new enchant.Canvas(w * 2,200,(_,w,h) ->
+#									@font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 80}px '#{C_FONT_FAMILY}'"
+#									@textAlign = "left"
+#									@textBaseline = "middle"
+#		
+#									@fillStyle = '#FFFFFF'
+#									@shadowColor = color
+#									@shadowBlur = 40
+#									@globalAlpha = 1
+#									@fillText(i,w * 0.25,h / 2)
+#									@fillText(i,w * 0.25,h / 2)
+#								),() ->
+#									#@x = ww
+#									@x = ww + prew * 0.75 - @width * 0.25
+#									@y = (N_Y_WND - @height) / 2
+#								)
+#								ww += prew
+#								prew = w
+							prew = 0
+							ww = 0
+							n = 0
+							for i in m.split("")
+								w = canvas.measureText(i).width * 1
+								@addChild(hook new enchant.Canvas(w * 2,200,(_,w,h) ->
+									@globalAlpha = 0.333
+									@fillStyle = '#000000'
+									@fillRect(0,0,w,h)
+
+									@font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 80}px '#{C_FONT_FAMILY}'"
+									@textAlign = "left"
+									@textBaseline = "middle"
+		
+									@fillStyle = '#FFFFFF'
+									@shadowColor = color
+									@shadowBlur = 40
+									@globalAlpha = 1
+									@fillText(i,w * 0.25,h / 2)
+									@fillText(i,w * 0.25,h / 2)
+
+									@strokeStyle = '#000000'
+									@lineWidth = 2
+									@shadowColor = '#000000'
+									@shadowBlur = 0
+									@globalAlpha = 1
+									@strokeText(i,w * 0.25,h / 2)
+								),() ->
+									@x = prew - @width * 0.25
+									@y = (N_Y_WND - @height) / 2
+
+									@scaleY = 4
+									@originX = @width / 2
+									@originY = @height / 2
+
+									@addEventListener(enchant.Event.ADDED_TO_SCENE,(b) ->
+										@b.on(F_MOTION_CLOSE_AND_BANISH)
+										@tl
+										.exec(-> console.log("start tl"))
+										.delay(N_500MS + N_100MS * ++n)
+										.open(NULL,0)
+										.tween(
+											opacity:1
+											scaleY:1
+											#scaleY:1 + Math.abs((@x + @width / 2) - N_X_WND / 2) / (N_X_WND / 3)
+											time:N_500MS
+											#easing:enchant.Easing.QUINT_EASEOUT
+											easing:enchant.Easing.CUBIC_EASEOUT
+										)
+										.delay(N_500MS)
+										.tween(
+											opacity:0
+											scaleY:4
+											time:N_500MS
+											#easing:enchant.Easing.QUINT_EASEIN
+											easing:enchant.Easing.CUBIC_EASEIN
+										)
+										.close(0)
+										.exec(-> console.log("end tl"))
+									)
+								)
+								prew = @lastChild.x + @lastChild.width * 0.75
+							width = @lastChild.x + @lastChild.width
+
+							for _ in @childNodes
+								_.x += (N_X_WND - prew) / 2
+						)
+						#main.lastChild.open()
+					Phase1:(i = 0,m) ->
+						if arguments.length == 2
+							m = arguments.shift()
+							color = arguments.shift()
+
+						m ?= [
+							'Blue Phase'
+							'Allies Phase'
+							'Red Phase'
+							'Orange Phase'
+							'Yellow Phase'
+							'Green Phase'
+							'Witch Phase'
+						][i]
+
+						color ?= [
+								'#0040FF'
+								'#00C0FF'
+								'#FF0000'
+								'#FF8000'
+								'#FFFF00'
+								'#00C000'
+								'#800080'
+								'#000000'
+								'#FFFFFF'
+						][i]
+
+						main.addChild(hook new enchant.Canvas(N_X_WND,N_Y_WND,(_,w,h) ->
+
+							@globalAlpha = 0.333
+							@fillStyle = '#000000'
+							@fillRect(0,0,w,h)
+
+							@font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 80}px '#{C_FONT_FAMILY}'"
+							@textAlign = "center"
+							@textBaseline = "middle"
+
+							@fillStyle = '#FFFFFF'
+							@shadowColor = color
+							@shadowBlur = 40
+							@globalAlpha = 1
+							@fillText(m,w / 2,h / 2)
+							@fillText(m,w / 2,h / 2)
+			
+							@strokeStyle = '#000000'
+							@lineWidth = 2
+							@shadowColor = '#000000'
+							@shadowBlur = 0
+							@globalAlpha = 1
+							@strokeText(m,w / 2,h / 2)
+						),() ->
+							@b.on(F_MOTION_CLOSE_AND_BANISH)
+
+							@addEventListener(enchant.Event.REMOVED,(a) ->
+								main.System.unlock()
+							)
+
+							@addEventListener(enchant.Event.ADDED_TO_SCENE,(b) ->
+								@tl
+								.delay(N_500MS)
+								.exec(-> console.log(@scene))
+								.open(NULL,N_1000MS)
+								.delay(N_1000MS)
+								.close(N_1000MS)
+							)
+						)
 				Label:class extends enchant.Sprite
 					constructor:() ->
 						#Control.apply(@)
 						super(160,160)
+						@b.off(F_MOTION_CLOSE_CLEAR_TL)
 		
 						@touchEnabled = 0
 		
@@ -4541,6 +4757,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							main.System.unlock()
 						)
 		
+						@open()
 						@tl.delay(N_500MS).tween(
 							opacity:1.000
 							time:N_1000MS
@@ -4550,6 +4767,8 @@ F_DEAL_B_WIL1					= 0x00000080
 							time:N_1000MS
 							easing:enchant.Easing.QUINT_EASEOUT
 						).exec(->
+							console.log("close")
+							console.log(@visible)
 							@parentNode.removeChild(@)
 						)
 						console.log(@)
