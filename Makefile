@@ -2,7 +2,8 @@ build/a: build/main.js build/lang.json build/name.json build/rule.json enchant.j
 	@echo 1
 
 build/main.js: main.coffee
-	perl ir.pl main.coffee|coffee -bps >$@
+	#perl ir.pl main.coffee|coffee -bps >$@
+	perl e.cgi main.coffee|perl ir.pl|coffee -bps >$@
 
 build/lang.json: lang.yaml
 	php y2j.php "param=LANGUAGE&yaml=lang.yaml" >$@

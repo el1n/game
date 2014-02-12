@@ -35,8 +35,6 @@ N_W_BTN_MAIN = N_X_WND - (N_M_BTN_MAIN * 2)
 N_H_BTN_MAIN = 64
 N_X_FIELD = 20
 N_Y_FIELD = 20
-N_X_GRID = 80
-N_Y_GRID = 80
 N_X_MAP = N_X_FIELD * N_X_GRID
 N_Y_MAP = N_Y_FIELD * N_Y_GRID
 N_X_MIN_SCR = -N_X_MAP + N_X_WND / 4
@@ -45,8 +43,23 @@ N_X_MAX_SCR = N_X_WND / 4
 N_Y_MAX_SCR = N_Y_WND / 4
 N_X_CELL = N_X_GRID
 N_Y_CELL = N_X_GRID
+
+N_X_GRID = 120
+N_Y_GRID = 60
+N_X_CHIP = 120
+N_Y_CHIP = 60
+N_Z_CHIP = 20
 N_X_UNIT = 80
 N_Y_UNIT = 80
+
+N_X_LAND = 4
+N_Y_LAND = 4
+N_Z_LAND = 0
+
+N_CAMERA_WEST = 0
+N_CAMERA_SOUTH = 1
+N_CAMERA_EAST = 2
+N_CAMERA_NORTH = 3
 
 F_CACHE							= 1
 N_IMP_BANK						= 1
@@ -81,7 +94,7 @@ F_VEC_SET_GRID					= 0x02000004
 F_VEC_SET_INPUT					= 0x02000008
 F_VEC_SETAS_FIELD				= 0x02000010
 F_VEC_SETAS_DISPLAY				= 0x02000020
-F_VEC_SETAS_GRID				= 0x02000040
+F_VEC_SETAS_LAND				= 0x02000040
 F_VEC_SETAS_INPUT				= 0x02000080
 F_VEC_SETAS_DISPLAY_GRID		= 0x02000024
 F_VEC_SETAS_GRID_INPUT			= 0x02000048
@@ -222,7 +235,7 @@ F_DEAL_B_WIL1					= 0x00000080
 			else
 				o[p] = f
 
-	hook = (o,fn) ->
+	chain= (o,fn) ->
 		fn?.call(o)
 
 		return(o)
@@ -328,6 +341,12 @@ F_DEAL_B_WIL1					= 0x00000080
 			@arcTo(x,y,x + r,y,r)
 			@closePath()
 			@fill()
+	)
+
+	arm(enchant.EventTarget,
+		chain:(fn) ->
+			fn?.call(@)
+			return(@)
 	)
 
 	arm(enchant.Node,
@@ -486,6 +505,7 @@ F_DEAL_B_WIL1					= 0x00000080
 					@tl.clear()
 				if b.is(F_MOTION_CLOSE_SET_TL)
 					@tl.fadeTo(0,time,enchant.Easing.QUINT_EASEOUT).exec(->
+					#@tl.fadeTo(0,time,enchant.Easing.QUINT_EASEIN).exec(->
 						if b.is(F_ACTION_MASK) && !b.is(F_MOTION_CLOSE_PRE_DISABLE_INPUT)
 							@touchEnabled = 0
 						@visible = 0
@@ -513,6 +533,7 @@ F_DEAL_B_WIL1					= 0x00000080
 				@width = w
 			if h?
 				@height = h
+			return([@x,@y,@width,@height])
 		wh:(w,h) ->
 			if w?
 				@width = w
@@ -655,7 +676,7 @@ F_DEAL_B_WIL1					= 0x00000080
 			if bank
 				return(@value[@bank(b)] & b | (b & F_FLAG_BANK))
 			else
-				return(@value[@bank(b)] & b & F_FLAG_FLAG)
+				return(@value[@bank(b)] & b | (b & F_FLAG_BANK))
 		geti:(b = F_FLAG_FLAG,shift = 0) ->
 			if (@value[@bank(b)] & b & F_FLAG_FLAG) != 0
 				return(1 + Math.log((@value[@bank(b)] & b & F_FLAG_FLAG) >>> Math.log(b & -b & F_FLAG_FLAG) / Math.LN2) / Math.LN2)
@@ -666,12 +687,13 @@ F_DEAL_B_WIL1					= 0x00000080
 
 	Coordinates = class
 		class:"Coordinates"
-		constructor:(x = 0,y = 0,b = 0) ->
+		constructor:(x = 0,y = 0,z = 0,b = 0) ->
 			if x.match?(/^(\d+)[ ,\.:;](\d+)$/)
 				x = parseInt(RegExp.$1)
 				y = parseInt(RegExp.$2)
 			@x = [x]
 			@y = [y]
+			@z = [z]
 			@b = new Flag(b)
 		clone:() ->
 			crd = new Coordinates()
@@ -684,18 +706,23 @@ F_DEAL_B_WIL1					= 0x00000080
 		push:(i = 1) ->
 			@x[i] = @x[0]
 			@y[i] = @y[0]
+			@z[i] = @z[0]
 			return(@)
 		pull:(i = 1) ->
 			@x[0] = @x[i]
 			@y[0] = @y[i]
+			@z[0] = @z[i]
 			return(@)
 		swap:(i = 1) ->
 			x = @x[i]
 			y = @y[i]
+			z = @z[i]
 			@x[i] = @x[0]
 			@y[i] = @y[0]
+			@z[i] = @z[0]
 			@x[0] = x
 			@y[0] = y
+			@z[0] = z
 			return(@)
 		same:(crd = @,i = 0) ->
 			return(crd.x[0] == @x[i] && crd.y[0] == @y[i])
@@ -777,41 +804,26 @@ F_DEAL_B_WIL1					= 0x00000080
 			@swap()
 			return(@)
 		setas:(o,i = 0,n = 0) ->
-			switch @b.get(F_VEC_SET_MASK)|F_VEC_BANK
-				when F_VEC_SET_FIELD
-					x = @x[i]
-					y = @y[i]
-				when F_VEC_SET_DISPLAY
-					x = @x[i]
-					y = @y[i]
-					console.log("F_VEC_SET_DISPLAY")
-				when F_VEC_SET_GRID
-					x = @x[i] * N_X_GRID
-					y = @y[i] * N_Y_GRID
-				when F_VEC_SET_INPUT
-					x = @x[i]
-					y = @y[i]
-					console.log("F_VEC_SET_INPUT")
+			switch @b.get(F_VEC_SET_MASK) | (o.b?.get(F_VEC_SETAS_MASK) || @b.get(F_VEC_SETAS_MASK))
+				when F_VEC_SET_GRID|F_VEC_SETAS_LAND
+					switch o.scene?.Field?.camera || o.parentNode?.scene?.Field?.camera
+						when N_CAMERA_WEST
+							x = N_X_CHIP / 2 * @x[i] + N_X_CHIP / 2 * @y[i]
+							y = N_Y_CHIP / 2 * @x[i] + -N_Y_CHIP / 2 * @y[i] + -N_Z_CHIP * @z[i]
+						when N_CAMERA_SOUTH
+							x = N_X_CHIP / 2 * @x[i] + -N_X_CHIP / 2 * @y[i]
+							y = y = -N_Y_CHIP / 2 * @x[i] + -N_Y_CHIP / 2 * @y[i] + -N_Z_CHIP * @z[i]
+						when N_CAMERA_EAST
+							x = -N_X_CHIP / 2 * @x[i] + -N_X_CHIP / 2 * @y[i]
+							y = -N_Y_CHIP / 2 * @x[i] + N_Y_CHIP / 2 * @y[i] + -N_Z_CHIP * @z[i]
+						when N_CAMERA_NORTH
+							x = -N_X_CHIP / 2 * @x[i] + N_X_CHIP / 2 * @y[i]
+							y = N_Y_CHIP / 2 * @x[i] + N_Y_CHIP / 2 * @y[i] + -N_Z_CHIP * @z[i]
+						else
+							console.log("! Invalid camera direction.")
 				when F_VEC_BANK
 					x = @x[i]
 					y = @y[i]
-				else
-					console.log("! Invalid VEC flag value #{@b.get(F_VEC_SET_MASK)}.")
-
-			switch @b.get(F_VEC_SETAS_MASK)|F_VEC_BANK
-				when F_VEC_SETAS_FIELD
-					NOP
-				when F_VEC_SETAS_DISPLAY
-					x = Math.min(N_X_WND / 4,Math.max(-N_X_MAP + N_X_WND / 4 * 3,-x + N_X_WND / 2))
-					y = Math.min(N_Y_WND / 4,Math.max(-N_Y_MAP + N_Y_WND / 4 * 3,-y + N_Y_WND / 2))
-				when F_VEC_SETAS_GRID
-					NOP
-				when F_VEC_SETAS_INPUT
-					x = Math.min(N_X_WND / 4,Math.max(-N_X_MAP + N_X_WND / 4 * 3,o.x + x))
-					y = Math.min(N_Y_WND / 4,Math.max(-N_Y_MAP + N_Y_WND / 4 * 3,o.y + y))
-				when F_VEC_BANK
-				else
-					console.log("! Invalid VEC flag value #{@b.get(F_VEC_SETAS_MASK)}.")
 
 			if o.class? && o.class == @class
 				@push()
@@ -946,6 +958,164 @@ F_DEAL_B_WIL1					= 0x00000080
 
 	COLORREF = (b) ->
 		return("rgba(#{b >> 24 & 0xff},#{b >> 16 & 0xff},#{b >> 8 & 0xff},#{(b & 0xff) / 0xff})")
+	rgb = (b) ->
+		return("rgb(#{b >> 16 & 0xff},#{b >> 8 & 0xff},#{(b & 0xff) / 0xff})")
+	rgba = (b) ->
+		return("rgba(#{b >> 24 & 0xff},#{b >> 16 & 0xff},#{b >> 8 & 0xff},#{(b & 0xff) / 0xff})")
+
+	(chain new enchant.Game(N_X_WND,N_Y_WND)
+		@preload("resources/icon/sideswipe.png")
+		@preload("land.gif")
+
+		@onload = () ->
+
+			core = @
+			main = new class extends enchant.Scene
+				constructor:() ->
+					super()
+					@backgroundColor = rgba(0x666666ff)
+
+					@addChild(@Input = new @Input())
+					@addChild(@Field = new @Field())
+					@addChild(@Interface = new @Interface())
+				Input:class extends enchant.Entity
+					constructor:() ->
+						super()
+						#@xywh(core.xywh()...)
+						@xywh(0,0,N_X_WND,N_Y_WND)
+					MOUSE_DOWN:() ->
+							NOP
+					MOUSE_DRAG:(c) ->
+						@scene.Field.scroll(c.dif().neg())
+				Field:class extends enchant.Group
+					constructor:() ->
+						super()
+
+						@camera = N_CAMERA_WEST
+
+						@addEventListener(enchant.Event.RENDER,() ->
+							if @sort
+								@childNodes.sort((a,b) =>
+									switch @camera
+										when N_CAMERA_WEST
+											a = a.c.x[0] + -a.c.y[0] + N_Z_LAND * a.c.z[0]
+											b = b.c.x[0] + -b.c.y[0] + N_Z_LAND * b.c.z[0]
+										when N_CAMERA_SOUTH
+											a = -a.c.x[0] + -a.c.y[0] + N_Z_LAND * a.c.z[0]
+											b = -b.c.x[0] + -b.c.y[0] + N_Z_LAND * b.c.z[0]
+										when N_CAMERA_EAST
+											a = -a.c.x[0] + a.c.y[0] + N_Z_LAND * a.c.z[0]
+											b = -b.c.x[0] + b.c.y[0] + N_Z_LAND * b.c.z[0]
+										when N_CAMERA_NORTH
+											a = a.c.x[0] + a.c.y[0] + N_Z_LAND * a.c.z[0]
+											b = b.c.x[0] + b.c.y[0] + N_Z_LAND * b.c.z[0]
+										else
+											a = 0
+											b = 0
+									return(a - b)
+								)
+						)
+					addChild:() ->
+						@sort = 1
+						super(arguments...)
+					removeChild:() ->
+						@sort = 1
+						super(arguments...)
+					scroll:(c) ->
+						c.add(new Coordinates(@x,@y,0)).setas(@)
+						DEBUG("Screen: #{@x}.#{@y}")
+					roll:(i) ->
+						@camera = (@camera + i) & 3
+						for v in @childNodes
+							v.c.setas(v)
+						@sort = 1
+				Land:class extends enchant.Sprite
+					@FLAT:0
+					@make:(type,xx,yy) ->
+						for x in [0..xx - 1]
+							for y in [0..yy - 1]
+								main.Field.addChild(new @(new Coordinates(x,y,0,F_VEC_SET_GRID),1))
+						main.Field.firstChild.frame = 5
+					constructor:(@c,@frame) ->
+						super()
+						@xywh(0,0,N_X_CHIP,N_Y_CHIP + N_Z_CHIP)
+
+						@b = new Flag(F_VEC_SETAS_LAND)
+
+						@image = core.assets["land.gif"]
+
+						@addEventListener(enchant.Event.ADDED,() ->
+							@c.setas(@)
+						)
+				Interface:class extends enchant.Group
+					constructor:() ->
+						super()
+
+						@addChild((new (class extends enchant.Canvas
+							MOUSE_DOWN:() ->
+								@scene.Field.roll(-1)
+						)(80,80,() ->
+							console.log(core.assets["resources/icon/sideswipe.png"])
+							@drawImage(
+								core.assets["resources/icon/sideswipe.png"]._element
+								0
+								0
+								512
+								512
+								0
+								0
+								80
+								80
+							)
+							img = @getImageData(0,0,80,80)
+							for i in [0..img.data.length / 4 - 1]
+								img.data[i * 4 + 3] = img.data[i * 4 + 0]
+								img.data[i * 4 + 0] = 0xff
+								img.data[i * 4 + 1] = 0xff
+								img.data[i * 4 + 2] = 0xff
+							@putImageData(img,0,0)
+						)).chain(() ->
+							@xywh(0,N_Y_WND - 80,NULL,NULL)
+							#@scaleX = -1
+							@scaleY = -1
+							#@rotate(180)
+						))
+
+						@addChild((new (class extends enchant.Canvas
+							MOUSE_DOWN:() ->
+								@scene.Field.roll(1)
+						)(80,80,() ->
+							console.log(core.assets["resources/icon/sideswipe.png"])
+							@drawImage(
+								core.assets["resources/icon/sideswipe.png"]._element
+								0
+								0
+								512
+								512
+								0
+								0
+								80
+								80
+							)
+							img = @getImageData(0,0,80,80)
+							for i in [0..img.data.length / 4 - 1]
+								img.data[i * 4 + 3] = img.data[i * 4 + 0]
+								img.data[i * 4 + 0] = 0xff
+								img.data[i * 4 + 1] = 0xff
+								img.data[i * 4 + 2] = 0xff
+							@putImageData(img,0,0)
+						)).chain(() ->
+							@xywh(N_X_WND - 80,N_Y_WND - 80,NULL,NULL)
+							@scaleX = -1
+							@scaleY = -1
+							#@rotate(180)
+						))
+			chain main
+				@Land.make(@Land.FLAT,10,6)
+			@replaceScene(main)
+	).start()
+
+	return(NULL)
 
 	(new class extends enchant.Game
 		constructor:() ->
@@ -1070,6 +1240,473 @@ F_DEAL_B_WIL1					= 0x00000080
 			console.log("onload start")
 			game = @
 			window.game = @
+
+			configure = new class extends enchant.Scene
+				constructor:() ->
+					super()
+					@backgroundColor = COLORREF(0x000000cf)
+
+					@value = new Object()
+
+					for a in Object.keys(Object.getPrototypeOf(@))
+						do (a) =>
+							if Object.getPrototypeOf(@)[a]?::class?
+								@[a] = (layer,args...) ->
+									@add(layer,Object.getPrototypeOf(@)[a],args)
+
+					@addEventListener(enchant.Event.ENTER_FRAME,() ->
+						console.log(1)
+						game.ready = false
+						game.currentScene = game._scenes[1]
+						game._callTick()
+						game.currentScene = game._scenes[2]
+						game.ready = true
+					)
+				add:(layer,class1,args) ->
+					while !@childNodes[layer]?
+						@addChild(new enchant.Group())
+						if layer != 0
+							@lastChild.x = -N_X_WND
+					@childNodes[layer].addChild(new class1([0,0,N_X_WND,N_Y_WND * 0.100],args...))
+				Common:class extends enchant.Group
+					class:"Common"
+					constructor:(xywh,@key) ->
+						super()
+						[@x,@y,@width,@height] = xywh
+
+						@addChild(new (class extends enchant.Entity
+							constructor:() ->
+								super()
+
+								@xywh(arguments...)
+								@backgroundColor = COLORREF(0xccccccff)
+						)(0,0,@width,1))
+
+						@addEventListener(enchant.Event.ADDED,() ->
+							@y = Math.max(0,@parentNode.childNodes.slice(0,-1).map((_) -> _.y + _.firstChild.y)...) + 1
+						)
+						@addEventListener(enchant.Event.CHILD_ADDED,() ->
+							@firstChild.y = Math.max(@firstChild.y,@lastChild.y + @lastChild.height - 1)
+						)
+				Dummy:class extends @::Common
+					class:"Dummy"
+					constructor:(xywh,@key,color = 0x7f7f7fff) ->
+						super(arguments...)
+
+						@addChild(new (class extends enchant.Entity
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(xywh...)
+								@backgroundColor = COLORREF(color)
+						)(xywh))
+				Label:class extends @::Common
+					class:"Label"
+					constructor:(xywh,@key,args...) ->
+						super(arguments...)
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 60}px '#{C_FONT_FAMILY}'"
+									@textAlign = "left"
+									@textBaseline = "middle"
+									@fillStyle = COLORREF(0xffffffff)
+									@fillText(args[0],w * 0.050,h * 0.500)
+								)
+						)(xywh...))
+
+						if args[1]?
+							@lastChild.y -= @lastChild.height * 0.166
+							@addChild(new (class extends enchant.Sprite
+								constructor:(x,y,w,h) ->
+									super()
+	
+									@xywh(arguments...)
+									@image = new enchant.Surface(w,h,() ->
+										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+										@textAlign = "left"
+										@textBaseline = "middle"
+										@fillStyle = COLORREF(0xffffffff)
+										@fillText(args[1],w * 0.050,h * 0.750)
+									)
+							)(xywh...))
+
+						if args[2]?
+							for _ in @childNodes[1..]
+								_.x = xywh[3] * 0.750 - xywh[2] * 0.050
+							@addChild(new (class extends enchant.Sprite
+								constructor:(x,y,w,h) ->
+									super()
+	
+									@xywh(arguments...)
+									@image = new enchant.Surface(w,h)
+									@image.draw(args[2],0,0,w,h)
+							)(xywh[3] * 0.125,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
+				Separator:class extends @::Dummy
+					class:"Separator"
+					constructor:(xywh,@key,args...) ->
+						xywh[3] *= 0.333
+						super(xywh,@key,0x222222ff)
+
+						if args[0]?
+							@addChild(new (class extends enchant.Sprite
+								constructor:(x,y,w,h) ->
+									super()
+	
+									@xywh(arguments...)
+									@image = new enchant.Surface(w,h,() ->
+										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+										@textAlign = "left"
+										@textBaseline = "middle"
+										@fillStyle = COLORREF(0xffffffff)
+										@fillText(args[0],w * 0.030,h * 0.500)
+									)
+							)(xywh...))
+
+						if args[1]?
+							@addChild(new (class extends enchant.Sprite
+								constructor:(x,y,w,h) ->
+									super()
+	
+									@xywh(arguments...)
+									@image = new enchant.Surface(w,h,() ->
+										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+										@textAlign = "right"
+										@textBaseline = "middle"
+										@fillStyle = COLORREF(0xffffffff)
+										@fillText(args[1],w - w * 0.030,h * 0.500)
+									)
+							)(xywh...))
+				Navigation:class extends @::Dummy
+					class:"Navigation"
+					constructor:(xywh,@key,args...) ->
+						xywh[3] *= 0.500
+						super(xywh,@key,0x444444ff)
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+									@textAlign = "center"
+									@textBaseline = "middle"
+									@fillStyle = COLORREF(0xffffffff)
+									@fillText(args[0],w * 0.500,h * 0.500)
+								)
+						)(xywh...))
+
+						if args[1]?
+							@addChild(new (class extends enchant.Sprite
+								constructor:(x,y,w,h) ->
+									super()
+		
+									@xywh(arguments...)
+									@image = new enchant.Surface(w,h,() ->
+										@lineWidth = 4
+										@strokeStyle = COLORREF(0xddddddff)
+										@beginPath()
+										@moveTo(w * 0.050,h * 0.250)
+										@lineTo(w * 0.020,h * 0.500)
+										@lineTo(w * 0.050,h * 0.750)
+										@stroke()
+		
+										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+										@textAlign = "left"
+										@textBaseline = "middle"
+										@fillStyle = COLORREF(0xffffffff)
+										@fillText(args[1],w * 0.070,h * 0.500)
+									)
+								MOUSE_CLICK:() ->
+									if @scene.x + @parentNode.width > 0
+										game.popScene(@scene)
+									else
+										@scene.tl.clear().moveTo(@scene.x + @parentNode.width,0,N_500MS,enchant.Easing.QUINT_EASEOUT)
+							)(xywh...))
+				Checkbox:class extends @::Label
+					class:"Checkbox"
+					constructor:(xywh,@key,args...) ->
+						super(arguments...)
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@fillStyle = COLORREF(0xffffffff)
+									@fillRoundRect(0,0,w,h,w / 10)
+								)
+						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@strokeStyle = COLORREF(0x666666ff)
+									@lineWidth = 16
+									@lineCap = "round"
+									@beginPath()
+									@moveTo(w * 0.200,h * 0.500)
+									@lineTo(w * 0.400,h * 0.750)
+									@lineTo(w * 0.800,h * 0.200)
+									@stroke()
+								)
+						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
+
+						@addEventListener(enchant.Event.ADDED_TO_SCENE,() ->
+							if @key?
+								[_,key,value] = @key.match(/^([^\.]+?)(?:\.(.+?))?$/)
+								if !@scene.value.__lookupGetter__(key)? && !@scene.value.__lookupSetter__(key)?
+									@scene.value.__defineGetter__(key,() =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												if _.lastChild.visible
+													return(value || _.lastChild.visible)
+									)
+									@scene.value.__defineSetter__(key,(value) =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												_.lastChild.visible = _.key == "#{key}.#{value}" && !!value
+									)
+						)
+						#@key = "#{@key.match(/^([^\.]+?)(?:\.(.+?))?$/)[1]}.0"
+					MOUSE_CLICK:() ->
+						if @key? && @key.search(/^([^\.]+?)(?:\.(.+?))?$/) != -1
+							@scene.value[RegExp.$1] ^= 1
+						console.log(game)
+				RadioButton:class extends @::Label
+					class:"RadioButton"
+					constructor:(xywh,@key,args...) ->
+						super(arguments...)
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@beginPath()
+									@arc(w / 2,h / 2,w / 2,0,Math.PI * 2,0)
+									@fillStyle = COLORREF(0xffffffff)
+									@fill()
+
+									@beginPath()
+									@arc(w / 2,h / 2,w / 3,0,Math.PI * 2,0)
+									@fillStyle = COLORREF(0xddddddff)
+									@fill()
+								)
+						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@beginPath()
+									@arc(w / 2,h / 2,w / 3,0,Math.PI * 2,0)
+									@fillStyle = COLORREF(0x666666ff)
+									@fill()
+								)
+						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
+
+						@addEventListener(enchant.Event.ADDED_TO_SCENE,() ->
+							if @key?
+								[_,key,value] = @key.match(/^([^\.]+?)(?:\.(.+?))?$/)
+								if !@scene.value.__lookupGetter__(key)? && !@scene.value.__lookupSetter__(key)?
+									@scene.value.__defineGetter__(key,() =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												if _.lastChild.visible
+													return(value || _.lastChild.visible)
+									)
+									@scene.value.__defineSetter__(key,(value) =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												_.lastChild.visible = _.key == "#{key}.#{value}" && !!value
+									)
+						)
+					MOUSE_CLICK:() ->
+						if @key? && @key.search(/^([^\.]+?)(?:\.(.+?))?$/) != -1
+							@scene.value[RegExp.$1] = RegExp.$2
+				SliderMulti:class extends @::Label
+					class:"SliderMulti"
+					constructor:(xywh,@key,args...) ->
+						super(arguments...)
+				Slider:class extends @::SliderMulti
+					class:"Slider"
+					constructor:(xywh,@key,args...) ->
+						super(arguments...)
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@fillStyle = COLORREF(0x666666ff)
+									@fillRoundRect(0,0,w,h,h * 0.200)
+								)
+						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.100,xywh[2] * 0.700,xywh[3] * 0.100))
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@fillStyle = COLORREF(0xccccccff)
+									@fillRoundRect(0,0,w,h,h * 0.200)
+								)
+						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.100,xywh[2] * 0.700,xywh[3] * 0.100))
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@fillStyle = COLORREF(0xffffffff)
+									@fillRoundRect(0,0,w,h,h * 0.200)
+								)
+						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.000,xywh[2] * 0.033,xywh[3] * 0.300))
+
+						@addChild(new (class extends enchant.Label
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
+								@text = "1.000"
+								@textAlign = "center"
+								@textBaseline = "middle"
+								@color = COLORREF(0xffffffff)
+						)(xywh[0] + xywh[2] * 0.750,xywh[3] * 1.000,xywh[2] * 0.250,xywh[3] * 0.500))
+
+						###
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@beginPath()
+									@arc(w / 2,h / 2,w / 3,0,Math.PI * 2,0)
+									@fillStyle = COLORREF(0x666666ff)
+									@fill()
+								)
+						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.100,xywh[2] * 0.900,xywh[3] * 0.500))
+						###
+
+						@addEventListener(enchant.Event.ADDED_TO_SCENE,() ->
+							if @key?
+								[_,key,value] = @key.match(/^([^\.]+?)(?:\.(.+?))?$/)
+								if !@scene.value.__lookupGetter__(key)? && !@scene.value.__lookupSetter__(key)?
+									@scene.value.__defineGetter__(key,() =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												return(value)
+									)
+									@scene.value.__defineSetter__(key,(value) =>
+										for _ in @scene.childNodes
+											for _ in _.childNodes when _.key?.indexOf(key) == 0
+												@childNodes[5].text = args[3]?(value) || value
+									)
+						)
+					MOUSE_DRAG:(crd) ->
+						console.log(@childNodes[3].x)
+						crd.dif().neg().add(new Coordinates(@childNodes[5].x,@childNodes[5].y))
+						crd.min(new Coordinates(@childNodes[3].x,@lastChild.y))
+						crd.max(new Coordinates(@childNodes[3].x + @childNodes[3].width - @childNodes[5].width,@childNodes[5].y))
+						crd.setas(@childNodes[5])
+
+						@childNodes[4].width = @childNodes[5].x - @childNodes[3].x
+
+						#@childNodes[5].text = (@childNodes[5].x - @childNodes[3].x) / (@childNodes[3].width - @childNodes[5].width)
+
+						if @key? && @key.search(/^([^\.]+?)(?:\.(.+?))?$/) != -1
+							@scene.value[RegExp.$1] = RegExp.$2 * (@childNodes[4].x - @childNodes[3].x) / (@childNodes[3].width - @childNodes[4].width) 
+				Color:class extends @::Slider
+					class:"Color"
+					constructor:(xywh,@key,args...) ->
+				Next:class extends @::Label
+					class:"Next"
+					constructor:(xywh,@key,args...) ->
+						super(arguments...)
+
+						@addChild(new (class extends enchant.Sprite
+							constructor:(x,y,w,h) ->
+								super()
+
+								@xywh(arguments...)
+								@image = new enchant.Surface(w,h,() ->
+									@beginPath()
+									@arc(w / 2,h / 2,w / 2,0,Math.PI * 2,0)
+									@fillStyle = COLORREF(0xffffffff)
+									@fill()
+
+									@strokeStyle = COLORREF(0x666666ff)
+									@lineWidth = 8
+									@lineCap = "round"
+									@lineJoin = "round"
+									@beginPath()
+									@moveTo(w * 0.375,h * 0.250)
+									@lineTo(w * 0.625,h * 0.500)
+									@lineTo(w * 0.375,h * 0.750)
+									@stroke()
+								)
+						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
+
+						if args[3]?
+							@layer = args[3]
+						else if @key?
+							@layer = @key
+					MOUSE_CLICK:() ->
+						if @layer?
+							@scene.childNodes[@layer].x = @x + @width
+							@scene.tl.clear().moveTo(-@scene.childNodes[@layer].x,0,N_500MS,enchant.Easing.QUINT_EASEOUT)
+#			configure.Dummy(0,NULL)
+#			configure.Dummy(0,NULL,0x7f0000ff)
+#			configure.Dummy(0,NULL,0x007f00ff)
+#			configure.Dummy(0,NULL,0x00007fff)
+
+#			configure.Dummy(0,NULL)
+#			configure.Dummy(0,NULL,0x7f0000ff)
+#			configure.Dummy(0,NULL,0x007f00ff)
+#			configure.Dummy(0,NULL,0x00007fff)
+#			configure.Label(0,NULL,"Label")
+#			configure.Label(0,NULL,"Label","Discription")
+			configure.Navigation(0,NULL,"Configure","Apply")
+			configure.Next(0,NULL,"Display",NULL,NULL,1)
+			configure.Navigation(1,NULL,"Display","Configure")
+			configure.Checkbox(1,"anim.1","Enable Animation")
+			configure.Separator(1,NULL,"")
+			configure.Checkbox(1,"fps.1","Show FPS")
+
+			configure.Label(0,NULL,"Label","Discription",game.assets["resources/icon/sunrise.png"])
+			configure.Separator(0,NULL,"Separator")
+			#configure.Separator(0,NULL,NULL,"Separator")
+			configure.Checkbox(0,"cb1.1","Checkbox")
+			configure.RadioButton(0,"rb.1","RadioButton 1")
+			configure.RadioButton(0,"rb.2","RadioButton 2")
+			configure.RadioButton(0,"rb.3","RadioButton 3")
+			configure.Slider(0,"sl.100","Slider","Discription",NULL,(a) -> parseInt(a))
+			configure.Next(0,NULL,"Next",NULL,NULL,1)
+
+			configure.Navigation(1,NULL,"Sub Menu","Main Menu")
+			configure.Label(1,NULL,"Label","Discription")
+
+			configure.value.i_mgc_cr = 0x00DF00FF
+			configure.value.i_wil_cr = 0x0000FFFF
+			configure.value.i_exp_cr = 0xDF0000FF
 
 			main = new class extends enchant.Scene
 				constructor:() ->
@@ -1199,7 +1836,7 @@ F_DEAL_B_WIL1					= 0x00000080
 								@parentNode.removeChild(@)
 								game.replaceScene(gameover)
 							)
-							(new main.Label()).defeat("Player Phase",NULL,@i)
+							@scene.Render.Defeat()
 						phaseend:() ->
 							main.MaskContainer.Mask.open()
 							@i = ++@i % main.ctrl.len()
@@ -1250,7 +1887,7 @@ F_DEAL_B_WIL1					= 0x00000080
 									#@tl.exec(-> main.FieldContainer.look(main.UnitContainer.childNodes.grep((_) -> _.b.is(phase)).fv().crd))
 									main.FieldContainer.look(main.UnitContainer.childNodes.grep((_) => _.b.is(@phase)).fv().crd)
 									@lock()
-									(new main.Label()).phase(NULL,NULL,@i)
+									@scene.Render.Phase(@i)
 									@tl.exec(->
 										main.MaskContainer.Mask.close()
 									)
@@ -1269,7 +1906,7 @@ F_DEAL_B_WIL1					= 0x00000080
 										@phaseend()
 								when 2
 									@lock()
-									(new main.Label()).phase(NULL,NULL,@i)
+									@scene.Render.Phase(@i)
 									@tl.exec(-> @role())
 								when 3
 									###
@@ -2908,11 +3545,11 @@ F_DEAL_B_WIL1					= 0x00000080
 							for i in [0,3,4]
 								@addChild(new enchant.Entity())
 								@lastChild.color = [
-									["#00DF00","#003F00"]
+									[COLORREF(configure.value.i_exp_cr),COLORREF(configure.value.i_exp_cr * 0.250)]
 									NULL
 									NULL
-									["#DF0000","#3F0000"]
-									["#0000DF","#00003F"]
+									[COLORREF(configure.value.i_wil_cr),COLORREF(configure.value.i_wil_cr * 0.250)]
+									[COLORREF(configure.value.i_mgc_cr),COLORREF(configure.value.i_mgc_cr * 0.250)]
 								][i]
 								@lastChild.cvsRender = (e) ->
 									if @width2 > 0
@@ -2922,14 +3559,16 @@ F_DEAL_B_WIL1					= 0x00000080
 										e.lineTo(@width * @width2 - 10,@height)
 										e.lineTo(0,@height)
 										e.closePath()
+										e.fillStyle = @color[0]
+										e.fill()
 										e.fillStyle = e.createLinearGradient(
 											@width
 											@height
 											0
 											0
 										)
-										e.fillStyle.addColorStop(0,@color[0])
-										e.fillStyle.addColorStop(1,@color[1])
+										e.fillStyle.addColorStop(0,COLORREF(0x00000000))
+										e.fillStyle.addColorStop(1,COLORREF(0x000000BF))
 										e.fill()
 								@lastChild.y = @window[3].grid(4,i,4)[1]
 								@lastChild.height = @window[3].grid(4,i,4)[3]
@@ -4375,7 +5014,7 @@ F_DEAL_B_WIL1					= 0x00000080
 						console.log("close")
 						@tl.delay(N_1000MS).exec(->
 							if @b.is(F_UNIT_CLASS_MAHOUSHOJO)
-								game.Gameover.deathtoll.push(
+								gameover.deathtoll.push(
 									name:@name
 									killer:@killer.name
 								)
@@ -4383,7 +5022,7 @@ F_DEAL_B_WIL1					= 0x00000080
 							else if @b.is(F_UNIT_CLASS_WITCH|F_UNIT_CLASS_MINION)
 								main.score.wk++
 							else if @b.is(F_UNIT_CLASS_HUMAN)
-								game.Gameover.deathtoll.push(
+								gameover.deathtoll.push(
 									name:@name
 									killer:@killer.name
 								)
@@ -4518,8 +5157,10 @@ F_DEAL_B_WIL1					= 0x00000080
 						(@crd = crd.clone()).setas(@)
 				Render:
 					Phase:(i = 0) ->
-						@Phase2(arguments...)
-					Phase2:(i = 0,m) ->
+						if arguments.length == 2
+							m = arguments.shift()
+							color = arguments.shift()
+
 						m ?= [
 							'Blue Phase'
 							'Allies Phase'
@@ -4530,13 +5171,66 @@ F_DEAL_B_WIL1					= 0x00000080
 							'Witch Phase'
 						][i]
 
+						color ?= [
+								['#0040FF','#FFFFFF','#000000']
+								['#00C0FF','#FFFFFF','#000000']
+								['#FF0000','#FFFFFF','#000000']
+								['#FF8000','#FFFFFF','#000000']
+								['#FFFF00','#FFFFFF','#000000']
+								['#00C000','#FFFFFF','#000000']
+								['#800080','#FFFFFF','#000000']
+								['#000000','#FFFFFF','#000000']
+								['#FFFFFF','#FFFFFF','#000000']
+						][i]
+
+						#@Phase1(m,color)
+						@Phase2(m,color)
+					Defeat:(i = 0) ->
+						@Phase1("DEFEAT",["#FF0000",'#000000',"#FF0000"])
+					Phase1:(m,color) ->
+						main.addChild(hook new enchant.Canvas(N_X_WND,N_Y_WND,(_,w,h) ->
+							@globalAlpha = 0.333
+							@fillStyle = '#000000'
+							@fillRect(0,0,w,h)
+
+							@font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 80}px '#{C_FONT_FAMILY}'"
+							@textAlign = "center"
+							@textBaseline = "middle"
+
+							@fillStyle = color[1]
+							@shadowColor = color[0]
+							@shadowBlur = 40
+							@globalAlpha = 1
+							@fillText(m,w / 2,h / 2)
+							@fillText(m,w / 2,h / 2)
+			
+							@strokeStyle = color[2]
+							@lineWidth = 2
+							@shadowColor = '#000000'
+							@shadowBlur = 0
+							@globalAlpha = 1
+							@strokeText(m,w / 2,h / 2)
+						),() ->
+							@b.on(F_MOTION_CLOSE_AND_BANISH)
+
+							@addEventListener(enchant.Event.REMOVED,(a) ->
+								main.System.unlock()
+							)
+
+							@addEventListener(enchant.Event.ADDED_TO_SCENE,(b) ->
+								@tl
+								.delay(N_500MS)
+								.exec(-> console.log(@scene))
+								.open(NULL,N_1000MS)
+								.delay(N_1000MS)
+								.close(N_1000MS)
+							)
+						)
+					Phase2:(m,color) ->
 						canvas = (new enchant.Surface(0,0)).context
 						canvas.font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 80}px '#{C_FONT_FAMILY}'"
 						canvas.textAlign = "center"
 						canvas.textBaseline = "middle"
-
-						color = COLORREF(0x0000ffff)
-
 
 						main.addChild(hook new enchant.Group(),->
 #							prew = 0
@@ -4562,28 +5256,43 @@ F_DEAL_B_WIL1					= 0x00000080
 #								)
 #								ww += prew
 #								prew = w
+
+							@addChild(hook new enchant.Canvas(N_X_WND,N_Y_WND,(_,w,h) ->
+								@globalAlpha = 0.333
+								@fillStyle = '#000000'
+								@fillRect(0,0,w,h)
+							),() ->
+								@addEventListener(enchant.Event.ADDED_TO_SCENE,(b) ->
+									@b.on(F_MOTION_CLOSE_AND_BANISH)
+									@tl
+									.delay(N_500MS)
+									.open(NULL,N_500MS)
+									.delay(N_500MS + N_100MS * (m.split("").length - 1))
+									.close(N_500MS)
+								)
+
+								@addEventListener(enchant.Event.REMOVED,(a) ->
+									main.System.unlock()
+								)
+							)
 							prew = 0
 							ww = 0
 							n = 0
 							for i in m.split("")
 								w = canvas.measureText(i).width * 1
 								@addChild(hook new enchant.Canvas(w * 2,200,(_,w,h) ->
-									@globalAlpha = 0.333
-									@fillStyle = '#000000'
-									@fillRect(0,0,w,h)
-
 									@font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 80}px '#{C_FONT_FAMILY}'"
 									@textAlign = "left"
 									@textBaseline = "middle"
 		
-									@fillStyle = '#FFFFFF'
-									@shadowColor = color
+									@fillStyle = color[1]
+									@shadowColor = color[0]
 									@shadowBlur = 40
 									@globalAlpha = 1
 									@fillText(i,w * 0.25,h / 2)
 									@fillText(i,w * 0.25,h / 2)
 
-									@strokeStyle = '#000000'
+									@strokeStyle = color[2]
 									@lineWidth = 2
 									@shadowColor = '#000000'
 									@shadowBlur = 0
@@ -4601,7 +5310,7 @@ F_DEAL_B_WIL1					= 0x00000080
 										@b.on(F_MOTION_CLOSE_AND_BANISH)
 										@tl
 										.exec(-> console.log("start tl"))
-										.delay(N_500MS + N_100MS * ++n)
+										.delay(N_500MS + N_100MS * n++)
 										.open(NULL,0)
 										.tween(
 											opacity:1
@@ -4626,196 +5335,54 @@ F_DEAL_B_WIL1					= 0x00000080
 								prew = @lastChild.x + @lastChild.width * 0.75
 							width = @lastChild.x + @lastChild.width
 
-							for _ in @childNodes
+							for _ in @childNodes.slice(1)
 								_.x += (N_X_WND - prew) / 2
 						)
-						#main.lastChild.open()
-					Phase1:(i = 0,m) ->
-						if arguments.length == 2
-							m = arguments.shift()
-							color = arguments.shift()
-
-						m ?= [
-							'Blue Phase'
-							'Allies Phase'
-							'Red Phase'
-							'Orange Phase'
-							'Yellow Phase'
-							'Green Phase'
-							'Witch Phase'
-						][i]
-
-						color ?= [
-								'#0040FF'
-								'#00C0FF'
-								'#FF0000'
-								'#FF8000'
-								'#FFFF00'
-								'#00C000'
-								'#800080'
-								'#000000'
-								'#FFFFFF'
-						][i]
-
+				Effect:
+					Damage:(unit,m) ->
 						main.addChild(hook new enchant.Canvas(N_X_WND,N_Y_WND,(_,w,h) ->
-
-							@globalAlpha = 0.333
-							@fillStyle = '#000000'
-							@fillRect(0,0,w,h)
-
-							@font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 80}px '#{C_FONT_FAMILY}'"
-							@textAlign = "center"
-							@textBaseline = "middle"
-
-							@fillStyle = '#FFFFFF'
-							@shadowColor = color
-							@shadowBlur = 40
-							@globalAlpha = 1
+							@font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 32}px '#{C_FONT_FAMILY}'"
+							@textAlign = 'center'
+							@fillStyle = c
 							@fillText(m,w / 2,h / 2)
-							@fillText(m,w / 2,h / 2)
-			
-							@strokeStyle = '#000000'
-							@lineWidth = 2
-							@shadowColor = '#000000'
-							@shadowBlur = 0
-							@globalAlpha = 1
+							@strokeStyle = '#FFFFFF'
+							@lineWidth = 1
 							@strokeText(m,w / 2,h / 2)
 						),() ->
-							@b.on(F_MOTION_CLOSE_AND_BANISH)
+							unit.crd.setas(@)
+							@xywh(@x - N_X_GRID / 2,NULL,N_X_GRID * 2,N_Y_GRID)
 
-							@addEventListener(enchant.Event.REMOVED,(a) ->
-								main.System.unlock()
-							)
-
-							@addEventListener(enchant.Event.ADDED_TO_SCENE,(b) ->
-								@tl
-								.delay(N_500MS)
-								.exec(-> console.log(@scene))
-								.open(NULL,N_1000MS)
-								.delay(N_1000MS)
-								.close(N_1000MS)
-							)
+							@tl
+							.delay(0)
+							.open()
+							.and()
+							.tween(
+								x:@x + x
+								time:N_500MS
+							).and().tween(
+								y:@y - N_Y_GRID / 4
+								time:N_500MS
+								#easing:enchant.Easing.QUINT_EASEOUT
+								easing:enchant.Easing.CUBIC_EASEOUT
+							).tween(
+								x:@x + x + x
+								time:N_500MS
+							).and().tween(
+								y:@y
+								opacity:0.000
+								time:N_500MS
+								easing:enchant.Easing.CUBIC_EASEIN
+							).close()
 						)
 				Label:class extends enchant.Sprite
 					constructor:() ->
 						#Control.apply(@)
 						super(160,160)
 						@b.off(F_MOTION_CLOSE_CLEAR_TL)
-		
+
 						@touchEnabled = 0
-		
+
 						return(@)
-					phase:(m,color,i) ->
-						@geom(NULL,NULL,N_X_WND,N_Y_WND)
-		
-						m ?= [
-							'Blue Phase'
-							'Allies Phase'
-							'Red Phase'
-							'Orange Phase'
-							'Yellow Phase'
-							'Green Phase'
-							'Witch Phase'
-						][i]
-						@image = new enchant.Surface(N_X_WND,N_Y_WND)
-						@image.context.globalAlpha = 0.333
-						@image.context.fillStyle = '#000000'
-						@image.context.fillRect(0,0,N_X_WND,N_Y_WND)
-		
-						@image.context.font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 80}px '#{C_FONT_FAMILY}'"
-						@image.context.textAlign = 'center'
-		
-						@image.context.fillStyle = '#FFFFFF'
-						@image.context.shadowColor = [
-							'#0040FF'
-							'#00C0FF'
-							'#FF0000'
-							'#FF8000'
-							'#FFFF00'
-							'#00C000'
-							'#800080'
-							'#000000'
-							'#FFFFFF'
-						][i]
-						@image.context.shadowBlur = 40
-						@image.context.globalAlpha = 1
-						@image.context.fillText(m,N_X_WND / 2,N_Y_WND / 2)
-						@image.context.fillText(m,N_X_WND / 2,N_Y_WND / 2)
-		
-						@image.context.strokeStyle = '#000000'
-						@image.context.lineWidth = 2
-						@image.context.shadowColor = '#000000'
-						@image.context.shadowBlur = 0
-						@image.context.globalAlpha = 1
-						@image.context.strokeText(m,N_X_WND / 2,N_Y_WND / 2)
-		
-						@opacity = 0.000
-		
-						main.Pool2.addChild(@)
-		
-						@addEventListener(enchant.Event.REMOVED,(a) ->
-							main.System.unlock()
-						)
-		
-						@open()
-						@tl.delay(N_500MS).tween(
-							opacity:1.000
-							time:N_1000MS
-							easing:enchant.Easing.QUINT_EASEOUT
-						).delay(N_1000MS).tween(
-							opacity:0.000
-							time:N_1000MS
-							easing:enchant.Easing.QUINT_EASEOUT
-						).exec(->
-							console.log("close")
-							console.log(@visible)
-							@parentNode.removeChild(@)
-						)
-						console.log(@)
-					defeat:(m) ->
-						@touchEnabled = 1
-						@geom(NULL,NULL,N_X_WND,N_Y_WND)
-		
-						@image = new enchant.Surface(N_X_WND,N_Y_WND)
-						#@image.context.fillStyle = '#000000'
-						#@image.context.fillRect(0,0,N_X_WND,N_Y_WND)
-		
-						@image.context.font = "#{C_FONT_STYLE} bold #{C_FONT_SIZE + 80}px '#{C_FONT_FAMILY}'"
-						@image.context.textAlign = 'center'
-		
-						@image.context.fillStyle = '#000000'
-						@image.context.shadowColor = '#FF0000'
-		
-						@image.context.shadowBlur = 40
-						@image.context.globalAlpha = 1
-						@image.context.fillText("DEFEAT",N_X_WND / 2,N_Y_WND / 2)
-						@image.context.fillText("DEFEAT",N_X_WND / 2,N_Y_WND / 2)
-		
-						@image.context.strokeStyle = '#FF0000'
-						@image.context.lineWidth = 2
-						@image.context.shadowColor = '#FF0000'
-						@image.context.shadowBlur = 0
-						@image.context.globalAlpha = 1
-						@image.context.strokeText("DEFEAT",N_X_WND / 2,N_Y_WND / 2)
-						@opacity = 0.000
-						main.Pool2.addChild(@)
-		
-						@addEventListener(enchant.Event.REMOVED,(a) ->
-							main.System.unlock()
-						)
-		
-						@tl.delay(N_500MS).tween(
-							opacity:1.000
-							time:N_1000MS
-							easing:enchant.Easing.QUINT_EASEOUT
-						).delay(N_1500MS).tween(
-							opacity:0.000
-							time:N_1000MS
-							easing:enchant.Easing.QUINT_EASEOUT
-						).exec(->
-							@parentNode.removeChild(@)
-						)
-		
 					geom:(x = @x,y = @y,w = @width,h = @height) ->
 						@x = x
 						@y = y
@@ -4913,7 +5480,7 @@ F_DEAL_B_WIL1					= 0x00000080
 						@childNodes[1].y = N_X_GRID - m - (h + 2) * 2
 						@childNodes[1].width = 0
 						@childNodes[1].height = h
-						@childNodes[1].backgroundColor = '#DF2000'
+						@childNodes[1].backgroundColor = COLORREF(configure.value.i_wil_cr)
 						#@childNodes[1].backgroundColor = '#00DF00'
 						#@childNodes[1].backgroundColor = '#0020FF'
 						#@childNodes[1].opacity = 0.750
@@ -4926,7 +5493,7 @@ F_DEAL_B_WIL1					= 0x00000080
 						@childNodes[2].height = h
 						#@childNodes[2].backgroundColor = '#FF2000'
 						#@childNodes[2].backgroundColor = '#00DF00'
-						@childNodes[2].backgroundColor = '#0020FF'
+						@childNodes[2].backgroundColor = COLORREF(configure.value.i_mgc_cr)
 						#@childNodes[2].opacity = 0.750
 						#@childNodes[2].visible = 0
 						@childNodes[2].localX = -N_X_GRID
@@ -5123,456 +5690,6 @@ F_DEAL_B_WIL1					= 0x00000080
 						)
 
 
-			configure = new class extends enchant.Scene
-				constructor:() ->
-					super()
-					@backgroundColor = COLORREF(0x000000cf)
-
-					@value = new Object()
-
-					for a in Object.keys(Object.getPrototypeOf(@))
-						do (a) =>
-							if Object.getPrototypeOf(@)[a]?::class?
-								@[a] = (layer,args...) ->
-									@add(layer,Object.getPrototypeOf(@)[a],args)
-
-					@addEventListener(enchant.Event.ENTER_FRAME,() ->
-						console.log(1)
-						game.ready = false
-						game.currentScene = game._scenes[1]
-						game._callTick()
-						game.currentScene = game._scenes[2]
-						game.ready = true
-					)
-				add:(layer,class1,args) ->
-					while !@childNodes[layer]?
-						@addChild(new enchant.Group())
-						if layer != 0
-							@lastChild.x = -N_X_WND
-					@childNodes[layer].addChild(new class1([0,0,N_X_WND,N_Y_WND * 0.100],args...))
-				Common:class extends enchant.Group
-					class:"Common"
-					constructor:(xywh,@key) ->
-						super()
-						[@x,@y,@width,@height] = xywh
-
-						@addChild(new (class extends enchant.Entity
-							constructor:() ->
-								super()
-
-								@xywh(arguments...)
-								@backgroundColor = COLORREF(0xccccccff)
-						)(0,0,@width,1))
-
-						@addEventListener(enchant.Event.ADDED,() ->
-							@y = Math.max(0,@parentNode.childNodes.slice(0,-1).map((_) -> _.y + _.firstChild.y)...) + 1
-						)
-						@addEventListener(enchant.Event.CHILD_ADDED,() ->
-							@firstChild.y = Math.max(@firstChild.y,@lastChild.y + @lastChild.height - 1)
-						)
-				Dummy:class extends @::Common
-					class:"Dummy"
-					constructor:(xywh,@key,color = 0x7f7f7fff) ->
-						super(arguments...)
-
-						@addChild(new (class extends enchant.Entity
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(xywh...)
-								@backgroundColor = COLORREF(color)
-						)(xywh))
-				Label:class extends @::Common
-					class:"Label"
-					constructor:(xywh,@key,args...) ->
-						super(arguments...)
-
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 60}px '#{C_FONT_FAMILY}'"
-									@textAlign = "left"
-									@textBaseline = "middle"
-									@fillStyle = COLORREF(0xffffffff)
-									@fillText(args[0],w * 0.050,h * 0.500)
-								)
-						)(xywh...))
-
-						if args[1]?
-							@lastChild.y -= @lastChild.height * 0.166
-							@addChild(new (class extends enchant.Sprite
-								constructor:(x,y,w,h) ->
-									super()
-	
-									@xywh(arguments...)
-									@image = new enchant.Surface(w,h,() ->
-										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
-										@textAlign = "left"
-										@textBaseline = "middle"
-										@fillStyle = COLORREF(0xffffffff)
-										@fillText(args[1],w * 0.050,h * 0.750)
-									)
-							)(xywh...))
-
-						if args[2]?
-							for _ in @childNodes[1..]
-								_.x = xywh[3] * 0.750 - xywh[2] * 0.050
-							@addChild(new (class extends enchant.Sprite
-								constructor:(x,y,w,h) ->
-									super()
-	
-									@xywh(arguments...)
-									@image = new enchant.Surface(w,h)
-									@image.draw(args[2],0,0,w,h)
-							)(xywh[3] * 0.125,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
-				Separator:class extends @::Dummy
-					class:"Separator"
-					constructor:(xywh,@key,args...) ->
-						xywh[3] *= 0.333
-						super(xywh,@key,0x222222ff)
-
-						if args[0]?
-							@addChild(new (class extends enchant.Sprite
-								constructor:(x,y,w,h) ->
-									super()
-	
-									@xywh(arguments...)
-									@image = new enchant.Surface(w,h,() ->
-										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
-										@textAlign = "left"
-										@textBaseline = "middle"
-										@fillStyle = COLORREF(0xffffffff)
-										@fillText(args[0],w * 0.030,h * 0.500)
-									)
-							)(xywh...))
-
-						if args[1]?
-							@addChild(new (class extends enchant.Sprite
-								constructor:(x,y,w,h) ->
-									super()
-	
-									@xywh(arguments...)
-									@image = new enchant.Surface(w,h,() ->
-										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
-										@textAlign = "right"
-										@textBaseline = "middle"
-										@fillStyle = COLORREF(0xffffffff)
-										@fillText(args[1],w - w * 0.030,h * 0.500)
-									)
-							)(xywh...))
-				Navigation:class extends @::Dummy
-					class:"Navigation"
-					constructor:(xywh,@key,args...) ->
-						xywh[3] *= 0.500
-						super(xywh,@key,0x444444ff)
-
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
-									@textAlign = "center"
-									@textBaseline = "middle"
-									@fillStyle = COLORREF(0xffffffff)
-									@fillText(args[0],w * 0.500,h * 0.500)
-								)
-						)(xywh...))
-
-						if args[1]?
-							@addChild(new (class extends enchant.Sprite
-								constructor:(x,y,w,h) ->
-									super()
-		
-									@xywh(arguments...)
-									@image = new enchant.Surface(w,h,() ->
-										@lineWidth = 4
-										@strokeStyle = COLORREF(0xddddddff)
-										@beginPath()
-										@moveTo(w * 0.050,h * 0.250)
-										@lineTo(w * 0.020,h * 0.500)
-										@lineTo(w * 0.050,h * 0.750)
-										@stroke()
-		
-										@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
-										@textAlign = "left"
-										@textBaseline = "middle"
-										@fillStyle = COLORREF(0xffffffff)
-										@fillText(args[1],w * 0.070,h * 0.500)
-									)
-								MOUSE_CLICK:() ->
-									if @scene.x + @parentNode.width > 0
-										game.popScene(@scene)
-									else
-										@scene.tl.clear().moveTo(@scene.x + @parentNode.width,0,N_500MS,enchant.Easing.QUINT_EASEOUT)
-							)(xywh...))
-				Checkbox:class extends @::Label
-					class:"Checkbox"
-					constructor:(xywh,@key,args...) ->
-						super(arguments...)
-
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@fillStyle = COLORREF(0xffffffff)
-									@fillRoundRect(0,0,w,h,w / 10)
-								)
-						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
-
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@strokeStyle = COLORREF(0x666666ff)
-									@lineWidth = 16
-									@lineCap = "round"
-									@beginPath()
-									@moveTo(w * 0.200,h * 0.500)
-									@lineTo(w * 0.400,h * 0.750)
-									@lineTo(w * 0.800,h * 0.200)
-									@stroke()
-								)
-						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
-
-						@addEventListener(enchant.Event.ADDED_TO_SCENE,() ->
-							if @key?
-								[_,key,value] = @key.match(/^([^\.]+?)(?:\.(.+?))?$/)
-								if !@scene.value.__lookupGetter__(key)? && !@scene.value.__lookupSetter__(key)?
-									@scene.value.__defineGetter__(key,() =>
-										for _ in @scene.childNodes
-											for _ in _.childNodes when _.key?.indexOf(key) == 0
-												if _.lastChild.visible
-													return(value || _.lastChild.visible)
-									)
-									@scene.value.__defineSetter__(key,(value) =>
-										for _ in @scene.childNodes
-											for _ in _.childNodes when _.key?.indexOf(key) == 0
-												_.lastChild.visible = _.key == "#{key}.#{value}" && !!value
-									)
-						)
-						#@key = "#{@key.match(/^([^\.]+?)(?:\.(.+?))?$/)[1]}.0"
-					MOUSE_CLICK:() ->
-						if @key? && @key.search(/^([^\.]+?)(?:\.(.+?))?$/) != -1
-							@scene.value[RegExp.$1] ^= 1
-						console.log(game)
-				RadioButton:class extends @::Label
-					class:"RadioButton"
-					constructor:(xywh,@key,args...) ->
-						super(arguments...)
-
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@beginPath()
-									@arc(w / 2,h / 2,w / 2,0,Math.PI * 2,0)
-									@fillStyle = COLORREF(0xffffffff)
-									@fill()
-
-									@beginPath()
-									@arc(w / 2,h / 2,w / 3,0,Math.PI * 2,0)
-									@fillStyle = COLORREF(0xddddddff)
-									@fill()
-								)
-						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
-
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@beginPath()
-									@arc(w / 2,h / 2,w / 3,0,Math.PI * 2,0)
-									@fillStyle = COLORREF(0x666666ff)
-									@fill()
-								)
-						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
-
-						@addEventListener(enchant.Event.ADDED_TO_SCENE,() ->
-							if @key?
-								[_,key,value] = @key.match(/^([^\.]+?)(?:\.(.+?))?$/)
-								if !@scene.value.__lookupGetter__(key)? && !@scene.value.__lookupSetter__(key)?
-									@scene.value.__defineGetter__(key,() =>
-										for _ in @scene.childNodes
-											for _ in _.childNodes when _.key?.indexOf(key) == 0
-												if _.lastChild.visible
-													return(value || _.lastChild.visible)
-									)
-									@scene.value.__defineSetter__(key,(value) =>
-										for _ in @scene.childNodes
-											for _ in _.childNodes when _.key?.indexOf(key) == 0
-												_.lastChild.visible = _.key == "#{key}.#{value}" && !!value
-									)
-						)
-					MOUSE_CLICK:() ->
-						if @key? && @key.search(/^([^\.]+?)(?:\.(.+?))?$/) != -1
-							@scene.value[RegExp.$1] = RegExp.$2
-				Slider:class extends @::Label
-					class:"Slider"
-					constructor:(xywh,@key,args...) ->
-						super(arguments...)
-
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@fillStyle = COLORREF(0x666666ff)
-									@fillRoundRect(0,0,w,h,h * 0.200)
-								)
-						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.100,xywh[2] * 0.700,xywh[3] * 0.100))
-
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@fillStyle = COLORREF(0xccccccff)
-									@fillRoundRect(0,0,w,h,h * 0.200)
-								)
-						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.100,xywh[2] * 0.700,xywh[3] * 0.100))
-
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@fillStyle = COLORREF(0xffffffff)
-									@fillRoundRect(0,0,w,h,h * 0.200)
-								)
-						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.000,xywh[2] * 0.033,xywh[3] * 0.300))
-
-						@addChild(new (class extends enchant.Label
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@font = "#{C_FONT_STYLE} #{C_FONT_SIZE + 24}px '#{C_FONT_FAMILY}'"
-								@text = "1.000"
-								@textAlign = "center"
-								@textBaseline = "middle"
-								@color = COLORREF(0xffffffff)
-						)(xywh[0] + xywh[2] * 0.750,xywh[3] * 1.000,xywh[2] * 0.250,xywh[3] * 0.500))
-
-						###
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@beginPath()
-									@arc(w / 2,h / 2,w / 3,0,Math.PI * 2,0)
-									@fillStyle = COLORREF(0x666666ff)
-									@fill()
-								)
-						)(xywh[0] + xywh[2] * 0.050,xywh[3] * 1.100,xywh[2] * 0.900,xywh[3] * 0.500))
-						###
-
-						@addEventListener(enchant.Event.ADDED_TO_SCENE,() ->
-							if @key?
-								[_,key,value] = @key.match(/^([^\.]+?)(?:\.(.+?))?$/)
-								if !@scene.value.__lookupGetter__(key)? && !@scene.value.__lookupSetter__(key)?
-									@scene.value.__defineGetter__(key,() =>
-										for _ in @scene.childNodes
-											for _ in _.childNodes when _.key?.indexOf(key) == 0
-												return(value)
-									)
-									@scene.value.__defineSetter__(key,(value) =>
-										for _ in @scene.childNodes
-											for _ in _.childNodes when _.key?.indexOf(key) == 0
-												@childNodes[5].text = args[3]?(value) || value
-									)
-						)
-					MOUSE_DRAG:(crd) ->
-						console.log(@childNodes[3].x)
-						crd.dif().neg().add(new Coordinates(@childNodes[5].x,@childNodes[5].y))
-						crd.min(new Coordinates(@childNodes[3].x,@lastChild.y))
-						crd.max(new Coordinates(@childNodes[3].x + @childNodes[3].width - @childNodes[5].width,@childNodes[5].y))
-						crd.setas(@childNodes[5])
-
-						@childNodes[4].width = @childNodes[5].x - @childNodes[3].x
-
-						#@childNodes[5].text = (@childNodes[5].x - @childNodes[3].x) / (@childNodes[3].width - @childNodes[5].width)
-
-						if @key? && @key.search(/^([^\.]+?)(?:\.(.+?))?$/) != -1
-							@scene.value[RegExp.$1] = RegExp.$2 * (@childNodes[4].x - @childNodes[3].x) / (@childNodes[3].width - @childNodes[4].width) 
-				Next:class extends @::Label
-					class:"Next"
-					constructor:(xywh,@key,args...) ->
-						super(arguments...)
-
-						@addChild(new (class extends enchant.Sprite
-							constructor:(x,y,w,h) ->
-								super()
-
-								@xywh(arguments...)
-								@image = new enchant.Surface(w,h,() ->
-									@beginPath()
-									@arc(w / 2,h / 2,w / 2,0,Math.PI * 2,0)
-									@fillStyle = COLORREF(0xffffffff)
-									@fill()
-
-									@strokeStyle = COLORREF(0x666666ff)
-									@lineWidth = 8
-									@lineCap = "round"
-									@lineJoin = "round"
-									@beginPath()
-									@moveTo(w * 0.375,h * 0.250)
-									@lineTo(w * 0.625,h * 0.500)
-									@lineTo(w * 0.375,h * 0.750)
-									@stroke()
-								)
-						)(xywh[2] - xywh[3] * 0.750,xywh[3] * 0.250,xywh[3] * 0.500,xywh[3] * 0.500))
-
-						if args[3]?
-							@layer = args[3]
-						else if @key?
-							@layer = @key
-					MOUSE_CLICK:() ->
-						if @layer?
-							@scene.childNodes[@layer].x = @x + @width
-							@scene.tl.clear().moveTo(-@scene.childNodes[@layer].x,0,N_500MS,enchant.Easing.QUINT_EASEOUT)
-#			configure.Dummy(0,NULL)
-#			configure.Dummy(0,NULL,0x7f0000ff)
-#			configure.Dummy(0,NULL,0x007f00ff)
-#			configure.Dummy(0,NULL,0x00007fff)
-
-#			configure.Dummy(0,NULL)
-#			configure.Dummy(0,NULL,0x7f0000ff)
-#			configure.Dummy(0,NULL,0x007f00ff)
-#			configure.Dummy(0,NULL,0x00007fff)
-#			configure.Label(0,NULL,"Label")
-#			configure.Label(0,NULL,"Label","Discription")
-			configure.Navigation(0,NULL,"Configure","Apply")
-
-			configure.Label(0,NULL,"Label","Discription",game.assets["resources/icon/sunrise.png"])
-			configure.Separator(0,NULL,"Separator")
-			#configure.Separator(0,NULL,NULL,"Separator")
-			configure.Checkbox(0,"cb1.1","Checkbox")
-			configure.RadioButton(0,"rb.1","RadioButton 1")
-			configure.RadioButton(0,"rb.2","RadioButton 2")
-			configure.RadioButton(0,"rb.3","RadioButton 3")
-			configure.Slider(0,"sl.100","Slider","Discription",NULL,(a) -> parseInt(a))
-			configure.Next(0,NULL,"Next",NULL,NULL,1)
-
-			configure.Navigation(1,NULL,"Sub Menu","Main Menu")
-			configure.Label(1,NULL,"Label","Discription")
 
 			@replaceScene(main)
 			#@replaceScene(configure)

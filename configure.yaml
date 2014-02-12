@@ -1,0 +1,3 @@
+i_mgc_cr: 0x00DF00FF
+i_wil_cr: 0x0000FFFF
+i_exp_cr: 0xDF0000FF
